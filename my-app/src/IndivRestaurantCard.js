@@ -1,19 +1,22 @@
 import React from 'react';
 
-const RestaurantCard = ({ restaurantData }) => {
+const IndivRestaurantCard = ({ restaurantData }) => {
+  if (!restaurantData) return null;
+
   const {
     name,
     cuisines,
     location,
     images,
     popularDishes,
-    features,
+    description,
+    rating
   } = restaurantData;
 
   return (
     <div className="restaurant-card">
-      {/* Restaurant Image */}
-      <div className="restaurant-image">
+      {/* Main Restaurant Image */}
+      <div className="restaurant-header-image">
         <img src={images[0]} alt={`Image of ${name}`} />
       </div>
 
@@ -21,18 +24,18 @@ const RestaurantCard = ({ restaurantData }) => {
       <div className="restaurant-info">
         <h2>{name}</h2>
         <p><strong>Cuisine:</strong> {cuisines}</p>
-        <p><strong>Location:</strong> {location.address}, {location.city}, {location.state} {location.postalCode}</p>
-        <p><strong>Description:</strong> Classic American Diner with popular comfort foods.</p>
-        <p><strong>Rating:</strong> ⭐⭐⭐⭐☆ (4/5)</p> {/* Mock rating */}
+        <p><strong>Location:</strong> {location?.address}, {location?.city}, {location?.state} {location?.postalCode}</p>
+        <p><strong>Description:</strong> {description}</p>
+        <p><strong>Rating:</strong> {"⭐".repeat(rating)} ({rating}/5)</p>
       </div>
 
       {/* Popular Dishes */}
       <div className="popular-dishes">
-        <p><strong>Popular Dishes:</strong></p>
+        <p><strong>Popular Dishes</strong></p>
         {popularDishes.map((dish, index) => (
           <div key={index} className="dish">
-            <img src={`https://example.com/${dish.toLowerCase().replace(/\s+/g, '')}.jpg`} alt={dish} />
-            <span>{dish}</span>
+            <img src={dish.image} alt={dish.name} />
+            <span>{dish.name}</span>
           </div>
         ))}
       </div>
@@ -40,4 +43,4 @@ const RestaurantCard = ({ restaurantData }) => {
   );
 };
 
-export default RestaurantCard;
+export default IndivRestaurantCard;

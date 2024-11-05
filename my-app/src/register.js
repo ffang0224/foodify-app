@@ -24,7 +24,7 @@ const Register = () => {
       {/* Right side - Register form */}
       <div className="flex items-center justify-center w-full md:w-1/2 p-12 bg-white">
         <div className="w-full max-w-md">
-          <div className="mx-auto h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
+          <div className="mx-auto h-16 w-16 rounded-full bg-gray-200 flex items-center text-center justify-center text-sm font-bold text-gray-600">
             Logo Image
           </div>
 

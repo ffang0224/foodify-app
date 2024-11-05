@@ -1,4 +1,4 @@
-/* @tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -60,11 +60,8 @@
   border-radius: 4px;
 }
 
-
- */
-
 /* DELETE ABOVE AND UNCOMMENT BELOW FOR ELYAZIA'S PART*/
-
+/* 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -132,9 +129,9 @@
 
 .restaurant-info h2 {
   margin-top: 0;
-}
+} */
 
-/* UNCOMMENT BELOW FOR MINSEOK'S PART (EXTENDED FROM ELYAZIA'S PART)*/
+/* UNCOMMENT BELOW FOR MINSEOK'S PART - ADD TO ELYAZIA'S PART (DON'T DELETE ABOVE, JUST UNCOMMENT LINES BELOW)*/
 /* 
 .login-container {
   display: flex;

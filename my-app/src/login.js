@@ -1,48 +1,58 @@
 import React, { useState } from "react";
-import "./App.css";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(`Logging in with Email or Username: ${emailOrUsername}`);
+    navigate("/map");
   };
 
   return (
-    <div className="login-container">
+    <div className="flex min-h-screen">
       {/* Left side - Image section */}
-      <div className="login-image-section">
-        <div className="login-image-placeholder">App Image</div>
+      <div className="hidden md:flex md:w-1/2 bg-gray-100 items-center justify-center">
+        <div className="w-3/4 h-3/4 bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600">
+          App Image
+        </div>
       </div>
 
       {/* Right side - Login form */}
-      <div className="login-form-section">
+      <div className="flex items-center justify-center w-full md:w-1/2 p-12 bg-white">
         <div className="w-full max-w-md">
-          <div className="login-logo-placeholder">Logo Image</div>
-          <h2 className="mt-8 text-center text-2xl font-bold tracking-tight text-black">
+          <div className="mx-auto h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
+            Logo Image
+          </div>
+
+          <h2 className="mt-8 text-center text-2xl font-bold tracking-tight text-gray-900">
             Log in to Foodify
           </h2>
 
           {/* Social Login Buttons */}
           <div className="mt-6 space-y-4">
-            <button className="social-login-button">
+            <button className="w-full flex items-center justify-center px-3 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200">
               <img
                 src="https://upload.wikimedia.org/wikipedia/commons/1/18/Gile_use.png?20230327030750"
                 alt="Google logo"
-                className="social-login-icon"
+                className="h-6 w-6 mr-3"
               />
-              <span>Continue with Google</span>
+              <span className="text-gray-700 font-semibold">
+                Continue with Google
+              </span>
             </button>
 
-            <button className="social-login-button">
+            <button className="w-full flex items-center justify-center px-3 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200">
               <img
                 src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png"
                 alt="Facebook logo"
-                className="social-login-icon"
+                className="h-6 w-6 mr-3"
               />
-              <span>Continue with Facebook</span>
+              <span className="text-gray-700 font-semibold">
+                Continue with Facebook
+              </span>
             </button>
           </div>
 
@@ -50,63 +60,53 @@ const Login = () => {
             <div>
               <label
                 htmlFor="emailOrUsername"
-                className="block text-sm font-medium text-gray-900 text-left"
+                className="block text-sm font-medium text-gray-700"
               >
                 Email or Username
               </label>
-              <div className="mt-2">
-                <input
-                  id="emailOrUsername"
-                  name="emailOrUsername"
-                  type="text"
-                  value={emailOrUsername}
-                  onChange={(e) => setEmailOrUsername(e.target.value)}
-                  required
-                  autoComplete="username"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm"
-                />
-              </div>
+              <input
+                id="emailOrUsername"
+                name="emailOrUsername"
+                type="text"
+                value={emailOrUsername}
+                onChange={(e) => setEmailOrUsername(e.target.value)}
+                required
+                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-black sm:text-sm"
+              />
             </div>
 
             <div>
               <div className="flex items-center justify-between">
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-900 text-left"
+                  className="block text-sm font-medium text-gray-700"
                 >
                   Password
                 </label>
-                <div className="text-sm">
-                  <a
-                    href="#"
-                    className="font-semibold text-gray-600 hover:text-black"
-                  >
-                    Forgot password?
-                  </a>
-                </div>
+                <a
+                  href="#"
+                  className="text-sm font-semibold text-gray-600 hover:text-black"
+                >
+                  Forgot password?
+                </a>
               </div>
-              <div className="mt-2">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm"
-                />
-              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-black sm:text-sm"
+              />
             </div>
 
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-black px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-              >
-                Log in
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="w-full rounded-md bg-black py-2 px-3 text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+            >
+              Log in
+            </button>
           </form>
 
           <p className="mt-10 text-center text-sm text-gray-500">

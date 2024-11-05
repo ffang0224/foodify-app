@@ -1,4 +1,4 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -61,11 +61,10 @@
 }
 
 
+ */
 
+/* DELETE ABOVE AND UNCOMMENT BELOW FOR ELYAZIA'S PART*/
 
- /* DELETE ABOVE AND UNCOMMENT BELOW FOR ELYAZIA'S PART*/
-
-/* 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -107,7 +106,7 @@
 }
 
 .reservation-link {
-  color: #007BFF;
+  color: #007bff;
   text-decoration: none;
 }
 
@@ -133,4 +132,89 @@
 
 .restaurant-info h2 {
   margin-top: 0;
+}
+
+/* UNCOMMENT BELOW FOR MINSEOK'S PART (EXTENDED FROM ELYAZIA'S PART)*/
+/* 
+.login-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.login-image-section {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3f4f6;
+}
+
+@media (min-width: 768px) {
+  .login-image-section {
+    display: flex;
+    width: 50%;
+  }
+}
+
+.login-image-placeholder {
+  width: 75%;
+  height: 75%;
+  background-color: #d1d5db;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #4b5563;
+}
+
+.login-form-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 3rem;
+  background-color: #ffffff;
+}
+
+@media (min-width: 768px) {
+  .login-form-section {
+    width: 50%;
+  }
+}
+
+.login-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 4rem;
+  width: 4rem;
+  margin: 0 auto;
+  border-radius: 9999px;
+  background-color: #e5e7eb;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+
+.social-login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  color: #374151;
+  font-weight: 600;
+  text-align: left;
+}
+
+.social-login-button:hover {
+  background-color: #f3f4f6;
+}
+
+.social-login-icon {
+  height: 1.5rem;
+  width: 1.5rem;
+  margin-right: 0.75rem;
 } */

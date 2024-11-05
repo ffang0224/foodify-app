@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import sampleRestaurantData from "./sampleRestaurantData";
 
 const IndivRestaurantCard = () => {
-  const { restaurantId } = useParams();
+  const { restaurantId } = useParams(); 
   const restaurant = sampleRestaurantData.find(
     (r) => r.restaurantId === restaurantId
   );

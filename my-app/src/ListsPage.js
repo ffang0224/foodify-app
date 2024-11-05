@@ -2,16 +2,19 @@
 import { useState, useEffect} from 'react';
 //import Papa from 'papaparse';
 import ListCard from './ListCard';
+import sampleListsData from "./sampleListsData";
 
 const ListsPage = () => {
-  console.log("List page entered")
+  
   // Example data structure - replace with database data
 
-  const [popularLists] = useState([
-    { id: 1, image: null, header: null, description: null },
-    { id: 2, image: null, header: null, description: null },
-    { id: 3, image: null, header: null, description: null }
-  ]);
+  // const [popularLists] = useState([
+  //   { id: 1, image: null, header: null, description: null },
+  //   { id: 2, image: null, header: null, description: null },
+  //   { id: 3, image: null, header: null, description: null }
+  // ]);
+
+  const popularLists = Object.values(sampleListsData);
   
   const [userLists] = useState([
     { id: 1, image: null, header: null, description: null },
@@ -28,10 +31,11 @@ const ListsPage = () => {
         <div className="flex flex-wrap justify-start gap-4">
           {popularLists.map(list => (
             <ListCard
-              key={list.id}
+              key={list.name}
               image={list.image}
-              header={list.header}
+              header={list.name}
               description={list.description}
+              listId={list.name} // Pass the list name as the listId
             />
           ))}
         </div>
@@ -47,6 +51,7 @@ const ListsPage = () => {
               image={list.image}
               header={list.header}
               description={list.description}
+              listId={list.id} // Pass the list name as the listId
             />
           ))}
         </div>
@@ -56,31 +61,3 @@ const ListsPage = () => {
 };
 
 export default ListsPage;
-
-  //const [popularLists, setPopularLists] = useState([]);
-  // useEffect(() => {
-  //   const fetchPopularLists = async () => {
-  //     const csvFilePath = './TestingDataPlaylists.csv';
-
-  //     const response = await fetch(csvFilePath);
-  //     const csvData = await response.text();
-  //     console.log(csvData);
-
-  //     Papa.parse(csvData, {
-  //       download: true,
-  //       header: true,
-  //       skipEmptyLines: true,
-  //       complete: (results) => {
-  //         const lists = results.data.map((row, index) => ({
-  //           id: index + 1,
-  //           image: null,
-  //           header: row.name,
-  //           description: row.description
-  //         }));
-
-  //         setPopularLists(lists);
-  //       }
-  //     });
-  //   };
-  //   fetchPopularLists();
-  // }, []);

@@ -14,6 +14,7 @@ import Login from "./login";
 import Register from "./register";
 import MapComponent from "./map.js";
 import ListsPage from './ListsPage';
+import sampleListsData from "./sampleListsData";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 

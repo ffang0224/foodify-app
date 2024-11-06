@@ -26,7 +26,7 @@ The `Register` component provides a registration form where users can sign up wi
 
 1. **Clone the Repository**:
 
-   - `git clone [repository link]`
+   - `git clone https://github.com/ffang0224/foodify-app`
    - `cd foodify-app`
 
 2. **Install Dependencies**:

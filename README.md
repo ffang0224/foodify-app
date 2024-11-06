@@ -51,16 +51,15 @@ The `Register` component provides a registration form where users can sign up wi
 
 ### Design Decisions
 
-- **Consistent Visual Layout**: We aimed for a clean, minimalistic interface, keeping components well-spaced and using a neutral color palette to maintain focus on content.
-- **Responsive Layouts**: The app was designed to be responsive, ensuring a seamless experience across both desktop and mobile views. Tailwind CSS’s responsive utilities helped us quickly adjust layouts for different screen sizes.
-- **User-Friendly Navigation**: We implemented a straightforward navigation flow with prominent buttons and clear sections, allowing users to easily switch between login, registration, lists, and maps.
-- **Social Login Integration**: Social login buttons for Google and Facebook were added to streamline the login experience, positioned prominently to encourage quick access.
+- **Consistent Visual Layout**: We aimed for a clean, minimalistic interface, keeping components well-spaced to maintain focus on content.
+- **User-Friendly Navigation**: We implemented a straightforward navigation flow with prominent buttons and clear sections, allowing users to easily switch between different pages.
+- **Social Login Integration**: Social login buttons for Google and Facebook were added to streamline the login experience and encourage quick access.
 
 ### Technical Choices
 
 - **Tailwind CSS**: Tailwind CSS was selected for its utility-first approach, enabling us to rapidly style components without creating separate CSS files. This choice ensured design consistency and streamlined the layout process across the app.
 
-- **Google Maps API**: We included @react-google-maps/api in preparation for map integration within the app. While not fully implemented yet, this setup provides a foundation for future development involving location-based restaurant data.
+- **Google Maps API**: We included @react-google-maps/api in preparation for map integration within the app, providing location-based restaurant data.
 
 - **Icon Library**: We opted for lucide-react to provide a versatile and lightweight icon set, enhancing the app’s UI with minimal setup and ensuring our icons fit seamlessly within the design.
 

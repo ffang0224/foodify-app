@@ -1,14 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Register component
 const Register = () => {
+  // State for input fields
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  // Nevigation after registration
   const navigate = useNavigate();
 
+  // Form submission handler
   const handleSubmit = (e) => {
+    // Doesn't reload after submission
     e.preventDefault();
+    // Navigate to the login page after successful registration
     navigate("/login");
   };
 

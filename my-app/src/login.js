@@ -1,13 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Login component
 const Login = () => {
+  // State for input fields
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
+  // Navigation after login
   const navigate = useNavigate();
 
+  // Form submission handler
   const handleSubmit = (e) => {
+    // Doesn't reload after submission
     e.preventDefault();
+    // Navigate to the map page after successful login
     navigate("/map");
   };
 

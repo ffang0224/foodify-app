@@ -2,11 +2,11 @@
 
 ## Project Description
 
-This project is the frontend prototype for our data product, **Foodify**, allowing users to explore restaurant collections, navigate lists, and view maps of restaurants. The primary goal was to implement a user-friendly, responsive interface using React, based on wireframes created in Figma.
+This project is the frontend prototype for our data product, **Foodify**, allowing users to explore restaurant collections, navigate lists, and view maps of restaurants. The primary goal this week was to implement a user-friendly, responsive interface using React, based on wireframes we created in Figma.
 
 ## Figma Wireframe
 
-The initial wireframe in Figma guided the layout and component structure for this project. It includes a basic flow between primary components, user interactions, and a focus on component placement. The wireframe link or exported file can be found [here](#).
+The initial wireframe in Figma guided the layout and component structure for this project. It includes a basic flow between primary components, user interactions, and a focus on component placement. The wireframe link or exported file can be found [here](https://www.figma.com/design/9TSA9lHTsOBFWM9XFOGB6k/Foodify-Wireframe?node-id=0-1&m=dev&t=zLGmbL571CAWqaCm-1).
 
 ## Component Documentation
 
@@ -40,7 +40,7 @@ The `Register` component provides a registration form where users can sign up wi
 4. **Dependencies**:
 
    - `react-router-dom` for navigation between pages.
-   - `@react-google-maps/api` for map integration (for future use).
+   - `@react-google-maps/api` for map integration.
    - `lucide-react` for icon support.
 
 5. **Environment Variables**:
@@ -51,12 +51,19 @@ The `Register` component provides a registration form where users can sign up wi
 
 ### Design Decisions
 
-- **Component-Based Architecture**: Each component represents a distinct feature or page (e.g., login, register, restaurant collection), creating a modular and organized codebase.
-- **Mock Data Integration**: We used mock data to simulate API responses, enabling us to structure components and layouts without backend dependencies.
-- **Tailwind CSS**: Tailwind CSS utility classes were used for consistent styling, maintaining layout and spacing without separate CSS files.
+- **Consistent Visual Layout**: We aimed for a clean, minimalistic interface, keeping components well-spaced and using a neutral color palette to maintain focus on content.
+- **Responsive Layouts**: The app was designed to be responsive, ensuring a seamless experience across both desktop and mobile views. Tailwind CSS’s responsive utilities helped us quickly adjust layouts for different screen sizes.
+- **User-Friendly Navigation**: We implemented a straightforward navigation flow with prominent buttons and clear sections, allowing users to easily switch between login, registration, lists, and maps.
+- **Social Login Integration**: Social login buttons for Google and Facebook were added to streamline the login experience, positioned prominently to encourage quick access.
 
 ### Technical Choices
 
-- **React**: Selected for its component-based structure and efficient rendering, making it ideal for rapid prototyping.
-- **Figma for Wireframing**: Used to design and plan the UI layout, helping streamline the development process.
-- **GitHub for Collaboration**: Version control allowed team members to contribute seamlessly with a clear commit history reflecting progress.
+- **Tailwind CSS**: Tailwind CSS was selected for its utility-first approach, enabling us to rapidly style components without creating separate CSS files. This choice ensured design consistency and streamlined the layout process across the app.
+
+- **Google Maps API**: We included @react-google-maps/api in preparation for map integration within the app. While not fully implemented yet, this setup provides a foundation for future development involving location-based restaurant data.
+
+- **Icon Library**: We opted for lucide-react to provide a versatile and lightweight icon set, enhancing the app’s UI with minimal setup and ensuring our icons fit seamlessly within the design.
+
+### AI Usage
+
+AI was used to assist with the initial structuring and formatting of components, particularly in ensuring consistent styles and layout across files. It provided guidance on component organization, helped troubleshoot minor issues, and offered examples for setting up Tailwind CSS classes. With the help of the AI, our team handled the detailed component development, functionality, and UI logic to align with our specific requirements.

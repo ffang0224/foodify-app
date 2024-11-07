@@ -1,17 +1,19 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
 const RestaurantCollectionWithNav = ({ data, NavBar }) => (
   <div className="min-h-screen bg-white">
     <NavBar />
     <div className="max-w-7xl mx-auto px-4 py-8">
-      
       {/* Horizontal Orange Line Behind Discs */}
       <div className="relative flex items-center justify-center mb-12">
         <div className="absolute w-full h-1 bg-orange-400 top-1/2 transform -translate-y-1/2"></div>
         <div className="flex space-x-4 z-10">
           {data.map((restaurant) => (
-            <div key={restaurant.restaurantId} className="w-16 h-16 relative group">
+            <div
+              key={restaurant.restaurantId}
+              className="w-16 h-16 relative group"
+            >
               {/* Disc Image with Rotation and Scale Effect */}
               <img
                 src={restaurant.images[0]}
@@ -50,24 +52,34 @@ const RestaurantCollectionWithNav = ({ data, NavBar }) => (
               </h3>
               <div className="space-y-2 text-gray-600">
                 <p>
-                  <span className="font-medium">Cuisine:</span> {restaurant.cuisines}
+                  <span className="font-medium">Cuisine:</span>{" "}
+                  {restaurant.cuisines}
                 </p>
                 <p>
-                  <span className="font-medium">Price Range:</span> {restaurant.priceRange}
+                  <span className="font-medium">Price Range:</span>{" "}
+                  {restaurant.priceRange}
                 </p>
                 <p>
                   <span className="font-medium">Popular Dishes:</span>{" "}
                   {restaurant.popularDishes.join(", ")}
                 </p>
               </div>
-              <a
-                href="https://www.opentable.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block w-full text-center bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200"
-              >
-                Make a Reservation
-              </a>
+              <div className="flex flex-col space-y-3">
+                <Link
+                  to={`/restaurant/${restaurant.restaurantId}`}
+                  className="inline-block w-full text-center bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors duration-200"
+                >
+                  View Details
+                </Link>
+                <a
+                  href="https://www.opentable.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block w-full text-center bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Make a Reservation
+                </a>
+              </div>
             </div>
           </div>
         ))}
@@ -77,4 +89,3 @@ const RestaurantCollectionWithNav = ({ data, NavBar }) => (
 );
 
 export { RestaurantCollectionWithNav };
-

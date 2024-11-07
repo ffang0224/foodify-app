@@ -3,7 +3,6 @@ import {
   BrowserRouter as Router,
   Route,
   Routes,
-  Link,
   Navigate,
   useNavigate,
   useLocation,
@@ -21,7 +20,7 @@ import { ArrowLeft, ArrowRight, UtensilsCrossed } from "lucide-react";
 const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isRestaurantPage = location.pathname.includes("/restaurants");
+  const isRestaurantPage = location.pathname.includes("/restaurant");
   const isMapPage = location.pathname === "/map";
   const isListsPage = location.pathname === "/lists";
 
@@ -52,15 +51,13 @@ const NavBar = () => {
 
             {/* For Lists page */}
             {isListsPage && (
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => navigate("/map")}
-                  className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
-                >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
-                  <span>Back to Map</span>
-                </button>
-              </div>
+              <button
+                onClick={() => navigate("/map")}
+                className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                <span>Back to Map</span>
+              </button>
             )}
 
             {/* For map page */}

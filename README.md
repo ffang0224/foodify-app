@@ -35,7 +35,7 @@ The `ListsPage` component renders a collection of `ListCard` components in two s
 1. **Clone the Repository**:
 
    - `git clone https://github.com/ffang0224/foodify-app`
-   - `cd foodify-app`
+   - `cd foodify-app\my-app`
 
 2. **Install Dependencies**:
 

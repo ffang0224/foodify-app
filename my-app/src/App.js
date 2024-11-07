@@ -51,15 +51,6 @@ const NavBar = () => {
             <ArrowLeft className="w-5 h-5 mr-2" />
             <span>Back to Map</span>
           </button>
-      
-          {/* Restaurants on the right */}
-          <button
-            onClick={() => navigate("/restaurants")}
-            className="flex items-center text-gray-700 hover:text-gray-900 ml-auto"
-          >
-            <span>Restaurants</span>
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </button>
         </div>
         )}
         {/* For map page, show restaurants on the right */}

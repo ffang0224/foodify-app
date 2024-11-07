@@ -1,6 +1,5 @@
 // ListsPage.js
 import { useState, useEffect} from 'react';
-//import Papa from 'papaparse';
 import ListCard from './ListCard';
 import sampleListsData from "../sample-data/sampleListsData";
 

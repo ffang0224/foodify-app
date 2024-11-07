@@ -2,14 +2,37 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const RestaurantCollectionWithNav = ({ data, NavBar }) => (
-  <div className="min-h-screen bg-gray-50">
+  <div className="min-h-screen bg-white">
     <NavBar />
     <div className="max-w-7xl mx-auto px-4 py-8">
+      
+      {/* Horizontal Orange Line Behind Discs */}
+      <div className="relative flex items-center justify-center mb-12">
+        <div className="absolute w-full h-1 bg-orange-400 top-1/2 transform -translate-y-1/2"></div>
+        <div className="flex space-x-4 z-10">
+          {data.map((restaurant) => (
+            <div key={restaurant.restaurantId} className="w-16 h-16 relative group">
+              {/* Disc Image with Rotation and Scale Effect */}
+              <img
+                src={restaurant.images[0]}
+                alt={`${restaurant.name}`}
+                className="w-full h-full rounded-full object-cover border-2 border-blue-500 shadow-md transform group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Header */}
+      <h2 className="text-3xl font-bold text-gray-800 text-center mb-8">
+        Explore Our Top Picks
+      </h2>
+
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {data.map((restaurant) => (
           <div
             key={restaurant.restaurantId}
-            className="bg-white rounded-lg shadow-md overflow-hidden"
+            className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 hover:shadow-xl transition-all duration-300"
           >
             <img
               src={restaurant.images[0]}
@@ -27,12 +50,10 @@ const RestaurantCollectionWithNav = ({ data, NavBar }) => (
               </h3>
               <div className="space-y-2 text-gray-600">
                 <p>
-                  <span className="font-medium">Cuisine:</span>{" "}
-                  {restaurant.cuisines}
+                  <span className="font-medium">Cuisine:</span> {restaurant.cuisines}
                 </p>
                 <p>
-                  <span className="font-medium">Price Range:</span>{" "}
-                  {restaurant.priceRange}
+                  <span className="font-medium">Price Range:</span> {restaurant.priceRange}
                 </p>
                 <p>
                   <span className="font-medium">Popular Dishes:</span>{" "}
@@ -54,4 +75,6 @@ const RestaurantCollectionWithNav = ({ data, NavBar }) => (
     </div>
   </div>
 );
-export {RestaurantCollectionWithNav};
+
+export { RestaurantCollectionWithNav };
+

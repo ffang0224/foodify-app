@@ -26,7 +26,7 @@ The `Register` component provides a registration form where users can sign up wi
 
 ### ListCard.js
 
-The `ListCard` component displays individual list items on the `ListsPage`. Each card includes an image placeholder, a header, and a description. The image, header and description will be fetched out from Playlists database according to the PlaylistID key. `ListCard` is a clickable component, which navigates to the individual page for the restaurants list. 
+The `ListCard` component displays individual list items on the `ListsPage`. Each card includes an image placeholder, a header, and a description. The image, header and description will be fetched out from Playlists database according to the PlaylistID key. `ListCard` is a clickable component, which navigates to the individual page for the restaurants list.
 
 ### ListsPage.js
 
@@ -40,12 +40,12 @@ The `IndivRestaurantCard` component displays detailed information about a specif
 
 The `IndivPlaylist` is a component that displays a list of restaurants. Each restaurant is displayed as a card with its image, name, cuisine type, price range, and popular dishes. The restaurant name is a clickable link that navigates to the individual restaurant's detail page
 
-
 ## Setup Instructions
 
 1. **Clone the Repository**:
 
    - `git clone https://github.com/ffang0224/foodify-app`
+   - `cd foodify-app`
 
 2. **Install Dependencies**:
 
@@ -64,13 +64,14 @@ The `IndivPlaylist` is a component that displays a list of restaurants. Each res
 5. **Environment Variables**:
    For Google Maps or other API keys, create a `.env` file at the root level and add any necessary keys in the format:
    - `REACT_APP_GOOGLE_API_KEY=your_google_maps_api_key`
-   See `.env.example` for reference.
+     See `.env.example` for reference.
 
 ## Development Process
 
 The development process was focused on laying down the bases for a component-focused system. We ensured that no component became too complex, taking up too much functionality of the app. For example, we have `ListsPage.js`, which renders `ListCard.js`, a custom card component that becomes part of the bigger element (the `List` page itself)
 
 ### Design Decisions
+
 In terms of design decisions, we abided by common practices, using popular libraries and resources:
 
 - **Consistent Visual Layout**: We aimed for a clean, minimalistic interface, keeping components well-spaced to maintain focus on content.

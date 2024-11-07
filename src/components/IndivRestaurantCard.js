@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import sampleRestaurantData from "../sample-data/sampleRestaurantData";
 
 const IndivRestaurantCard = () => {
-  const { restaurantId } = useParams(); 
+  const { restaurantId } = useParams();
   const restaurant = sampleRestaurantData.find(
     (r) => r.restaurantId === restaurantId
   );
@@ -26,7 +26,7 @@ const IndivRestaurantCard = () => {
   } = restaurant;
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-2xl mx-auto p-6 space-y-6">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="w-full">
           <img
@@ -42,20 +42,16 @@ const IndivRestaurantCard = () => {
               <span className="font-semibold">Cuisine:</span> {cuisines}
             </p>
             <p className="text-gray-700">
-              <span className="font-semibold">Location:</span>{" "}
-              {location.address}, {location.city}, {location.state}{" "}
-              {location.postalCode}
+              <span className="font-semibold">Location:</span> {location.address}, {location.city}, {location.state} {location.postalCode}
             </p>
             <p className="text-gray-700">
               <span className="font-semibold">Description:</span> {description}
             </p>
             <p className="text-gray-700">
-              <span className="font-semibold">Rating:</span>{" "}
-              {"⭐".repeat(rating)} ({rating}/5)
+              <span className="font-semibold">Rating:</span> {"⭐".repeat(rating)} ({rating}/5)
             </p>
             <p className="text-gray-700">
-              <span className="font-semibold">Popular Dishes:</span>{" "}
-              {popularDishes.join(", ")}
+              <span className="font-semibold">Popular Dishes:</span> {popularDishes.join(", ")}
             </p>
             <p className="text-gray-700">
               <span className="font-semibold">Price Range:</span> {priceRange}

@@ -32,6 +32,15 @@ The `ListCard` component displays individual list items on the `ListsPage`. Each
 
 The `ListsPage` component renders a collection of `ListCard` components in two sections: Popular Lists and Your Lists. Selection for Popular Lists will be inserted manually, while Your Lists section is determined according to user's username and playlists in the database.
 
+### IndivRestaurantCard.js
+
+The `IndivRestaurantCard` component displays detailed information about a specific restaurant. It retrieves the restaurantId from the URL and searches for the corresponding restaurant in sampleRestaurantData (temporary). It shows the restaurant’s name, cuisine type, location, description, rating, popular dishes, and price range. Additionally, it includes an image of the restaurant and a "Make a Reservation" button linking to OpenTable.
+
+### IndivPlaylist.js
+
+The `IndivPlaylist` is a component that displays a list of restaurants. Each restaurant is displayed as a card with its image, name, cuisine type, price range, and popular dishes. The restaurant name is a clickable link that navigates to the individual restaurant's detail page
+
+
 ## Setup Instructions
 
 1. **Clone the Repository**:

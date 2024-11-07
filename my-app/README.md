@@ -1,70 +1,76 @@
-# Getting Started with Create React App
+# Data Product Frontend - Foodify
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Project Description
 
-## Available Scripts
+This project is the frontend prototype for our data product, **Foodify**, allowing users to explore restaurant collections, navigate lists, and view maps of restaurants. The primary goal this week was to implement a user-friendly, responsive interface using React, based on wireframes we created in Figma.
 
-In the project directory, you can run:
+## Figma Wireframe
 
-### `npm start`
+The initial wireframe in Figma guided the layout and component structure for this project. It includes a basic flow between primary components, user interactions, and a focus on component placement. The wireframe link or exported file can be found [here](https://www.figma.com/design/9TSA9lHTsOBFWM9XFOGB6k/Foodify-Wireframe?node-id=0-1&m=dev&t=zLGmbL571CAWqaCm-1).
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Component Documentation
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### App.js
 
-### `npm test`
+`App.js` is the main entry point for the application, setting up routing for different pages using `react-router-dom`. Key routes include pages for registration, login, restaurant lists, maps, and individual restaurant details. `App.js` integrates several components and provides navigation throughout the app.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Login.js
 
-### `npm run build`
+The `Login` component presents a login form where users can enter their credentials or sign in using social login options. This component features a split-screen layout with the form on the right and a placeholder image area on the left. Upon submission, users are navigated to the map view.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Register.js
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The `Register` component provides a registration form where users can sign up with their email, username, and password. Similar to `Login.js`, this component includes a split-screen layout and social login buttons. Upon form submission, users are navigated to the login page.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### ListCard.js
 
-### `npm run eject`
+The `ListCard` component displays individual list items on the `ListsPage`. Each card includes an image placeholder, a header, and a description. The image, header and description will be fetched out from Playlists database according to the PlaylistID key. `ListCard` is a clickable component, which navigates to the individual page for the restaurants list. 
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### ListsPage.js 
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The `ListsPage` component renders a collection of `ListCard` components in two sections: Popular Lists and Your Lists. Selection for Popular Lists will be inserted manually, while Your Lists section is determined according to user's username and playlists in the database.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Setup Instructions
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+1. **Clone the Repository**:
 
-## Learn More
+   - `git clone https://github.com/ffang0224/foodify-app`
+   - `cd foodify-app\my-app`
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+2. **Install Dependencies**:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+   - Run `npm install` to install all necessary packages.
 
-### Code Splitting
+3. **Run the Application**:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+   - Use `npm start` to start the development server.
 
-### Analyzing the Bundle Size
+4. **Dependencies**:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+   - `react-router-dom` for navigation between pages.
+   - `@react-google-maps/api` for map integration.
+   - `lucide-react` for icon support.
 
-### Making a Progressive Web App
+5. **Environment Variables**:
+   For Google Maps or other API keys, create a `.env` file at the root level and add any necessary keys in the format:
+   - `REACT_APP_GOOGLE_API_KEY=your_google_maps_api_key`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Development Process
 
-### Advanced Configuration
+### Design Decisions
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- **Consistent Visual Layout**: We aimed for a clean, minimalistic interface, keeping components well-spaced to maintain focus on content.
+- **User-Friendly Navigation**: We implemented a straightforward navigation flow with prominent buttons and clear sections, allowing users to easily switch between different pages.
+- **Social Login Integration**: Social login buttons for Google and Facebook were added to streamline the login experience and encourage quick access.
 
-### Deployment
+### Technical Choices
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- **Tailwind CSS**: Tailwind CSS was selected for its utility-first approach, enabling us to rapidly style components without creating separate CSS files. This choice ensured design consistency and streamlined the layout process across the app.
 
-### `npm run build` fails to minify
+- **Google Maps API**: We included @react-google-maps/api in preparation for map integration within the app, providing location-based restaurant data.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Icon Library**: We opted for lucide-react to provide a versatile and lightweight icon set, enhancing the app’s UI with minimal setup and ensuring our icons fit seamlessly within the design.
+
+### AI Usage
+
+AI was used to assist with the initial structuring and formatting of components, particularly in ensuring consistent styles and layout across files. It provided guidance on component organization, helped troubleshoot minor issues, and offered examples for setting up Tailwind CSS classes. With the help of the AI, our team handled the detailed component development, functionality, and UI logic to align with our specific requirements.

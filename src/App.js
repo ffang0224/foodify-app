@@ -8,14 +8,14 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
-import sampleRestaurantData from "./sampleRestaurantData";
-import IndivRestaurantCard from "./IndivRestaurantCard";
-import Login from "./login";
-import Register from "./register";
-import MapComponent from "./map.js";
-import ListsPage from './ListsPage';
-import sampleListsData from "./sampleListsData";
-import { RestaurantCollectionWithNav } from "./IndivPlaylist.js";
+import sampleRestaurantData from "./sample-data/sampleRestaurantData.js";
+import IndivRestaurantCard from "./components/IndivRestaurantCard.js";
+import Login from "./components/login.js";
+import Register from "./components/register.js";
+import MapComponent from "./components/map.js";
+import ListsPage from './components/ListsPage.js';
+import sampleListsData from "./sample-data/sampleListsData.js";
+import { RestaurantCollectionWithNav } from "./components/IndivPlaylist.js";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 

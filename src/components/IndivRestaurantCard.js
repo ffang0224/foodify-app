@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import sampleRestaurantData from "./sampleRestaurantData";
+import sampleRestaurantData from "../sample-data/sampleRestaurantData";
 
 const IndivRestaurantCard = () => {
   const { restaurantId } = useParams(); 

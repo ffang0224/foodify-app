@@ -22,6 +22,14 @@ The `Login` component presents a login form where users can enter their credenti
 
 The `Register` component provides a registration form where users can sign up with their email, username, and password. Similar to `Login.js`, this component includes a split-screen layout and social login buttons. Upon form submission, users are navigated to the login page.
 
+### ListCard.js
+
+The `ListCard` component displays individual list items on the `ListsPage`. Each card includes an image placeholder, a header, and a description. The image, header and description will be fetched out from Playlists database according to the PlaylistID key. `ListCard` is a clickable component, which navigates to the individual page for the restaurants list. 
+
+### ListsPage.js 
+
+The `ListsPage` component renders a collection of `ListCard` components in two sections: Popular Lists and Your Lists. Selection for Popular Lists will be inserted manually, while Your Lists section is determined according to user's username and playlists in the database.
+
 ## Setup Instructions
 
 1. **Clone the Repository**:

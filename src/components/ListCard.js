@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-
+// Disclaimer: This component has been partially generated using Claude.
 const ListCard = ({ image, header, description, listId }) => {
   const navigate = useNavigate();
 

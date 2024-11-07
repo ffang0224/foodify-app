@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import sampleRestaurantData from "../sample-data/sampleRestaurantData";
-
+// Disclaimer: This component has been partially generated using Claude.
 const IndivRestaurantCard = () => {
   const { restaurantId } = useParams();
   const navigate = useNavigate();

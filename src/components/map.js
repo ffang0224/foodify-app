@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { GoogleMap, useLoadScript, MarkerF } from "@react-google-maps/api";
 import { MapPin, Search, Loader2, MapIcon } from "lucide-react";
 
+// Disclaimer: This component has been partially generated using Claude.
 const MapComponent = () => {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,

@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+// Disclaimer: This component has been partially generated using Claude.
+
 const RestaurantCollectionWithNav = ({ data, NavBar }) => (
   <div className="min-h-screen bg-white">
     <NavBar />

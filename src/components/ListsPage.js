@@ -2,7 +2,7 @@
 import { useState, useEffect} from 'react';
 import ListCard from './ListCard';
 import sampleListsData from "../sample-data/sampleListsData";
-
+// Disclaimer: This component has been partially generated using Claude.
 const ListsPage = () => {
   
   // Example data structure - replace with database data

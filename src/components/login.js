@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+// Disclaimer: This component has been partially generated using Claude.
 // Login component
 const Login = () => {
   // State for input fields

@@ -1,5 +1,7 @@
 # Data Product Frontend - Foodify
 
+![Map](image-1.png)
+
 ## Project Description
 
 This project is the frontend prototype for our data product, **Foodify**, allowing users to explore restaurant collections, navigate lists, and view maps of restaurants. The primary goal is to implement a user-friendly, responsive interface using React, based on wireframes we created in Figma.

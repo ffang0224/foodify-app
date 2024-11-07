@@ -13,11 +13,9 @@ import IndivRestaurantCard from "./components/IndivRestaurantCard.js";
 import Login from "./components/login.js";
 import Register from "./components/register.js";
 import MapComponent from "./components/map.js";
-import ListsPage from './components/ListsPage.js';
-import sampleListsData from "./sample-data/sampleListsData.js";
+import ListsPage from "./components/ListsPage.js";
 import { RestaurantCollectionWithNav } from "./components/IndivPlaylist.js";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-
+import { ArrowLeft, ArrowRight, UtensilsCrossed } from "lucide-react";
 
 // Navigation bar component with conditional rendering
 const NavBar = () => {
@@ -29,48 +27,59 @@ const NavBar = () => {
 
   return (
     <div className="bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        {/* For restaurant pages, show back to lists on the left */}
-        {isRestaurantPage && (
-          <button
-            onClick={() => navigate("/lists")}
-            className="flex items-center text-gray-700 hover:text-gray-900"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            <span>Back to Lists</span>
-          </button>
-        )}
-        {/* For Lisrs page, show restaurants on the right and map on the left*/}
-        {isListsPage && (
-          <div className="flex justify-between w-full">
-          {/* Back to Map on the left */}
-          <button
-            onClick={() => navigate("/map")}
-            className="flex items-center text-gray-700 hover:text-gray-900"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            <span>Back to Map</span>
-          </button>
-        </div>
-        )}
-        {/* For map page, show restaurants on the right */}
-        {isMapPage && (
-          <div className="ml-auto">
-            <button
-              onClick={() => navigate("/lists")}
-              className="flex items-center text-gray-700 hover:text-gray-900"
-            >
-              <span>Lists</span>
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </button>
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="flex justify-between items-center">
+          {/* Logo and Title */}
+          <div className="flex items-center">
+            <UtensilsCrossed className="w-6 h-6 text-orange-500" />
+            <h1 className="text-2xl font-bold ml-2 text-orange-500 tracking-tight">
+              Foodify
+            </h1>
           </div>
-        )}
-        {/* If we're not on either page, show empty div for spacing */}
-        {!isRestaurantPage && !isMapPage && !isListsPage &&<div></div>}
+
+          {/* Navigation Controls */}
+          <div className="flex items-center space-x-4">
+            {/* For restaurant pages, show back to lists */}
+            {isRestaurantPage && (
+              <button
+                onClick={() => navigate("/lists")}
+                className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                <span>Back to Lists</span>
+              </button>
+            )}
+
+            {/* For Lists page */}
+            {isListsPage && (
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => navigate("/map")}
+                  className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  <span>Back to Map</span>
+                </button>
+              </div>
+            )}
+
+            {/* For map page */}
+            {isMapPage && (
+              <button
+                onClick={() => navigate("/lists")}
+                className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
+              >
+                <span>Lists</span>
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
+
 // Map view with navigation
 const MapView = () => (
   <div className="min-h-screen bg-gray-50">
@@ -83,20 +92,15 @@ const MapView = () => (
 
 // Lists Page with navigation
 const ListsPageWithNav = () => {
-  // const [currentPage] = useState('lists'); // You can expand this for actual routing
-  return(
+  return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <NavBar />
       <div className="flex-grow">
         <ListsPage />
       </div>
     </div>
-  )
+  );
 };
-
-// Restaurant Collection with navigation
-
-
 
 const App = () => {
   return (
@@ -109,7 +113,12 @@ const App = () => {
         <Route path="/lists" element={<ListsPageWithNav />} />
         <Route
           path="/restaurants"
-          element={<RestaurantCollectionWithNav data={sampleRestaurantData} NavBar={NavBar}/>}
+          element={
+            <RestaurantCollectionWithNav
+              data={sampleRestaurantData}
+              NavBar={NavBar}
+            />
+          }
         />
         <Route
           path="/restaurant/:restaurantId"
@@ -126,4 +135,5 @@ const App = () => {
     </Router>
   );
 };
+
 export default App;

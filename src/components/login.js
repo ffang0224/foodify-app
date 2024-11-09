@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { UtensilsCrossed } from "lucide-react";
+
 // Disclaimer: This component has been partially generated using Claude.
 // Login component
 const Login = () => {
@@ -20,17 +22,20 @@ const Login = () => {
   return (
     <div className="flex min-h-screen">
       {/* Left side - Image section */}
-      <div className="hidden md:flex md:w-1/2 bg-gray-100 items-center justify-center">
-        <div className="w-3/4 h-3/4 bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600">
-          App Image
-        </div>
+      <div className="hidden md:flex md:w-1/2 bg-gray-100 items-center justify-center h-screen">
+        <img
+          src="/app_image.png"
+          alt="App Image"
+          className="w-full h-full object-fill max-w-[80%] max-h-[80%] rounded-lg"
+        />
       </div>
 
       {/* Right side - Login form */}
       <div className="flex items-center justify-center w-full md:w-1/2 p-12 bg-white">
         <div className="w-full max-w-md">
-          <div className="mx-auto h-16 w-16 rounded-full bg-gray-200 flex items-center text-center justify-center text-sm font-bold text-gray-600">
-            Logo Image
+          <div className="mx-auto flex items-center text-center justify-center">
+            {/* Logo Image */}
+            <UtensilsCrossed className="w-32 h-32 text-orange-500" />
           </div>
 
           <h2 className="mt-8 text-center text-2xl font-bold tracking-tight text-gray-900">
@@ -118,7 +123,7 @@ const Login = () => {
           <p className="mt-10 text-center text-sm text-gray-500">
             Not a member?{" "}
             <a
-              href="#"
+              href="/register"
               className="font-semibold text-gray-600 hover:text-black"
             >
               Sign up

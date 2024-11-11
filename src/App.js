@@ -17,11 +17,15 @@ import { RestaurantCollectionWithNav } from "./components/IndivPlaylist.js";
 import { ArrowLeft, ArrowRight, UtensilsCrossed } from "lucide-react";
 import CreatePlaylist from "./components/CreatePlaylist";
 import ViewPlaylist from "./components/ViewPlaylist"; // Import ViewPlaylist
+import ProfilePage from "./components/ProfilePage"; 
+import IconDropdown from "./components/IconDropdown";
 
 // Navigation bar component with conditional rendering
 const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const isRestaurantPage = location.pathname.includes("/restaurant");
   const isMapPage = location.pathname === "/map";
   const isListsPage = location.pathname === "/lists";
@@ -75,12 +79,37 @@ const NavBar = () => {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </button>
             )}
+
+            {/* User Icon and Dropdown */}
+            <div className="relative ml-4">
+              <button 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="focus:outline-none"
+              >
+                <img 
+                  src="https://static.vecteezy.com/system/resources/thumbnails/019/896/012/small_2x/female-user-avatar-icon-in-flat-design-style-person-signs-illustration-png.png" 
+                  alt="User" 
+                  className="w-10 h-10 rounded-full"
+                />
+              </button>
+              <IconDropdown isOpen={isDropdownOpen} onClose={() => setIsDropdownOpen(false)} />
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+// Profile Page with navigation
+const ProfilePageWithNav = () => (
+  <div className="min-h-screen bg-gray-50">
+    <NavBar />
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <ProfilePage />
+    </div>
+  </div>
+);
 
 // Map view with navigation
 const MapView = () => (
@@ -117,6 +146,7 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/map" element={<MapView />} />
+        <Route path="/profile" element={<ProfilePageWithNav />} />
         <Route
           path="/lists"
           element={<ListsPageWithNav userPlaylists={userPlaylists} />}

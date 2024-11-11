@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -15,6 +15,8 @@ import MapComponent from "./components/map.js";
 import ListsPage from "./components/ListsPage.js";
 import { RestaurantCollectionWithNav } from "./components/IndivPlaylist.js";
 import { ArrowLeft, ArrowRight, UtensilsCrossed } from "lucide-react";
+import CreatePlaylist from "./components/CreatePlaylist";
+import ViewPlaylist from "./components/ViewPlaylist"; // Import ViewPlaylist
 
 // Navigation bar component with conditional rendering
 const NavBar = () => {
@@ -38,7 +40,6 @@ const NavBar = () => {
 
           {/* Navigation Controls */}
           <div className="flex items-center space-x-4">
-            {/* For restaurant pages, show back to lists */}
             {isRestaurantPage && (
               <button
                 onClick={() => navigate("/lists")}
@@ -48,19 +49,23 @@ const NavBar = () => {
                 <span>Back to Lists</span>
               </button>
             )}
-
-            {/* For Lists page */}
             {isListsPage && (
-              <button
-                onClick={() => navigate("/map")}
-                className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
-              >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                <span>Back to Map</span>
-              </button>
+              <>
+                <button
+                  onClick={() => navigate("/map")}
+                  className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  <span>Back to Map</span>
+                </button>
+                <button
+                  onClick={() => navigate("/create-playlist")}
+                  className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
+                >
+                  <span>Create Playlist</span>
+                </button>
+              </>
             )}
-
-            {/* For map page */}
             {isMapPage && (
               <button
                 onClick={() => navigate("/lists")}
@@ -88,18 +93,23 @@ const MapView = () => (
 );
 
 // Lists Page with navigation
-const ListsPageWithNav = () => {
-  return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <NavBar />
-      <div className="flex-grow">
-        <ListsPage />
-      </div>
+const ListsPageWithNav = ({ userPlaylists }) => (
+  <div className="min-h-screen flex flex-col bg-gray-50">
+    <NavBar />
+    <div className="flex-grow">
+      <ListsPage userPlaylists={userPlaylists} />
     </div>
-  );
-};
+  </div>
+);
 
 const App = () => {
+  const [userPlaylists, setUserPlaylists] = useState([]);
+
+  // Function to add a new playlist
+  const addNewPlaylist = (playlist) => {
+    setUserPlaylists((prevPlaylists) => [...prevPlaylists, playlist]);
+  };
+
   return (
     <Router>
       <Routes>
@@ -107,7 +117,10 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/map" element={<MapView />} />
-        <Route path="/lists" element={<ListsPageWithNav />} />
+        <Route
+          path="/lists"
+          element={<ListsPageWithNav userPlaylists={userPlaylists} />}
+        />
         <Route
           path="/restaurants"
           element={
@@ -127,6 +140,16 @@ const App = () => {
               </div>
             </div>
           }
+        />
+        {/* New route for CreatePlaylist */}
+        <Route
+          path="/create-playlist"
+          element={<CreatePlaylist onSave={addNewPlaylist} />}
+        />
+        {/* Route to view individual playlist */}
+        <Route
+          path="/playlist/:playlistId"
+          element={<ViewPlaylist userPlaylists={userPlaylists} />}
         />
       </Routes>
     </Router>

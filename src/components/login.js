@@ -94,9 +94,9 @@ const Login = () => {
       {/* Left side - Image section */}
       <div className="hidden md:flex md:w-1/2 bg-gray-100 items-center justify-center h-screen">
         <img
-          src="/app_image.png"
+          src="/app_image.jpg"
           alt="App Image"
-          className="w-full h-full object-cover max-w-[80%] max-h-[80%] rounded-lg"
+          className="w-full h-screen max-h-screen overflow-hidden rounded-lg flex items-center justify-center"
         />
       </div>
 

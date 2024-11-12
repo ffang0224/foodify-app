@@ -86,6 +86,7 @@ Currently, the setup requires running back-end and front-end separately.
   ```
   pip install -r requirements.txt
   ```
+- Place "firebase_credentials" in the directory.
 - Start the backend server:
   ```
   uvicorn app:app

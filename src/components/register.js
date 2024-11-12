@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
+import appImage from "../app_image.png"
 
 const Register = () => {
   const [formData, setFormData] = useState({

@@ -41,6 +41,8 @@ The `IndivRestaurantCard` component displays detailed information about a specif
 The `IndivPlaylist` is a component that displays a list of restaurants. Each restaurant is displayed as a card with its image, name, cuisine type, price range, and popular dishes. The restaurant name is a clickable link that navigates to the individual restaurant's detail page
 
 ## Setup Instructions
+Warning:
+Currently, the setup requires running back-end and front-end separately.
 
 1. **Clone the Repository**:
 
@@ -60,9 +62,22 @@ The `IndivPlaylist` is a component that displays a list of restaurants. Each res
 3. **Run the Backend Server** (in a separate terminal):
 
 - Clone the backend repository if you haven't already:
-  ```
+
+  ```unix
   git clone https://github.com/ffang0224/ppds-team-5.git
   ```
+
+- Create a virtual environment and activate it:
+  ```python
+  python -m venv .venv 
+
+  # On Windows:
+  .venv\Scripts\activate
+
+  # On macOS and Linux:
+  source .venv/bin/activate
+  ```
+
 - Navigate to the backend project directory:
   ```
   cd ppds-team-5/api

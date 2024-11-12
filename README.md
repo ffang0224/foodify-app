@@ -106,7 +106,7 @@ Currently, the setup requires running back-end and front-end separately.
 
 ## Environment Variables:
 
-For Google Maps, Firebase credentials or other API keys, create a `.env` file at the root level and add any necessary keys in the format:
+For Google Maps, Firebase credentials or other API keys, create a `.env` file at the root level in frontend folder and add any necessary keys in the format:
 
 ```
 REACT_APP_GOOGLE_API_KEY=...

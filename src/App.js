@@ -35,7 +35,7 @@ const NavBar = () => {
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           {/* Logo and Title */}
-          <div className="flex items-center">
+          <div className="flex items-center hover:cursor-pointer" onClick={() => navigate("/map")}>
             <UtensilsCrossed className="w-6 h-6 text-orange-500" />
             <h1 className="text-2xl font-bold ml-2 text-orange-500 tracking-tight">
               Foodify

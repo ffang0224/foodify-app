@@ -3,67 +3,29 @@ import { useNavigate } from "react-router-dom";
 import { useAuthUser } from "../hooks/useAuthUser";
 import { Plus, Library, Loader } from "lucide-react";
 
-const ListsPage = () => {
+const RestaurantListCard = ({ list }) => {
   const navigate = useNavigate();
-  const { userData } = useAuthUser();
-  const [playlists, setPlaylists] = useState([]);
-  const [popularPlaylists, setPopularPlaylists] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchPlaylists = async () => {
-      if (!userData) return;
-
-      try {
-        // Fetch user's playlists
-        const userPlaylistsResponse = await fetch(
-          `http://localhost:8000/users/${userData.username}/playlists`
-        );
-        if (!userPlaylistsResponse.ok)
-          throw new Error("Failed to fetch user playlists");
-        const userPlaylists = await userPlaylistsResponse.ok;
-
-        // Fetch popular playlists (you'll need to add this endpoint to your API)
-        const popularPlaylistsResponse = await fetch(
-          "http://localhost:8000/playlists/popular"
-        );
-        if (!popularPlaylistsResponse.ok)
-          throw new Error("Failed to fetch popular playlists");
-        const popularPlaylists = await popularPlaylistsResponse.json();
-
-        setPlaylists(userPlaylists);
-        setPopularPlaylists(popularPlaylists);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPlaylists();
-  }, [userData]);
-
-  const PlaylistCard = ({ playlist }) => (
+  return (
     <div
       className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300"
       style={{
-        borderLeft: `4px solid ${playlist.color || "#f97316"}`,
+        borderLeft: `4px solid ${list.color}`,
       }}
     >
       <div className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          {playlist.name}
+          {list.name}
         </h3>
         <p className="text-sm text-gray-600 mb-4">
-          {playlist.description || `Created by ${playlist.author}`}
+          {list.description || `Created by ${list.author}`}
         </p>
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-500">
-            {playlist.restaurants.length} restaurants
+            {list.restaurants.length} restaurants
           </span>
           <button
-            onClick={() => navigate(`/playlist/${playlist.id}`)}
+            onClick={() => navigate(`/lists/${list.id}`)}
             className="text-orange-500 hover:text-orange-600 text-sm font-semibold"
           >
             View List →
@@ -72,6 +34,41 @@ const ListsPage = () => {
       </div>
     </div>
   );
+};
+
+const ListsPage = () => {
+  const navigate = useNavigate();
+  const { userData } = useAuthUser();
+  const [lists, setLists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchLists = async () => {
+      if (!userData) return;
+
+      try {
+        const response = await fetch(
+          `http://localhost:8000/users/${userData.username}/lists`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch lists");
+        }
+
+        const userLists = await response.json();
+        console.log("Fetched lists:", userLists); // Debug log
+        setLists(userLists);
+      } catch (err) {
+        console.error("Error fetching lists:", err);
+        setError(err.message || "Failed to load lists");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLists();
+  }, [userData]);
 
   if (loading) {
     return (
@@ -109,10 +106,10 @@ const ListsPage = () => {
           </button>
         </div>
 
-        {playlists.length > 0 ? (
+        {lists.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {playlists.map((playlist) => (
-              <PlaylistCard key={playlist.id} playlist={playlist} />
+            {lists.map((list) => (
+              <RestaurantListCard key={list.id} list={list} />
             ))}
           </div>
         ) : (
@@ -122,30 +119,13 @@ const ListsPage = () => {
               You haven't created any lists yet
             </p>
             <button
-              onClick={() => navigate("/create-playlist")}
+              onClick={() => navigate("/create-list")}
               className="text-orange-500 hover:text-orange-600 font-semibold"
             >
               Create Your First List
             </button>
           </div>
         )}
-      </section>
-
-      <section>
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-xl font-bold text-gray-800">Popular Lists</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Discover curated collections from the community
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {popularPlaylists.map((playlist) => (
-            <PlaylistCard key={playlist.id} playlist={playlist} />
-          ))}
-        </div>
       </section>
     </div>
   );

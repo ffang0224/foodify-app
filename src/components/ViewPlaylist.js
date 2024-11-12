@@ -9,67 +9,77 @@ import {
   Edit2,
   Trash2,
   Loader,
+  MapPin,
+  Star,
+  DollarSign,
 } from "lucide-react";
 
 const ViewPlaylist = () => {
-  const { playlistId } = useParams();
+  const { listId } = useParams();
   const navigate = useNavigate();
   const { userData } = useAuthUser();
 
-  const [playlist, setPlaylist] = useState(null);
+  const [list, setList] = useState(null);
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isOwner, setIsOwner] = useState(false);
 
+  const getPriceLevel = (level) => {
+    return level ? "$$$$".slice(0, level) : "N/A";
+  };
+
   useEffect(() => {
-    const fetchPlaylistData = async () => {
+    const fetchListData = async () => {
       if (!userData) return;
 
       try {
-        // Fetch playlist data
-        const playlistResponse = await fetch(
-          `http://localhost:8000/users/${userData.username}/playlists/${playlistId}`
+        // Fetch list data
+        const listResponse = await fetch(
+          `http://localhost:8000/users/${userData.username}/lists/${listId}`
         );
-        if (!playlistResponse.ok) throw new Error("Failed to fetch playlist");
-        const playlistData = await playlistResponse.json();
+        if (!listResponse.ok) throw new Error("Failed to fetch list");
+        const listData = await listResponse.json();
 
-        setPlaylist(playlistData);
-        setIsOwner(playlistData.username === userData.username);
+        setList(listData);
+        setIsOwner(listData.username === userData.username);
 
-        // Fetch restaurant details for each restaurant in the playlist
-        const restaurantPromises = playlistData.restaurants.map(
-          (restaurantId) =>
-            fetch(`http://localhost:8000/restaurants/${restaurantId}`).then(
-              (res) => res.json()
-            )
+        // Fetch restaurant details for each restaurant in the list
+        const restaurantPromises = listData.restaurants.map((restaurantId) =>
+          fetch(`http://localhost:8000/restaurants/${restaurantId}`).then(
+            (res) => {
+              if (!res.ok)
+                throw new Error(`Failed to fetch restaurant ${restaurantId}`);
+              return res.json();
+            }
+          )
         );
 
         const restaurantData = await Promise.all(restaurantPromises);
         setRestaurants(restaurantData);
       } catch (err) {
+        console.error("Error fetching data:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPlaylistData();
-  }, [playlistId, userData]);
+    fetchListData();
+  }, [listId, userData]);
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this playlist?"))
-      return;
+    if (!window.confirm("Are you sure you want to delete this list?")) return;
 
     try {
       const response = await fetch(
-        `http://localhost:8000/users/${userData.username}/playlists/${playlistId}`,
+        `http://localhost:8000/users/${userData.username}/lists/${listId}`,
         {
           method: "DELETE",
         }
       );
 
-      if (!response.ok) throw new Error("Failed to delete playlist");
+      if (!response.ok) throw new Error("Failed to delete list");
 
       navigate("/lists");
     } catch (err) {
@@ -82,16 +92,16 @@ const ViewPlaylist = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex items-center space-x-2 text-gray-600">
           <Loader className="w-5 h-5 animate-spin" />
-          <span>Loading playlist...</span>
+          <span>Loading list...</span>
         </div>
       </div>
     );
   }
 
-  if (!playlist) {
+  if (!list) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Playlist not found</div>
+        <div className="text-gray-600">List not found</div>
       </div>
     );
   }
@@ -121,7 +131,7 @@ const ViewPlaylist = () => {
               {isOwner && (
                 <>
                   <button
-                    onClick={() => navigate(`/playlist/${playlistId}/edit`)}
+                    onClick={() => navigate(`/lists/${listId}/edit`)}
                     className="text-gray-600 hover:text-orange-500"
                   >
                     <Edit2 className="w-5 h-5" />
@@ -147,14 +157,12 @@ const ViewPlaylist = () => {
         )}
 
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            {playlist.name}
-          </h2>
-          {playlist.description && (
-            <p className="text-gray-600 mb-4">{playlist.description}</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">{list.name}</h2>
+          {list.description && (
+            <p className="text-gray-600 mb-4">{list.description}</p>
           )}
           <div className="flex items-center text-sm text-gray-500">
-            <span>Created by @{playlist.author}</span>
+            <span>Created by @{list.author}</span>
             <span className="mx-2">•</span>
             <span>{restaurants.length} restaurants</span>
           </div>
@@ -163,31 +171,40 @@ const ViewPlaylist = () => {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {restaurants.map((restaurant) => (
             <div
-              key={restaurant.restaurantId}
+              key={restaurant.place_id}
               className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 hover:shadow-xl transition-all duration-300"
             >
-              <img
-                src={restaurant.images[0]}
-                alt={restaurant.name}
-                className="w-full h-48 object-cover"
-              />
               <div className="p-6 space-y-4">
                 <h3 className="text-xl font-semibold text-gray-800">
                   {restaurant.name}
                 </h3>
-                <div className="space-y-2 text-gray-600">
-                  <p>
-                    <span className="font-medium">Cuisine:</span>{" "}
-                    {restaurant.cuisines}
-                  </p>
-                  <p>
-                    <span className="font-medium">Price Range:</span>{" "}
-                    {restaurant.priceRange}
-                  </p>
-                  <p>
-                    <span className="font-medium">Popular Dishes:</span>{" "}
-                    {restaurant.popularDishes.join(", ")}
-                  </p>
+                <div className="flex items-center text-sm text-gray-500 mb-2">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {restaurant.address}
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                    <span className="text-sm text-gray-600">
+                      {restaurant.rating} ({restaurant.user_ratings_total})
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
+                    <span className="text-sm text-gray-600">
+                      {getPriceLevel(restaurant.price_level)}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {restaurant.types.slice(0, 3).map((type, index) => (
+                    <span
+                      key={index}
+                      className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
+                    >
+                      {type.replace(/_/g, " ")}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>

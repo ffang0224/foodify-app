@@ -1,82 +1,124 @@
-import React, { useState } from 'react';
-import List from './ListCard';  // Assuming this is your existing List component
-import RestaurantCard from './IndivRestaurantCard';  // Assuming this is your existing RestaurantCard component
-// Profile page component
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthUser } from "../hooks/useAuthUser";
+import ListCard from "./ListCard";
+import RestaurantCard from "./IndivRestaurantCard";
+import { Edit, MapPin, Mail, User } from "lucide-react";
+
 const ProfilePage = () => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [lists] = useState([
-    { name: 'List 1', description: 'Short Description 1', image: '/api/placeholder/200/150' },
-    { name: 'List 2', description: 'Short Description 2', image: '/api/placeholder/200/150' },
-    { name: 'List 3', description: 'Short Description 3', image: '/api/placeholder/200/150' }
-  ]);
-  
-  const [restaurants] = useState([
-    {
-      name: 'Restaurant 1',
-      cuisine: 'Italian',
-      priceRange: '$$',
-      popularDishes: ['Pizza', 'Pasta'],
-      image: '/api/placeholder/200/150'
-    },
-    {
-      name: 'Restaurant 2',
-      cuisine: 'Japanese',
-      priceRange: '$$$',
-      popularDishes: ['Sushi', 'Ramen'],
-      image: '/api/placeholder/200/150'
-    }
-  ]);
+  const { userData, loading } = useAuthUser();
+  const navigate = useNavigate();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-lg text-gray-600">Loading profile...</div>
+      </div>
+    );
+  }
+
+  if (!userData) {
+    navigate("/login");
+    return null;
+  }
+
+  const totalPoints = Object.values(userData.points).reduce((a, b) => a + b, 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-        <p className="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center text-2xl font-semibold"> Profile page</p>
-
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Profile Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="flex items-center gap-6">
-            <img 
-              src="https://static.vecteezy.com/system/resources/thumbnails/019/896/012/small_2x/female-user-avatar-icon-in-flat-design-style-person-signs-illustration-png.png" 
-              alt="Profile" 
-              className="w-28 h-28 rounded-full"
-            />
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <div className="flex items-start gap-6">
+            <div className="w-32 h-32 rounded-full bg-orange-500 flex items-center justify-center text-white text-3xl font-bold">
+              {userData.firstName[0]}
+              {userData.lastName[0]}
+            </div>
             <div className="flex-grow">
-              <h1 className="text-2xl font-semibold mb-2">Alice Smith</h1>
-              <button className="px-4 py-2 border rounded-md hover:bg-gray-50">
-                Edit Profile
-              </button>
+              <div className="flex justify-between items-start">
+                <div>
+                  <h1 className="text-2xl font-bold mb-2">
+                    {userData.firstName} {userData.lastName}
+                  </h1>
+                  <div className="space-y-2 text-gray-600">
+                    <p className="flex items-center">
+                      <User className="w-4 h-4 mr-2" />@{userData.username}
+                    </p>
+                    <p className="flex items-center">
+                      <Mail className="w-4 h-4 mr-2" />
+                      {userData.email}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate("/settings")}
+                  className="flex items-center px-4 py-2 border rounded-md hover:bg-gray-50"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </button>
+              </div>
+
+              <div className="mt-6 grid grid-cols-3 gap-4">
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Total Points</p>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {totalPoints}
+                  </p>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Lists Created</p>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {userData.playlists.length}
+                  </p>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Reviews</p>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {userData.points.reviewPoints}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Lists Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Your Lists</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {lists.map((list, index) => (
-              <List 
-                key={index}
-                name={list.name}
-                description={list.description}
-                image={list.image}
-              />
-            ))}
+        <div className="mb-12">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-800">Your Lists</h2>
+            <button
+              onClick={() => navigate("/create-playlist")}
+              className="text-orange-500 hover:text-orange-600 font-semibold"
+            >
+              Create New List
+            </button>
           </div>
-        </div>
-
-        {/* Favorites Section */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Favorites</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {restaurants.map((restaurant, index) => (
-              <RestaurantCard 
-                key={index}
-                {...restaurant}
-              />
-            ))}
-          </div>
+          {userData.playlists.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {userData.playlists.map((list, index) => (
+                <ListCard
+                  key={list.id || index}
+                  listId={list.id}
+                  header={list.name}
+                  description={`${list.restaurants.length} restaurants`}
+                  image={list.image || "/api/placeholder/200/150"}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <p className="text-gray-600 mb-4">
+                You haven't created any lists yet
+              </p>
+              <button
+                onClick={() => navigate("/create-playlist")}
+                className="text-orange-500 hover:text-orange-600 font-semibold"
+              >
+                Create Your First List
+              </button>
+            </div>
+          )}
         </div>
       </main>
     </div>

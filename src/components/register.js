@@ -1,33 +1,188 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { UtensilsCrossed } from "lucide-react";
+import {
+  UtensilsCrossed,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Loader,
+} from "lucide-react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
 
 const Register = () => {
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    username: "",
+    firstName: "",
+    lastName: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState(true);
+  const [checkingUsername, setCheckingUsername] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  // Debounce function
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  };
+
+  // Check username availability
+  const checkUsername = async (username) => {
+    if (!username || username.length < 3) {
+      setUsernameAvailable(false);
+      return;
+    }
+
+    setCheckingUsername(true);
+    try {
+      const response = await fetch(`http://localhost:8000/users/${username}`);
+      setUsernameAvailable(response.status === 404); // 404 means username is available
+    } catch (error) {
+      console.error("Error checking username:", error);
+      setUsernameAvailable(false);
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
+
+  // Debounced username check
+  const debouncedCheckUsername = debounce(checkUsername, 500);
+
+  useEffect(() => {
+    if (formData.username.length >= 3) {
+      debouncedCheckUsername(formData.username);
+    }
+  }, [formData.username]);
+
+  const validatePassword = (password) => {
+    const requirements = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      numeric: /[0-9]/.test(password),
+    };
+
+    if (!requirements.length)
+      return "Password must be at least 8 characters long";
+    if (!requirements.uppercase)
+      return "Password must contain an uppercase letter";
+    if (!requirements.lowercase)
+      return "Password must contain a lowercase letter";
+    if (!requirements.numeric) return "Password must contain a number";
+
+    return null;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setError("");
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/login");
+    setLoading(true);
+    setError("");
+
+    try {
+      // Check username availability one last time
+      if (!usernameAvailable) {
+        throw new Error("Username is not available");
+      }
+
+      // Validate passwords
+      if (formData.password !== formData.confirmPassword) {
+        throw new Error("Passwords do not match");
+      }
+
+      const passwordError = validatePassword(formData.password);
+      if (passwordError) {
+        throw new Error(passwordError);
+      }
+
+      // Create Firebase auth user
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      // Prepare user data for API
+      const userData = {
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        username: formData.username,
+        uid: userCredential.user.uid,
+        points: {
+          generalPoints: 0,
+          postPoints: 0,
+          reviewPoints: 0,
+        },
+        playlists: [],
+        emailVerified: false,
+      };
+
+      // Create user in backend
+      const response = await fetch("http://localhost:8000/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // If backend creation fails, delete the Firebase auth user
+        await userCredential.user.delete();
+        throw new Error(data.detail || "Failed to create user profile");
+      }
+
+      // Sign out after successful registration
+      await auth.signOut();
+
+      // Navigate to login with success message
+      navigate("/login", {
+        state: {
+          message: "Account created successfully! Please log in.",
+        },
+      });
+    } catch (err) {
+      setError(err.message);
+      // Clean up: If there was an error and auth user was created, delete it
+      if (auth.currentUser) {
+        await auth.currentUser.delete();
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex min-h-screen">
       {/* Left side - Image section */}
       <div className="hidden md:flex md:w-1/2 bg-gray-100 items-center justify-center">
-        <div className="w-3/4 h-3/4 bg-gray-300 rounded-lg flex items-center justify-center">
-          <img
-            src="https://img.freepik.com/premium-photo/close-up-pancake-berries-with-dripping-honey-fork-white-background-food-dessert-fun-copy-space-concept_13339-316062.jpg?w=1060"
-            alt="App Image"
-            className="w-full h-full object-cover rounded-lg"
-          />
-        </div>
+        <img
+          src="/app_image.png"
+          alt="App Image"
+          className="w-full h-full object-fill max-w-[80%] max-h-[80%] rounded-lg"
+        />
       </div>
 
       {/* Right side - Register form */}
@@ -41,8 +196,15 @@ const Register = () => {
             Sign up for Foodify
           </h2>
 
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
+              <AlertCircle className="w-5 h-5 mr-2" />
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-            {/* Email Field */}
+            {/* Email field */}
             <div>
               <label
                 htmlFor="email"
@@ -54,14 +216,57 @@ const Register = () => {
                 id="email"
                 name="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={handleChange}
                 required
-                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-black sm:text-sm"
+                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
-            {/* First and Last Name Fields */}
+            {/* Username field with availability check */}
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Username
+              </label>
+              <div className="relative">
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  value={formData.username}
+                  onChange={handleChange}
+                  required
+                  className={`mt-2 block w-full rounded-md border px-3 py-2 focus:ring-orange-500 ${
+                    formData.username.length >= 3
+                      ? usernameAvailable
+                        ? "border-green-500 focus:border-green-500"
+                        : "border-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:border-orange-500"
+                  }`}
+                />
+                {checkingUsername && (
+                  <div className="mt-1 text-sm text-gray-500">
+                    Checking availability...
+                  </div>
+                )}
+                {formData.username.length >= 3 && !checkingUsername && (
+                  <div
+                    className={`mt-1 text-sm ${
+                      usernameAvailable ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {usernameAvailable
+                      ? "Username is available"
+                      : "Username is taken"}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Name fields */}
             <div className="flex space-x-4">
               <div className="w-1/2">
                 <label
@@ -74,10 +279,10 @@ const Register = () => {
                   id="firstName"
                   name="firstName"
                   type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  value={formData.firstName}
+                  onChange={handleChange}
                   required
-                  className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-black sm:text-sm"
+                  className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
 
@@ -92,34 +297,15 @@ const Register = () => {
                   id="lastName"
                   name="lastName"
                   type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  value={formData.lastName}
+                  onChange={handleChange}
                   required
-                  className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-black sm:text-sm"
+                  className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
             </div>
 
-            {/* Username Field */}
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Username
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-black sm:text-sm"
-              />
-            </div>
-
-            {/* Password Field */}
+            {/* Password fields */}
             <div>
               <label
                 htmlFor="password"
@@ -127,18 +313,26 @@ const Register = () => {
               >
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-black sm:text-sm"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
-            {/* Confirm Password Field */}
             <div>
               <label
                 htmlFor="confirmPassword"
@@ -146,24 +340,57 @@ const Register = () => {
               >
                 Confirm Password
               </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-black sm:text-sm"
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full rounded-md bg-black py-2 px-3 text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+              disabled={loading || !usernameAvailable || checkingUsername}
+              className="w-full rounded-md bg-orange-500 py-2 px-3 text-sm font-semibold text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
             >
-              Register
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <Loader className="w-5 h-5 animate-spin mr-2" />
+                  Creating Account...
+                </div>
+              ) : (
+                "Create Account"
+              )}
             </button>
+
+            <div className="text-center">
+              <span className="text-sm text-gray-600">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="text-orange-500 hover:text-orange-600 font-semibold"
+                >
+                  Log in
+                </button>
+              </span>
+            </div>
           </form>
         </div>
       </div>

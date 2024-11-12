@@ -1,22 +1,92 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { UtensilsCrossed } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  UtensilsCrossed,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Loader,
+} from "lucide-react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
 
-// Disclaimer: This component has been partially generated using Claude.
-// Login component
 const Login = () => {
-  // State for input fields
-  const [emailOrUsername, setEmailOrUsername] = useState("");
-  const [password, setPassword] = useState("");
-  // Navigation after login
-  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    emailOrUsername: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Form submission handler
-  const handleSubmit = (e) => {
-    // Doesn't reload after submission
+  const navigate = useNavigate();
+  const location = useLocation();
+  const successMessage = location.state?.message;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setError("");
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Navigate to the map page after successful login
-    navigate("/map");
+    setLoading(true);
+    setError("");
+
+    try {
+      // Determine if input is email or username
+      let loginEmail = formData.emailOrUsername;
+
+      // If it's not an email, fetch the email from the backend
+      if (!loginEmail.includes("@")) {
+        const userResponse = await fetch(
+          `http://localhost:8000/users/${formData.emailOrUsername}`
+        );
+
+        if (!userResponse.ok) {
+          throw new Error("Invalid username or password");
+        }
+
+        const userData = await userResponse.json();
+        loginEmail = userData.email;
+      }
+
+      // Sign in with Firebase
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        loginEmail,
+        formData.password
+      );
+
+      // Fetch user data from backend
+      const response = await fetch(
+        `http://localhost:8000/users/auth/${userCredential.user.uid}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+
+      const userData = await response.json();
+
+      // Store user data in localStorage if needed
+      localStorage.setItem("userData", JSON.stringify(userData));
+
+      // Navigate to home page
+      navigate("/map");
+    } catch (err) {
+      setError(
+        err.code === "auth/invalid-credential"
+          ? "Invalid email/username or password"
+          : err.message
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -26,7 +96,7 @@ const Login = () => {
         <img
           src="/app_image.png"
           alt="App Image"
-          className="w-full h-full object-fill max-w-[80%] max-h-[80%] rounded-lg"
+          className="w-full h-full object-cover max-w-[80%] max-h-[80%] rounded-lg"
         />
       </div>
 
@@ -34,7 +104,6 @@ const Login = () => {
       <div className="flex items-center justify-center w-full md:w-1/2 p-12 bg-white">
         <div className="w-full max-w-md">
           <div className="mx-auto flex items-center text-center justify-center">
-            {/* Logo Image */}
             <UtensilsCrossed className="w-32 h-32 text-orange-500" />
           </div>
 
@@ -42,30 +111,18 @@ const Login = () => {
             Log in to Foodify
           </h2>
 
-          {/* Social Login Buttons */}
-          <div className="mt-6 space-y-4">
-            <button className="w-full flex items-center justify-center px-3 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200">
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/1/18/Gile_use.png?20230327030750"
-                alt="Google logo"
-                className="h-6 w-6 mr-3"
-              />
-              <span className="text-gray-700 font-semibold">
-                Continue with Google
-              </span>
-            </button>
+          {successMessage && (
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+              {successMessage}
+            </div>
+          )}
 
-            <button className="w-full flex items-center justify-center px-3 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200">
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png"
-                alt="Facebook logo"
-                className="h-6 w-6 mr-3"
-              />
-              <span className="text-gray-700 font-semibold">
-                Continue with Facebook
-              </span>
-            </button>
-          </div>
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
+              <AlertCircle className="w-5 h-5 mr-2" />
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
             <div>
@@ -79,10 +136,10 @@ const Login = () => {
                 id="emailOrUsername"
                 name="emailOrUsername"
                 type="text"
-                value={emailOrUsername}
-                onChange={(e) => setEmailOrUsername(e.target.value)}
+                value={formData.emailOrUsername}
+                onChange={handleChange}
                 required
-                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-black sm:text-sm"
+                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -94,41 +151,55 @@ const Login = () => {
                 >
                   Password
                 </label>
-                <a
-                  href="#"
-                  className="text-sm font-semibold text-gray-600 hover:text-black"
-                >
-                  Forgot password?
-                </a>
               </div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-black sm:text-sm"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-md bg-black py-2 px-3 text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+              disabled={loading}
+              className="w-full rounded-md bg-orange-500 py-2 px-3 text-sm font-semibold text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
             >
-              Log in
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <Loader className="w-5 h-5 animate-spin mr-2" />
+                  Logging in...
+                </div>
+              ) : (
+                "Log in"
+              )}
             </button>
-          </form>
 
-          <p className="mt-10 text-center text-sm text-gray-500">
-            Not a member?{" "}
-            <a
-              href="/register"
-              className="font-semibold text-gray-600 hover:text-black"
-            >
-              Sign up
-            </a>
-          </p>
+            <div className="text-center">
+              <span className="text-sm text-gray-600">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/register")}
+                  className="text-orange-500 hover:text-orange-600 font-semibold"
+                >
+                  Sign up
+                </button>
+              </span>
+            </div>
+          </form>
         </div>
       </div>
     </div>

@@ -44,27 +44,65 @@ The `IndivPlaylist` is a component that displays a list of restaurants. Each res
 
 1. **Clone the Repository**:
 
-   - `git clone https://github.com/ffang0224/foodify-app`
-   - `cd foodify-app`
+   ```
+   git clone https://github.com/ffang0224/foodify-app
+   cd foodify-app
+   ```
 
 2. **Install Dependencies**:
 
-   - Run `npm install` to install all necessary packages.
+   ```
+   npm install
+   ```
 
-3. **Run the Application**:
+   Run the above to install all necessary packages.
 
-   - Use `npm start` to start the development server.
+3. **Run the Backend Server** (in a separate terminal):
 
-4. **Dependencies**:
+- Clone the backend repository if you haven't already:
+  ```
+  git clone https://github.com/ffang0224/ppds-team-5.git
+  ```
+- Navigate to the backend project directory:
+  ```
+  cd ppds-team-5/api
+  ```
+- Install backend dependencies:
+  ```
+  pip install -r requirements.txt
+  ```
+- Start the backend server:
+  ```
+  uvicorn app:app
+  ```
+- Keep this terminal open to keep the backend server running.
 
-   - `react-router-dom` for navigation between pages.
-   - `@react-google-maps/api` for map integration.
-   - `lucide-react` for icon support.
+4. **Run the Frontend Application** (in another terminal):
+   ```
+   npm start
+   ```
 
-5. **Environment Variables**:
-   For Google Maps or other API keys, create a `.env` file at the root level and add any necessary keys in the format:
-   - `REACT_APP_GOOGLE_API_KEY=your_google_maps_api_key`
-     See `.env.example` for reference.
+## Dependencies:
+
+- `react-router-dom` for navigation between pages.
+- `@react-google-maps/api` for map integration.
+- `lucide-react` for icon support.
+
+## Environment Variables:
+
+For Google Maps, Firebase credentials or other API keys, create a `.env` file at the root level and add any necessary keys in the format:
+
+```
+REACT_APP_GOOGLE_API_KEY=...
+REACT_APP_FIREBASE_API_KEY=...
+REACT_APP_FIREBASE_AUTH_DOMAIN=...
+REACT_APP_FIREBASE_PROJECT_ID=...
+REACT_APP_FIREBASE_STORAGE_BUCKET=...
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=...
+REACT_APP_FIREBASE_APP_ID=...
+```
+
+See `.env.example` for reference.
 
 ## Development Process
 

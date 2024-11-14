@@ -41,6 +41,7 @@ The `IndivRestaurantCard` component displays detailed information about a specif
 The `IndivPlaylist` is a component that displays a list of restaurants. Each restaurant is displayed as a card with its image, name, cuisine type, price range, and popular dishes. The restaurant name is a clickable link that navigates to the individual restaurant's detail page
 
 ## Setup Instructions
+
 Warning:
 Currently, the setup requires running back-end and front-end separately.
 
@@ -67,9 +68,16 @@ Currently, the setup requires running back-end and front-end separately.
   git clone https://github.com/ffang0224/ppds-team-5.git
   ```
 
+- Navigate to the backend project directory:
+
+  ```
+  cd ppds-team-5
+  ```
+
 - Create a virtual environment and activate it:
+
   ```python
-  python -m venv .venv 
+  python -m venv .venv
 
   # On Windows:
   .venv\Scripts\activate
@@ -78,21 +86,24 @@ Currently, the setup requires running back-end and front-end separately.
   source .venv/bin/activate
   ```
 
-- Navigate to the backend project directory:
-  ```
-  cd ppds-team-5
-  ```
 - Install backend dependencies:
   ```
   pip install -r requirements.txt
   ```
 - Create firebase_credentials.json and write the data:
-  ```
-  cd 
+
+  ```console
+  cd python_script
+  touch firebase_credentials.json
+
+  * Write credentials on your file *
+
+  cd ..
   ```
 
 - Start the backend server:
   ```
+  cd api/
   uvicorn app:app
   ```
 - Keep this terminal open to keep the backend server running.
@@ -102,13 +113,13 @@ Currently, the setup requires running back-end and front-end separately.
    npm start
    ```
 
-## Dependencies:
+## Dependencies
 
 - `react-router-dom` for navigation between pages.
 - `@react-google-maps/api` for map integration.
 - `lucide-react` for icon support.
 
-## Environment Variables:
+## Environment Variables
 
 For Google Maps, Firebase credentials or other API keys, create a `.env` file at the root level in frontend folder and add any necessary keys in the format:
 

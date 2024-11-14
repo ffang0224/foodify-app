@@ -80,13 +80,17 @@ Currently, the setup requires running back-end and front-end separately.
 
 - Navigate to the backend project directory:
   ```
-  cd ppds-team-5/api
+  cd ppds-team-5
   ```
 - Install backend dependencies:
   ```
   pip install -r requirements.txt
   ```
-- Place "firebase_credentials.json" with appropriate values in ../python_scripts directory
+- Create firebase_credentials.json and write the data:
+  ```
+  cd 
+  ```
+
 - Start the backend server:
   ```
   uvicorn app:app

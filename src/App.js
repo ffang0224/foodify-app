@@ -19,6 +19,7 @@ import CreatePlaylist from "./components/CreatePlaylist";
 import ViewPlaylist from "./components/ViewPlaylist"; // Import ViewPlaylist
 import ProfilePage from "./components/ProfilePage"; 
 import IconDropdown from "./components/IconDropdown";
+import RefreshCacheButton from "./components/refreshRestaurantCache.js";
 
 // Navigation bar component with conditional rendering
 const NavBar = () => {
@@ -71,6 +72,8 @@ const NavBar = () => {
               </>
             )}
             {isMapPage && (
+              <div>
+                {/* <RefreshCacheButton></RefreshCacheButton> */}
               <button
                 onClick={() => navigate("/lists")}
                 className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
@@ -78,6 +81,7 @@ const NavBar = () => {
                 <span>Lists</span>
                 <ArrowRight className="w-5 h-5 ml-2" />
               </button>
+              </div>
             )}
 
             {/* User Icon and Dropdown */}

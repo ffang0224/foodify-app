@@ -60,7 +60,13 @@ Currently, the setup requires running back-end and front-end separately.
 
    Run the above to install all necessary packages.
 
-3. **Run the Backend Server** (in a separate terminal):
+3. **Create .env file and write the credentials:**
+
+   ```
+   touch .env
+   ```
+
+4. **Run the Backend Server** (in a separate terminal):
 
 - Clone the backend repository if you haven't already:
 
@@ -108,7 +114,7 @@ Currently, the setup requires running back-end and front-end separately.
   ```
 - Keep this terminal open to keep the backend server running.
 
-4. **Run the Frontend Application** (in another terminal):
+5. **Run the Frontend Application** (in another terminal):
    ```
    npm start
    ```

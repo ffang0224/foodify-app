@@ -42,6 +42,7 @@ const ListsPage = () => {
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [incentiveMessage, setIncentiveMessage] = useState("");
 
   useEffect(() => {
     const fetchLists = async () => {
@@ -57,8 +58,35 @@ const ListsPage = () => {
         }
 
         const userLists = await response.json();
-        console.log("Fetched lists:", userLists); // Debug log
         setLists(userLists);
+
+        // Calculate incentive message
+        const numLists = userLists.length;
+        const nextMilestone = Math.ceil((numLists + 1) / 10) * 10;
+        const points = (nextMilestone / 10) * 10;
+        const firstName = userData.firstName;
+
+        if (numLists > 0 && numLists % 10 === 0) {
+          // Update points on the server
+          await fetch(
+            `http://localhost:8000/users/${userData.username}/updatePoints`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ points }),
+            }
+          );
+        }
+
+        setIncentiveMessage(
+          `Keep going, ${firstName}! Create ${
+            nextMilestone - numLists
+          } more list${nextMilestone - numLists > 1 ? "s" : ""} to reach ${
+            nextMilestone
+          } lists and earn ${points} points.`
+        );
       } catch (err) {
         console.error("Error fetching lists:", err);
         setError(err.message || "Failed to load lists");
@@ -86,6 +114,15 @@ const ListsPage = () => {
       {error && (
         <div className="mb-8 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
+        </div>
+      )}
+
+      {incentiveMessage && (
+        <div className="mb-8 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md shadow-sm">
+          <h3 className="text-yellow-600 font-semibold text-lg">
+            Keep Going!
+          </h3>
+          <p className="text-gray-700">{incentiveMessage}</p>
         </div>
       )}
 
@@ -119,7 +156,7 @@ const ListsPage = () => {
               You haven't created any lists yet
             </p>
             <button
-              onClick={() => navigate("/create-list")}
+              onClick={() => navigate("/create-playlist")}
               className="text-orange-500 hover:text-orange-600 font-semibold"
             >
               Create Your First List

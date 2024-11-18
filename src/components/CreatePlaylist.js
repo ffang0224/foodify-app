@@ -22,6 +22,8 @@ const CreatePlaylist = () => {
   const [selectedRestaurants, setSelectedRestaurants] = useState([]);
   const [selectedColor, setSelectedColor] = useState("#f97316");
   const [searchQuery, setSearchQuery] = useState("");
+  const [priceRange, setPriceRange] = useState([1, 4]); // Min and max price range
+  const [ratingRange, setRatingRange] = useState(0); // Minimum rating
   const [allRestaurants, setAllRestaurants] = useState([]);
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -58,7 +60,6 @@ const CreatePlaylist = () => {
         }
 
         const data = await response.json();
-        console.log("Received data:", data); // For debugging
         setAllRestaurants(data);
         setFilteredRestaurants(data);
       } catch (err) {
@@ -71,21 +72,24 @@ const CreatePlaylist = () => {
 
     fetchRestaurants();
   }, []);
+
   useEffect(() => {
     const filtered = allRestaurants.filter((restaurant) => {
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        restaurant.name.toLowerCase().includes(searchLower) ||
+      const matchesSearch =
+        restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (restaurant.types &&
           restaurant.types.some((type) =>
-            type.toLowerCase().includes(searchLower)
-          )) ||
-        (restaurant.price_level &&
-          restaurant.price_level.toString().includes(searchLower))
-      );
+            type.toLowerCase().includes(searchQuery.toLowerCase())
+          ));
+      const matchesPrice =
+        restaurant.price_level >= priceRange[0] &&
+        restaurant.price_level <= priceRange[1];
+      const matchesRating = restaurant.rating >= ratingRange;
+
+      return matchesSearch && matchesPrice && matchesRating;
     });
     setFilteredRestaurants(filtered);
-  }, [searchQuery, allRestaurants]);
+  }, [searchQuery, priceRange, ratingRange, allRestaurants]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -107,9 +111,7 @@ const CreatePlaylist = () => {
     });
   };
 
-  const getPriceLevel = (level) => {
-    return level ? "$$$$".slice(0, level) : "N/A";
-  };
+  const getPriceLevel = (level) => (level ? "$$$$".slice(0, level) : "N/A");
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
@@ -181,7 +183,6 @@ const CreatePlaylist = () => {
                 Create New Restaurant List
               </span>
             </div>
-            <div className="w-20" />
           </div>
         </div>
       </div>
@@ -251,41 +252,43 @@ const CreatePlaylist = () => {
                   </div>
                 </div>
 
-                <div className="pt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">
-                      Selected Restaurants
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {selectedRestaurants.length} selected
-                    </span>
+                <div className="space-y-4 mt-6">
+                  <div>
+                    <label className="block text-sm text-gray-700">
+                      Price Range
+                    </label>
+                    <input
+                      type="range"
+                      min="1"
+                      max="4"
+                      value={priceRange[1]}
+                      onChange={(e) =>
+                        setPriceRange([priceRange[0], parseInt(e.target.value)])
+                      }
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>$</span>
+                      <span>$$$$</span>
+                    </div>
                   </div>
-                  {selectedRestaurants.length > 0 ? (
-                    <div className="space-y-2">
-                      {selectedRestaurants.map((restaurant) => (
-                        <div
-                          key={restaurant.place_id}
-                          className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md"
-                        >
-                          <span className="text-sm text-gray-700 truncate">
-                            {restaurant.name}
-                          </span>
-                          <button
-                            onClick={() =>
-                              toggleRestaurantSelection(restaurant)
-                            }
-                            className="text-gray-400 hover:text-red-500"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
+                  <div>
+                    <label className="block text-sm text-gray-700">
+                      Minimum Rating
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="5"
+                      value={ratingRange}
+                      onChange={(e) => setRatingRange(parseInt(e.target.value))}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>0</span>
+                      <span>5</span>
                     </div>
-                  ) : (
-                    <div className="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-md">
-                      No restaurants selected
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
 
@@ -312,7 +315,7 @@ const CreatePlaylist = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search restaurants by name, cuisine, or price level..."
+                  placeholder="Search restaurants by name, cuisine..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
@@ -321,69 +324,62 @@ const CreatePlaylist = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredRestaurants.map((restaurant) => {
-                const isSelected = selectedRestaurants.some(
-                  (r) => r.place_id === restaurant.place_id
-                );
-
-                return (
-                  <div
-                    key={restaurant.place_id}
-                    onClick={() => toggleRestaurantSelection(restaurant)}
-                    className={`bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-md ${
-                      isSelected ? "ring-2 ring-orange-500" : "hover:scale-102"
-                    }`}
-                  >
-                    <div className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-gray-900">
-                          {restaurant.name}
-                        </h3>
-                        {isSelected && (
-                          <div className="bg-orange-100 rounded-full p-1">
-                            <Plus className="w-4 h-4 text-orange-500 transform rotate-45" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center text-sm text-gray-500 mb-2">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        <span>{restaurant.address}</span>
-                        {restaurant.location && (
-                          <span className="ml-2 text-xs text-gray-400">
-                            ({restaurant.location.lat.toFixed(4)},{" "}
-                            {restaurant.location.lng.toFixed(4)})
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center">
-                          <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                          <span className="text-sm text-gray-600">
-                            {restaurant.rating} ({restaurant.user_ratings_total}
-                            )
-                          </span>
+              {filteredRestaurants.map((restaurant) => (
+                <div
+                  key={restaurant.place_id}
+                  onClick={() => toggleRestaurantSelection(restaurant)}
+                  className={`bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+                    selectedRestaurants.some(
+                      (r) => r.place_id === restaurant.place_id
+                    )
+                      ? "ring-2 ring-orange-500"
+                      : ""
+                  }`}
+                >
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-gray-900">
+                        {restaurant.name}
+                      </h3>
+                      {selectedRestaurants.some(
+                        (r) => r.place_id === restaurant.place_id
+                      ) && (
+                        <div className="bg-orange-100 rounded-full p-1">
+                          <Plus className="w-4 h-4 text-orange-500 transform rotate-45" />
                         </div>
-                        <div className="flex items-center">
-                          <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
-                          <span className="text-sm text-gray-600">
-                            {getPriceLevel(restaurant.price_level)}
-                          </span>
-                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center text-sm text-gray-500 mb-2">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      <span>{restaurant.address}</span>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center">
+                        <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                        <span className="text-sm text-gray-600">
+                          {restaurant.rating} ({restaurant.user_ratings_total})
+                        </span>
                       </div>
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {restaurant.types.slice(0, 3).map((type, index) => (
-                          <span
-                            key={index}
-                            className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
-                          >
-                            {type.replace(/_/g, " ")}
-                          </span>
-                        ))}
+                      <div className="flex items-center">
+                        <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
+                        <span className="text-sm text-gray-600">
+                          {getPriceLevel(restaurant.price_level)}
+                        </span>
                       </div>
                     </div>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {restaurant.types.slice(0, 3).map((type, index) => (
+                        <span
+                          key={index}
+                          className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
+                        >
+                          {type.replace(/_/g, " ")}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
 
             {filteredRestaurants.length === 0 && (

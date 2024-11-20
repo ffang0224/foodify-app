@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   UtensilsCrossed,
@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
-import appImage from "../app_image.png";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -24,30 +23,23 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [usernameAvailable, setUsernameAvailable] = useState(true);
+  const [usernameAvailable, setUsernameAvailable] = useState(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
 
   const navigate = useNavigate();
 
-  // Debounce function
-  const debounce = (func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-  };
-
   // Check username availability
-  const checkUsername = async (username) => {
-    if (!username || username.length < 3) {
+  const checkUsername = async () => {
+    if (!formData.username || formData.username.length < 3) {
       setUsernameAvailable(false);
       return;
     }
 
     setCheckingUsername(true);
     try {
-      const response = await fetch(`http://localhost:8000/users/${username}`);
+      const response = await fetch(
+        `http://localhost:8000/users/${formData.username}`
+      );
       setUsernameAvailable(response.status === 404); // 404 means username is available
     } catch (error) {
       console.error("Error checking username:", error);
@@ -56,15 +48,6 @@ const Register = () => {
       setCheckingUsername(false);
     }
   };
-
-  // Debounced username check
-  const debouncedCheckUsername = debounce(checkUsername, 500);
-
-  useEffect(() => {
-    if (formData.username.length >= 3) {
-      debouncedCheckUsername(formData.username);
-    }
-  }, [formData.username]);
 
   const validatePassword = (password) => {
     const requirements = {
@@ -224,7 +207,7 @@ const Register = () => {
               />
             </div>
 
-            {/* Username field with availability check */}
+            {/* Username field with manual availability check */}
             <div>
               <label
                 htmlFor="username"
@@ -232,7 +215,7 @@ const Register = () => {
               >
                 Username
               </label>
-              <div className="relative">
+              <div className="flex items-center space-x-2 mt-2">
                 <input
                   id="username"
                   name="username"
@@ -240,31 +223,39 @@ const Register = () => {
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  className={`mt-2 block w-full rounded-md border px-3 py-2 focus:ring-orange-500 ${
-                    formData.username.length >= 3
-                      ? usernameAvailable
-                        ? "border-green-500 focus:border-green-500"
-                        : "border-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:border-orange-500"
+                  className={`block w-full rounded-md border px-3 py-2 focus:ring-orange-500 ${
+                    usernameAvailable === null
+                      ? "border-gray-300"
+                      : usernameAvailable
+                      ? "border-green-500 focus:border-green-500"
+                      : "border-red-500 focus:border-red-500"
                   }`}
                 />
-                {checkingUsername && (
-                  <div className="mt-1 text-sm text-gray-500">
-                    Checking availability...
-                  </div>
-                )}
-                {formData.username.length >= 3 && !checkingUsername && (
-                  <div
-                    className={`mt-1 text-sm ${
-                      usernameAvailable ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {usernameAvailable
-                      ? "Username is available"
-                      : "Username is taken"}
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={checkUsername}
+                  className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                >
+                  Check
+                </button>
               </div>
+
+              {checkingUsername && (
+                <div className="mt-1 text-sm text-gray-500">
+                  Checking availability...
+                </div>
+              )}
+              {!checkingUsername && usernameAvailable !== null && (
+                <div
+                  className={`mt-1 text-sm ${
+                    usernameAvailable ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {usernameAvailable
+                    ? "Username is available"
+                    : "Username is taken"}
+                </div>
+              )}
             </div>
 
             {/* Name fields */}
@@ -367,7 +358,9 @@ const Register = () => {
 
             <button
               type="submit"
-              disabled={loading || !usernameAvailable || checkingUsername}
+              disabled={
+                loading || checkingUsername || usernameAvailable === false
+              }
               className="w-full rounded-md bg-orange-500 py-2 px-3 text-sm font-semibold text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
             >
               {loading ? (

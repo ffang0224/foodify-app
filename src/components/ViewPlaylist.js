@@ -25,6 +25,12 @@ const ViewPlaylist = () => {
   const [error, setError] = useState("");
   const [isOwner, setIsOwner] = useState(false);
 
+  console.log('Component mounted with:', {
+    listId,
+    userData,
+    loading
+  });
+
   const getPriceLevel = (level) => {
     return level ? "$$$$".slice(0, level) : "N/A";
   };
@@ -38,24 +44,42 @@ const ViewPlaylist = () => {
         const listResponse = await fetch(
           `http://localhost:8000/users/${userData.username}/lists/${listId}`
         );
-        if (!listResponse.ok) throw new Error("Failed to fetch list");
+        
+        console.log('List response status:', listResponse.status);
+        
+        if (!listResponse.ok) {
+          const errorText = await listResponse.text();
+          console.error('List response error:', errorText);
+          throw new Error(`Failed to fetch list: ${errorText}`);
+        }
+        
         const listData = await listResponse.json();
+        console.log('Received list data:', listData);
 
         setList(listData);
         setIsOwner(listData.username === userData.username);
 
+        if (!listData.restaurants || !Array.isArray(listData.restaurants)) {
+          console.error('No restaurants array in list data:', listData);
+          return;
+        }
+
         // Fetch restaurant details for each restaurant in the list
-        const restaurantPromises = listData.restaurants.map((restaurantId) =>
-          fetch(`http://localhost:8000/restaurants/${restaurantId}`).then(
-            (res) => {
-              if (!res.ok)
-                throw new Error(`Failed to fetch restaurant ${restaurantId}`);
-              return res.json();
-            }
-          )
-        );
+        console.log('Fetching details for restaurants:', listData.restaurants);
+        
+        const restaurantPromises = listData.restaurants.map(async (restaurantId) => {
+          console.log('Fetching restaurant:', restaurantId);
+          const res = await fetch(`http://localhost:8000/restaurants/${restaurantId}`);
+          if (!res.ok) {
+            console.error(`Failed to fetch restaurant ${restaurantId}:`, await res.text());
+            throw new Error(`Failed to fetch restaurant ${restaurantId}`);
+          }
+          return res.json();
+        });
 
         const restaurantData = await Promise.all(restaurantPromises);
+        console.log('Received restaurant data:', restaurantData);
+        
         setRestaurants(restaurantData);
       } catch (err) {
         console.error("Error fetching data:", err);

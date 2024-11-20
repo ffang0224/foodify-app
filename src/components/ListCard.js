@@ -1,49 +1,40 @@
-import { useNavigate } from 'react-router-dom';
 // Disclaimer: This component has been partially generated using Claude.
-const ListCard = ({ image, header, description, listId }) => {
-  const navigate = useNavigate();
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthUser } from "../hooks/useAuthUser";
+import { Plus, Library, Loader } from "lucide-react";
 
-  const handleCardClick = () => {
-    navigate(`/restaurants`);
-  };
+const RestaurantListCard = ({ list }) => {
+  const navigate = useNavigate();
 
   return (
     <div
-      className="w-64 h-80 border-2 border-gray-300 rounded-lg p-4 m-2 flex flex-col items-center cursor-pointer"
-      onClick={handleCardClick}
+      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300"
+      style={{
+        borderLeft: `4px solid ${list.color}`,
+      }}
     >
-      <div className="w-full h-40 bg-gray-200 mb-4">
-        {image ? (
-          <img
-            src={image}
-            alt={header}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-500">
-            &lt;img&gt;
-          </div>
-        )}
-      </div>
-      <div className="w-full text-center">
-        {header ? (
-          <h3
-            className="text-lg font-semibold mb-2 text-gray-900 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
-            onClick={handleCardClick}
+      <div className="p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          {list.name}
+        </h3>
+        <p className="text-sm text-gray-600 mb-4">
+          {list.description || `Created by ${list.author}`}
+        </p>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-500">
+            {list.restaurants.length} restaurants
+          </span>
+          <button
+            onClick={() => navigate(`/lists/${list.id}`)}
+            className="text-orange-500 hover:text-orange-600 text-sm font-semibold"
           >
-            {header}
-          </h3>
-        ) : (
-          <div className="text-gray-500">&lt;header&gt;</div>
-        )}
-        {description ? (
-          <p className="text-sm text-gray-600">{description}</p>
-        ) : (
-          <div className="text-gray-500">&lt;p&gt;</div>
-        )}
+            View List →
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default ListCard;
+export default RestaurantListCard;

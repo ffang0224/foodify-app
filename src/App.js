@@ -130,19 +130,13 @@ const ListsPageWithNav = ({ userPlaylists }) => (
   <div className="min-h-screen flex flex-col bg-gray-50">
     <NavBar />
     <div className="flex-grow">
-      <ListsPage userPlaylists={userPlaylists} />
+      <ListsPage />
     </div>
   </div>
 );
 
 const App = () => {
-  const [userPlaylists, setUserPlaylists] = useState([]);
-
-  // Function to add a new playlist
-  const addNewPlaylist = (playlist) => {
-    setUserPlaylists((prevPlaylists) => [...prevPlaylists, playlist]);
-  };
-
+ 
   return (
     <Router>
       <Routes>
@@ -153,7 +147,7 @@ const App = () => {
         <Route path="/profile" element={<ProfilePageWithNav />} />
         <Route
           path="/lists"
-          element={<ListsPageWithNav userPlaylists={userPlaylists} />}
+          element={<ListsPageWithNav />}
         />
         <Route
           path="/restaurants"
@@ -178,12 +172,12 @@ const App = () => {
         {/* New route for CreatePlaylist */}
         <Route
           path="/create-playlist"
-          element={<CreatePlaylist onSave={addNewPlaylist} />}
+          element={<CreatePlaylist />}
         />
         {/* Route to view individual playlist */}
         <Route
-          path="/playlist/:playlistId"
-          element={<ViewPlaylist userPlaylists={userPlaylists} />}
+          path="/lists/:listId"
+          element={<ViewPlaylist/>}
         />
       </Routes>
     </Router>

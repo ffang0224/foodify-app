@@ -67,12 +67,12 @@ const ViewPlaylist = () => {
         // Fetch restaurant details for each restaurant in the list
         console.log('Fetching details for restaurants:', listData.restaurants);
         
-        const restaurantPromises = listData.restaurants.map(async (restaurantId) => {
-          console.log('Fetching restaurant:', restaurantId);
-          const res = await fetch(`http://localhost:8000/restaurants/${restaurantId}`);
+        const restaurantPromises = listData.restaurants.map(async (place_id) => {
+          console.log('Fetching restaurant:', place_id);
+          const res = await fetch(`http://localhost:8000/restaurants/${place_id}`);
           if (!res.ok) {
-            console.error(`Failed to fetch restaurant ${restaurantId}:`, await res.text());
-            throw new Error(`Failed to fetch restaurant ${restaurantId}`);
+            console.error(`Failed to fetch restaurant ${place_id}:`, await res.text());
+            throw new Error(`Failed to fetch restaurant ${place_id}`);
           }
           return res.json();
         });
@@ -220,11 +220,11 @@ const ViewPlaylist = () => {
                     </span>
                   </div>
                 </div>
-                <div className="mt-2 flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-2">
                   {restaurant.types.slice(0, 3).map((type, index) => (
                     <span
                       key={index}
-                      className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
+                      className="px-2 py-1 text-xs bg-orange-50 text-orange-600 rounded-md"
                     >
                       {type.replace(/_/g, " ")}
                     </span>

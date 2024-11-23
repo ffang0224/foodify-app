@@ -33,12 +33,11 @@ const CreatePlaylist = () => {
   const { userData } = useAuthUser();
 
   const colorPalette = [
-    { value: "#f97316", name: "Orange" },
-    { value: "#fb923c", name: "Light Orange" },
     { value: "#facc15", name: "Yellow" },
-    { value: "#f87171", name: "Red" },
-    { value: "#fbbf24", name: "Amber" },
-    { value: "#f59e0b", name: "Dark Amber" },
+    { value: "#f97316", name: "Orange"},
+    { value: "#bf4240", name: "Red - Orange" },
+    { value: "#8a4647", name: "Brown - Red" },
+    { value: "#d3829c", name: "Pink" },
   ];
 
   useEffect(() => {
@@ -101,11 +100,16 @@ const CreatePlaylist = () => {
   };
 
   const toggleRestaurantSelection = (restaurant) => {
+    // Using setSelectedRestaurants with a callback function that receives previous state
     setSelectedRestaurants((prev) => {
+      // Check if restaurant is already selected by looking for matching place_id
       const isSelected = prev.find((r) => r.place_id === restaurant.place_id);
+  
       if (isSelected) {
+        // If restaurant was already selected, remove it by filtering it out
         return prev.filter((r) => r.place_id !== restaurant.place_id);
       } else {
+        // If restaurant wasn't selected, add it to the array
         return [...prev, restaurant];
       }
     });

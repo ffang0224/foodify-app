@@ -19,6 +19,7 @@ import CreatePlaylist from "./components/CreatePlaylist";
 import ViewPlaylist from "./components/ViewPlaylist"; // Import ViewPlaylist
 import ProfilePage from "./components/ProfilePage"; 
 import IconDropdown from "./components/IconDropdown";
+import SettingsPage from "./components/settings.js";
 import RefreshCacheButton from "./components/refreshRestaurantCache.js";
 
 // Navigation bar component with conditional rendering
@@ -145,6 +146,8 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/map" element={<MapView />} />
         <Route path="/profile" element={<ProfilePageWithNav />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        
         <Route
           path="/lists"
           element={<ListsPageWithNav />}

@@ -120,6 +120,7 @@ const ProfilePage = () => {
             </div>
           )}
         </div>
+
       </main>
     </div>
   );

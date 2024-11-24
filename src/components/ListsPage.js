@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthUser } from "../hooks/useAuthUser";
-import { Plus, Library, Loader } from "lucide-react";
+import { Plus, Library, Loader, Star } from "lucide-react";
 import RestaurantListCard from './ListCard';
 
 const ListsPage = () => {
@@ -70,8 +70,8 @@ const ListsPage = () => {
     return (
       <div className="max-w-7xl mx-auto p-8 flex items-center justify-center min-h-[50vh]">
         <div className="flex items-center space-x-2 text-gray-600">
-          <Loader className="w-5 h-5 animate-spin" />
-          <span>Loading lists...</span>
+          <Loader className="w-5 h-5 animate-spin text-orange-500" />
+          <span className="text-xl font-semibold">Loading lists...</span>
         </div>
       </div>
     );
@@ -80,14 +80,14 @@ const ListsPage = () => {
   return (
     <div className="max-w-7xl mx-auto p-8">
       {error && (
-        <div className="mb-8 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-8 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-lg">
           {error}
         </div>
       )}
 
       {incentiveMessage && (
-        <div className="mb-8 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md shadow-sm">
-          <h3 className="text-yellow-600 font-semibold text-lg">
+        <div className="mb-8 p-6 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-md shadow-lg animate-pulse">
+          <h3 className="text-yellow-600 font-semibold text-xl">
             Keep Going!
           </h3>
           <p className="text-gray-700">{incentiveMessage}</p>
@@ -97,35 +97,37 @@ const ListsPage = () => {
       <section className="mb-12">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-xl font-bold text-gray-800">Your Lists</h2>
+            <h2 className="text-3xl font-bold text-gray-800 hover:text-orange-500 transition-all duration-300">
+              Your Lists
+            </h2>
             <p className="text-sm text-gray-600 mt-1">
               Create and manage your restaurant collections
             </p>
           </div>
           <button
             onClick={() => navigate("/create-playlist")}
-            className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
+            className="flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-400 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all shadow-xl transform"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-5 h-5 mr-2" />
             Create New List
           </button>
         </div>
 
         {lists.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {lists.map((list) => (
               <RestaurantListCard key={list.id} list={list} />
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <div className="text-center py-12 bg-gray-50 rounded-lg shadow-md">
             <Library className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 mb-4">
+            <p className="text-lg text-gray-600 mb-4">
               You haven't created any lists yet
             </p>
             <button
               onClick={() => navigate("/create-playlist")}
-              className="text-orange-500 hover:text-orange-600 font-semibold"
+              className="text-xl text-orange-500 hover:text-orange-600 font-semibold transition-all duration-200"
             >
               Create Your First List
             </button>

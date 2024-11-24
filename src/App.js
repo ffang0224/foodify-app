@@ -23,7 +23,6 @@ import SettingsPage from "./components/settings.js";
 import RefreshCacheButton from "./components/refreshRestaurantCache.js";
 // Ensure to import the HelpPage
 import HelpPage from "./components/HelpPage"; 
-
 const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -99,6 +98,7 @@ const NavBar = () => {
               </button>
               <div 
                 className={`absolute right-0 mt-2 bg-white shadow-lg rounded-md w-48 ${isDropdownOpen ? 'block' : 'hidden'}`}
+                style={{ marginTop: '8px', zIndex: 50 }}  // Adjust margin-top and ensure dropdown is above other elements
               >
                 <ul className="py-2 text-gray-700">
                   <li>
@@ -149,6 +149,7 @@ const NavBar = () => {
     </div>
   );
 };
+
 
 
 // Profile Page with navigation

@@ -21,8 +21,9 @@ import ProfilePage from "./components/ProfilePage";
 import IconDropdown from "./components/IconDropdown";
 import SettingsPage from "./components/settings.js";
 import RefreshCacheButton from "./components/refreshRestaurantCache.js";
+// Ensure to import the HelpPage
+import HelpPage from "./components/HelpPage"; 
 
-// Navigation bar component with conditional rendering
 const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -74,14 +75,13 @@ const NavBar = () => {
             )}
             {isMapPage && (
               <div>
-                {/* <RefreshCacheButton></RefreshCacheButton> */}
-              <button
-                onClick={() => navigate("/lists")}
-                className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
-              >
-                <span>Lists</span>
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </button>
+                <button
+                  onClick={() => navigate("/lists")}
+                  className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
+                >
+                  <span>Lists</span>
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </button>
               </div>
             )}
 
@@ -97,7 +97,51 @@ const NavBar = () => {
                   className="w-10 h-10 rounded-full"
                 />
               </button>
-              <IconDropdown isOpen={isDropdownOpen} onClose={() => setIsDropdownOpen(false)} />
+              <div 
+                className={`absolute right-0 mt-2 bg-white shadow-lg rounded-md w-48 ${isDropdownOpen ? 'block' : 'hidden'}`}
+              >
+                <ul className="py-2 text-gray-700">
+                  <li>
+                    <span className="block px-4 py-2 text-sm">{`EA Elyazia Abbas`}</span>
+                  </li>
+                  <li>
+                    <span className="block px-4 py-2 text-sm">{`ea2749@nyu.edu`}</span>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigate("/profile")}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:text-orange-500 transition-colors duration-200"
+                    >
+                      Profile
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => navigate("/settings")}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:text-orange-500 transition-colors duration-200"
+                    >
+                      Account Settings
+                    </button>
+                  </li>
+                  {/* Move Help to the dropdown */}
+                  <li>
+                    <button 
+                      onClick={() => navigate("/help")}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:text-orange-500 transition-colors duration-200"
+                    >
+                      Help
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => alert("Logging out...")} // You can handle actual logout here
+                      className="block px-4 py-2 text-sm text-red-500 hover:text-red-700 transition-colors duration-200"
+                    >
+                      Log Out
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -105,6 +149,7 @@ const NavBar = () => {
     </div>
   );
 };
+
 
 // Profile Page with navigation
 const ProfilePageWithNav = () => (
@@ -137,10 +182,12 @@ const ListsPageWithNav = ({ userPlaylists }) => (
 );
 
 const App = () => {
- 
   return (
     <Router>
       <Routes>
+        {/* Add HelpPage Route */}
+        <Route path="/help" element={<HelpPage />} />
+        
         <Route path="/" element={<Navigate to="/register" replace />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
@@ -180,7 +227,7 @@ const App = () => {
         {/* Route to view individual playlist */}
         <Route
           path="/lists/:listId"
-          element={<ViewPlaylist/>}
+          element={<ViewPlaylist />}
         />
       </Routes>
     </Router>

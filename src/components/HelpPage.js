@@ -28,12 +28,7 @@ const HelpPage = () => {
             </p>
           </div>
 
-          <div>
-            <h3 className="text-xl font-semibold">How do I contact support?</h3>
-            <p>
-              If you need help, please reach out to us at support@foodify.com. We’re happy to assist with any issues you're experiencing.
-            </p>
-          </div>
+          
         </div>
       </div>
     </div>

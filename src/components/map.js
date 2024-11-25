@@ -5,7 +5,7 @@ import {
   GoogleMap,
   useLoadScript,
   MarkerF,
-  InfoWindow,
+  InfoWindowF,
 } from "@react-google-maps/api";
 import {
   MapPin,
@@ -90,10 +90,10 @@ const MapComponent = () => {
   // New custom marker icon using MapPin
   const restaurantMarkerIcon = isLoaded
     ? {
-        url: createMarkerIcon(MapPin, "#f97316", 40), // MapPin from lucide-react
-        scaledSize: new window.google.maps.Size(25, 25),
-        origin: new window.google.maps.Point(0, 0),
-        anchor: new window.google.maps.Point(20, 40), // Align pin tip
+        url: createMarkerIcon(MapPin, "#f97316", 40), // Custom MapPin icon
+        scaledSize: new window.google.maps.Size(25, 25), // Adjust size
+        origin: new window.google.maps.Point(0, 0), // Top-left corner
+        anchor: new window.google.maps.Point(12.5, 40), // Pin tip
       }
     : null;
 
@@ -210,10 +210,13 @@ const MapComponent = () => {
         {selectedRestaurant &&
           (console.log("Rendering InfoWindow for:", selectedRestaurant),
           (
-            <InfoWindow
+            <InfoWindowF
               position={{
-                lat: selectedRestaurant.location.lat,
+                lat: selectedRestaurant.location.lat + 0.0005,
                 lng: selectedRestaurant.location.lng,
+              }}
+              options={{
+                pixelOffset: new window.google.maps.Size(0, -25), // Move upward
               }}
               onCloseClick={() => setSelectedRestaurant(null)}
             >
@@ -342,7 +345,7 @@ const MapComponent = () => {
                   Add to Playlist
                 </button>
               </div>
-            </InfoWindow>
+            </InfoWindowF>
           ))}
       </GoogleMap>
 

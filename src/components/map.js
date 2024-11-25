@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import ReactDOMServer from "react-dom/server";
+
 import {
   GoogleMap,
   useLoadScript,
@@ -19,13 +21,16 @@ const MapComponent = () => {
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
   });
 
+  // NYU Washington Square Park location
+  const NYU_LOCATION = { lat: 40.7295, lng: -73.9965 };
+
   const [restaurants, setRestaurants] = useState([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // NYU Washington Square Park location
-  const NYU_LOCATION = { lat: 40.7295, lng: -73.9965 };
+  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
+  const [mapRef, setMapRef] = useState(null);
+  const [mapCenter, setMapCenter] = useState(NYU_LOCATION);
 
   // Fetch restaurants from your database
   useEffect(() => {
@@ -34,6 +39,7 @@ const MapComponent = () => {
         const response = await fetch("http://localhost:8000/restaurants");
         if (!response.ok) throw new Error("Failed to fetch restaurants");
         const data = await response.json();
+        console.log("Fetched restaurants:", data); // Debugging output
         setRestaurants(data);
       } catch (err) {
         console.error("Error fetching restaurants:", err);
@@ -63,16 +69,65 @@ const MapComponent = () => {
   };
 
   // Custom marker icon for restaurants
+  // const restaurantMarkerIcon = isLoaded
+  //   ? {
+  //       path: window.google.maps.SymbolPath.CIRCLE,
+  //       fillColor: "#f97316",
+  //       fillOpacity: 1,
+  //       strokeColor: "#ea580c",
+  //       strokeWeight: 2,
+  //       scale: 8,
+  //     }
+  //   : null;
+
+  // Function to generate Base64 marker icon using MapPin
+  const createMarkerIcon = (IconComponent, color, size) => {
+    const svgString = ReactDOMServer.renderToStaticMarkup(
+      <IconComponent color={color} width={size} height={size} />
+    );
+    return `data:image/svg+xml;base64,${btoa(svgString)}`;
+  };
+
+  // New custom marker icon using MapPin
   const restaurantMarkerIcon = isLoaded
     ? {
-        path: window.google.maps.SymbolPath.CIRCLE,
-        fillColor: "#f97316",
-        fillOpacity: 1,
-        strokeColor: "#ea580c",
-        strokeWeight: 2,
-        scale: 8,
+        url: createMarkerIcon(MapPin, "#f97316", 40), // MapPin from lucide-react
+        scaledSize: new window.google.maps.Size(25, 25),
+        origin: new window.google.maps.Point(0, 0),
+        anchor: new window.google.maps.Point(20, 40), // Align pin tip
       }
     : null;
+
+  const handleBoundsChanged = (map) => {
+    if (!map) return; // Ensure the map object is valid
+    const bounds = map.getBounds();
+    if (!bounds) return; // Ensure bounds are available
+
+    // Update map center
+    const center = map.getCenter();
+    setMapCenter({ lat: center.lat(), lng: center.lng() });
+
+    console.log("Current bounds:", bounds); // Debugging output
+
+    // Filter and sort restaurants
+    const topRestaurants = restaurants
+      .filter((restaurant) => {
+        const { lat, lng } = restaurant.location; // Ensure correct access to lat/lng
+        const isInBounds = bounds.contains(
+          new window.google.maps.LatLng(lat, lng)
+        ); // Ensure compatibility with Google Maps LatLng
+        console.log(`${restaurant.name} in bounds:`, isInBounds); // Debugging output
+        return isInBounds;
+      })
+      .sort(
+        (a, b) =>
+          b.rating - a.rating || b.user_ratings_total - a.user_ratings_total
+      )
+      .slice(0, 80); // how many restaurants to display
+
+    console.log("Filtered Restaurants:", topRestaurants); // Debugging filtered results
+    setFilteredRestaurants(topRestaurants);
+  };
 
   if (loadError) {
     return (
@@ -162,9 +217,11 @@ const MapComponent = () => {
       {/* Main map component */}
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={NYU_LOCATION}
-        zoom={15}
+        center={mapCenter} // Use dynamic center
+        zoom={16}
         options={options}
+        onLoad={(map) => setMapRef(map)} // Store the map instance
+        onIdle={() => handleBoundsChanged(mapRef)} // Filter on viewport change
         onClick={() => setSelectedRestaurant(null)}
       >
         {/* NYU Marker */}
@@ -178,7 +235,7 @@ const MapComponent = () => {
         />
 
         {/* Restaurant Markers */}
-        {restaurants.map((restaurant) => (
+        {filteredRestaurants.map((restaurant) => (
           <MarkerF
             key={restaurant.place_id}
             position={{

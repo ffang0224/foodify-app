@@ -162,11 +162,12 @@ const Register = () => {
     <div className="flex min-h-screen">
       {/* Left side - Image section */}
       <div className="hidden md:flex md:w-1/2 bg-gray-100 items-center justify-center">
-        <img
-          src="/app_image.jpg"
-          alt="App Image"
-          className="w-full h-screen max-h-screen overflow-hidden rounded-lg flex items-center justify-center"
-        />
+      <img
+        src="/app_image.jpg"
+        alt="App Image"
+        className="w-full h-full object-cover rounded-lg"
+      />
+
       </div>
 
       {/* Right side - Register form */}

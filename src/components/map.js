@@ -5,7 +5,7 @@ import {
   GoogleMap,
   useLoadScript,
   MarkerF,
-  InfoWindowF,
+  InfoWindow,
 } from "@react-google-maps/api";
 import {
   MapPin,
@@ -39,7 +39,6 @@ const MapComponent = () => {
         const response = await fetch("http://localhost:8000/restaurants");
         if (!response.ok) throw new Error("Failed to fetch restaurants");
         const data = await response.json();
-        console.log("Fetched restaurants:", data); // Debugging output
         setRestaurants(data);
       } catch (err) {
         console.error("Error fetching restaurants:", err);
@@ -50,7 +49,7 @@ const MapComponent = () => {
     };
 
     fetchRestaurants();
-  }, []);
+  }, []); // Dependencies are empty, runs only once on mount
 
   const getPriceLevel = (level) => {
     return level ? "$$$$".slice(0, level) : "N/A";
@@ -98,35 +97,43 @@ const MapComponent = () => {
       }
     : null;
 
+  const [skipUpdate, setSkipUpdate] = useState(false);
+
   const handleBoundsChanged = (map) => {
-    if (!map) return; // Ensure the map object is valid
+    if (!map || skipUpdate) return;
+
     const bounds = map.getBounds();
-    if (!bounds) return; // Ensure bounds are available
+    if (!bounds) return;
 
-    // Update map center
-    const center = map.getCenter();
-    setMapCenter({ lat: center.lat(), lng: center.lng() });
+    const newCenter = map.getCenter();
+    const newCenterObj = { lat: newCenter.lat(), lng: newCenter.lng() };
 
-    console.log("Current bounds:", bounds); // Debugging output
+    if (
+      newCenterObj.lat !== mapCenter.lat ||
+      newCenterObj.lng !== mapCenter.lng
+    ) {
+      setMapCenter(newCenterObj);
+    }
 
-    // Filter and sort restaurants
     const topRestaurants = restaurants
       .filter((restaurant) => {
-        const { lat, lng } = restaurant.location; // Ensure correct access to lat/lng
-        const isInBounds = bounds.contains(
-          new window.google.maps.LatLng(lat, lng)
-        ); // Ensure compatibility with Google Maps LatLng
-        console.log(`${restaurant.name} in bounds:`, isInBounds); // Debugging output
-        return isInBounds;
+        const { lat, lng } = restaurant.location;
+        return bounds.contains(new window.google.maps.LatLng(lat, lng));
       })
       .sort(
         (a, b) =>
           b.rating - a.rating || b.user_ratings_total - a.user_ratings_total
       )
-      .slice(0, 80); // how many restaurants to display
+      .slice(0, 80);
 
-    console.log("Filtered Restaurants:", topRestaurants); // Debugging filtered results
     setFilteredRestaurants(topRestaurants);
+  };
+
+  // Wrap your marker click handler
+  const handleMarkerClick = (restaurant) => {
+    setSkipUpdate(true); // Disable map updates temporarily
+    setSelectedRestaurant(restaurant);
+    setTimeout(() => setSkipUpdate(false), 1000); // Re-enable updates after 1 second
   };
 
   if (loadError) {
@@ -166,62 +173,14 @@ const MapComponent = () => {
         </div>
       </div>
 
-      {/* Restaurant info card */}
-      {selectedRestaurant && (
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-sm">
-          <div className="mx-4 bg-white rounded-lg shadow-lg p-4">
-            <div className="space-y-2">
-              <div className="flex items-start justify-between">
-                <h3 className="font-semibold text-gray-900">
-                  {selectedRestaurant.name}
-                </h3>
-                <button
-                  onClick={() => setSelectedRestaurant(null)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  ×
-                </button>
-              </div>
-              <p className="text-gray-600 text-sm flex items-center">
-                <MapPin className="w-4 h-4 mr-1" />
-                {selectedRestaurant.address}
-              </p>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center">
-                  <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                  <span>
-                    {selectedRestaurant.rating} (
-                    {selectedRestaurant.user_ratings_total})
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
-                  <span>{getPriceLevel(selectedRestaurant.price_level)}</span>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-1 mt-2">
-                {selectedRestaurant.types.slice(0, 3).map((type, index) => (
-                  <span
-                    key={index}
-                    className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
-                  >
-                    {type.replace(/_/g, " ")}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Main map component */}
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={mapCenter} // Use dynamic center
+        center={mapCenter} // Ensure this doesn't change unexpectedly
         zoom={16}
         options={options}
-        onLoad={(map) => setMapRef(map)} // Store the map instance
-        onIdle={() => handleBoundsChanged(mapRef)} // Filter on viewport change
+        onLoad={(map) => setMapRef(map)}
+        onIdle={() => handleBoundsChanged(mapRef)}
         onClick={() => setSelectedRestaurant(null)}
       >
         {/* NYU Marker */}
@@ -243,9 +202,148 @@ const MapComponent = () => {
               lng: restaurant.location.lng,
             }}
             icon={restaurantMarkerIcon}
-            onClick={() => setSelectedRestaurant(restaurant)}
+            onClick={() => handleMarkerClick(restaurant)}
           />
         ))}
+
+        {/* Enhanced InfoWindow for Selected Restaurant */}
+        {selectedRestaurant &&
+          (console.log("Rendering InfoWindow for:", selectedRestaurant),
+          (
+            <InfoWindow
+              position={{
+                lat: selectedRestaurant.location.lat,
+                lng: selectedRestaurant.location.lng,
+              }}
+              onCloseClick={() => setSelectedRestaurant(null)}
+            >
+              <div
+                style={{
+                  maxWidth: "300px",
+                  padding: "15px",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+                  backgroundColor: "#ffffff",
+                  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                }}
+              >
+                {/* Header Section */}
+                <h3
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    color: "#333",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {selectedRestaurant.name}
+                </h3>
+
+                {/* Image Section */}
+                <div
+                  style={{
+                    width: "100%",
+                    height: "120px",
+                    marginBottom: "10px",
+                    backgroundColor: "#f2f2f2",
+                    borderRadius: "8px",
+                    backgroundImage: `url(${
+                      selectedRestaurant.image || "placeholder.jpg"
+                    })`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
+                ></div>
+
+                {/* Address Section */}
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#555",
+                    marginBottom: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <MapPin style={{ marginRight: "5px" }} size={14} />
+                  {selectedRestaurant.address}
+                </p>
+
+                {/* Rating and Price Level */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <Star
+                      style={{ marginRight: "5px" }}
+                      size={14}
+                      color="#f59e0b"
+                    />
+                    <span>{selectedRestaurant.rating}</span>
+                    <span style={{ marginLeft: "5px", color: "#888" }}>
+                      ({selectedRestaurant.user_ratings_total})
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <DollarSign style={{ marginRight: "5px" }} size={14} />
+                    <span>{getPriceLevel(selectedRestaurant.price_level)}</span>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "5px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {selectedRestaurant.types.slice(0, 3).map((type, index) => (
+                    <span
+                      key={index}
+                      style={{
+                        fontSize: "12px",
+                        padding: "5px 8px",
+                        borderRadius: "20px",
+                        backgroundColor: "#f3f3f3",
+                        color: "#666",
+                      }}
+                    >
+                      {type.replace(/_/g, " ")}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Action Button */}
+                <button
+                  style={{
+                    width: "100%",
+                    padding: "10px 15px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: "#fff",
+                    backgroundColor: "#f97316",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() =>
+                    alert(
+                      `Added "${selectedRestaurant.name}" to your playlist!`
+                    )
+                  }
+                >
+                  Add to Playlist
+                </button>
+              </div>
+            </InfoWindow>
+          ))}
       </GoogleMap>
 
       {/* Legend */}

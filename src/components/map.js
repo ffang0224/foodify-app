@@ -396,9 +396,9 @@ const MapComponent = () => {
                     fetchPlaylists();
                     setShowModal(true);
                   }}
-                  className="mt-2 bg-orange-500 text-white px-4 py-2 rounded-md"
+                  className="mt-2 bg-orange-500 text-white px-6 py-3 rounded-md w-full hover:bg-orange-600"
                 >
-                  Add to Playlist
+                  Add to My Playlist
                 </button>
               </div>
             </InfoWindowF>

@@ -229,15 +229,15 @@ const RestaurantDetailsModal = ({ restaurant, show, onClose }) => {
                                         />
                                         <span className="ml-2 font-medium">View on Google Maps</span>
                                     </a>
-                                    {restaurant.additional_info?.yelp?.url && (
+                                    {restaurant.additional_info?.yelp?.yelp_id && (
                                         <a
-                                            href={restaurant.additional_info.yelp.url}
+                                            href={`https://www.yelp.com/biz/${restaurant.additional_info.yelp.yelp_id}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex items-center justify-center px-4 py-2 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                                         >
                                             <img
-                                                src="/images/yelp-logo.png"
+                                                src={YelpLogo}
                                                 alt="Yelp"
                                                 className="w-16 h-8"
                                             />
@@ -324,7 +324,7 @@ const RestaurantDetailsModal = ({ restaurant, show, onClose }) => {
                                             <ReviewPlatformSection
                                                 platform="Yelp"
                                                 reviews={yelpReviews}
-                                                platformUrl={restaurant.additional_info.yelp.url}
+                                                platformUrl={`https://www.yelp.com/biz/${restaurant.additional_info.yelp.yelp_id}`}
                                             />
                                         )}
                                     </div>

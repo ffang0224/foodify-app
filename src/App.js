@@ -198,7 +198,7 @@ const App = () => {
         {/* Add HelpPage Route */}
         <Route path="/help" element={<HelpPage />} />
         
-        <Route path="/" element={<Navigate to="/register" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         

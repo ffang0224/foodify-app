@@ -13,6 +13,7 @@ const DisplayUser = () => {
 
   const [searchQuery, setSearchQuery] = useState(""); // Stores the current search query
   const [filteredUsers, setFilteredUsers] = useState(users); // Stores the filtered list of users
+  const [requestSent, setRequestSent] = useState([]); // Tracks which users requests are sent
   const navigate = useNavigate();
 
   // Handle search query change
@@ -28,13 +29,19 @@ const DisplayUser = () => {
     setFilteredUsers(results);
   }, [searchQuery]);
 
-  // Navigate to the user's profile (you can replace this with your actual profile page navigation)
+  // Navigate to the user's profile
   const goToUserProfile = (username) => {
     navigate(`/profile/${username}`);
   };
 
+  // Handle Send Request click
+  const handleSendRequest = (username) => {
+    setRequestSent((prev) => [...prev, username]); // Add user to the list of sent requests
+    setTimeout(() => setRequestSent((prev) => prev.filter((user) => user !== username)), 3000); // Reset the button state after 3 seconds
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-8">
+    <div className="min-h-screen bg-white flex flex-col items-center p-8">
       <h2 className="text-4xl font-extrabold text-center text-orange-600 mb-8">
         Search for Foodies
       </h2>
@@ -46,7 +53,7 @@ const DisplayUser = () => {
           placeholder="Search for a foodie..."
           value={searchQuery}
           onChange={handleSearch}
-          className="w-full p-4 rounded-lg shadow-lg text-lg placeholder-gray-400 border-2 border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
+          className="w-full p-4 rounded-lg shadow-xl text-lg placeholder-gray-400 border-2 border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
         />
       </div>
 
@@ -56,23 +63,38 @@ const DisplayUser = () => {
           filteredUsers.map((user) => (
             <div
               key={user.username}
-              className="flex justify-between items-center bg-white p-6 rounded-xl shadow-md hover:bg-orange-50 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105"
+              className="flex justify-between items-center bg-white p-6 rounded-xl shadow-lg hover:bg-orange-50 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105"
               onClick={() => goToUserProfile(user.username)}
             >
-              <div className="flex flex-col">
+              <div className="flex flex-col space-y-2">
                 <span className="text-2xl font-semibold text-gray-800">{user.username}</span>
                 <span className="text-sm text-gray-500">{user.restaurants.length} restaurants</span>
                 <span className="text-sm text-gray-500">{user.reviews} reviews</span>
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering onClick when clicking the button
-                  goToUserProfile(user.username);
-                }}
-                className="px-6 py-2 text-sm text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-all duration-300"
-              >
-                View Profile
-              </button>
+
+              <div className="flex items-center space-x-4">
+                {/* View Profile Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering onClick when clicking the button
+                    goToUserProfile(user.username);
+                  }}
+                  className="px-6 py-2 text-sm text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-all duration-300"
+                >
+                  View Profile
+                </button>
+
+                {/* Send Request Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering onClick when clicking the button
+                    handleSendRequest(user.username);
+                  }}
+                  className={`px-6 py-2 text-sm text-white rounded-full transition-all duration-300 ${requestSent.includes(user.username) ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'}`}
+                >
+                  {requestSent.includes(user.username) ? "Request Sent" : "Send Request"}
+                </button>
+              </div>
             </div>
           ))
         ) : (

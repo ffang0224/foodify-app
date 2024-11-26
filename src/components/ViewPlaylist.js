@@ -12,7 +12,9 @@ import {
   MapPin,
   Star,
   DollarSign,
+  ImageIcon,
 } from "lucide-react";
+
 
 const ViewPlaylist = () => {
   const { listId } = useParams();
@@ -21,6 +23,7 @@ const ViewPlaylist = () => {
 
   const [list, setList] = useState(null);
   const [restaurants, setRestaurants] = useState([]);
+  const [restaurantPhotos, setRestaurantPhotos] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isOwner, setIsOwner] = useState(false);
@@ -117,6 +120,26 @@ const ViewPlaylist = () => {
 
         const restaurantData = await Promise.all(restaurantPromises);
         setRestaurants(restaurantData);
+
+        // Fetch photos for each restaurant
+        const photoPromises = restaurantData.map(async (restaurant) => {
+          const placeId = getPlaceId(restaurant);
+          try {
+            const photoRes = await fetch(`http://localhost:8000/restaurant-photo/${placeId}`);
+            if (photoRes.ok) {
+              const photoData = await photoRes.json();
+              return { [placeId]: photoData.photo_url };
+            }
+            return { [placeId]: null };
+          } catch (err) {
+            console.error(`Failed to fetch photo for ${placeId}:`, err);
+            return { [placeId]: null };
+          }
+        });
+
+        const photosData = await Promise.all(photoPromises);
+        const photosMap = photosData.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+        setRestaurantPhotos(photosMap);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(err.message);
@@ -229,46 +252,65 @@ const ViewPlaylist = () => {
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {restaurants.map((restaurant) => (
-            <div
-              key={getPlaceId(restaurant)}
-              className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 hover:shadow-xl transition-all duration-300"
-            >
-              <div className="p-6 space-y-4">
-                <h3 className="text-xl font-semibold text-gray-800">
-                  {getRestaurantName(restaurant)}
-                </h3>
-                <div className="flex items-center text-sm text-gray-500 mb-2">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  {getAddress(restaurant)}
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                    <span className="text-sm text-gray-600">
-                      {getRestaurantRating(restaurant).toFixed(1)} ({getTotalRatings(restaurant)})
-                    </span>
+          {restaurants.map((restaurant) => {
+            const placeId = getPlaceId(restaurant);
+            const photoUrl = restaurantPhotos[placeId];
+
+            return (
+              <div
+                key={placeId}
+                className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 hover:shadow-xl transition-all duration-300"
+              >
+                {photoUrl ? (
+                  <div className="h-48 overflow-hidden">
+                    <img 
+                      src={photoUrl} 
+                      alt={getRestaurantName(restaurant)} 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                  <div className="flex items-center">
-                    <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
-                    <span className="text-sm text-gray-600">
-                      {getPriceLevel(restaurant)}
-                    </span>
+                ) : (
+                  <div className="h-48 bg-gray-100 flex items-center justify-center">
+                    <ImageIcon className="w-12 h-12 text-gray-400" />
                   </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {getTypes(restaurant).slice(0, 3).map((type, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 text-xs bg-orange-50 text-orange-600 rounded-md"
-                    >
-                      {type}
-                    </span>
-                  ))}
+                )}
+                
+                <div className="p-6 space-y-4">
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    {getRestaurantName(restaurant)}
+                  </h3>
+                  <div className="flex items-center text-sm text-gray-500 mb-2">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    {getAddress(restaurant)}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                      <span className="text-sm text-gray-600">
+                        {getRestaurantRating(restaurant).toFixed(1)} ({getTotalRatings(restaurant)})
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
+                      <span className="text-sm text-gray-600">
+                        {getPriceLevel(restaurant)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {getTypes(restaurant).slice(0, 3).map((type, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 text-xs bg-orange-50 text-orange-600 rounded-md"
+                      >
+                        {type}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

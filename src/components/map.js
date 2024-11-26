@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ReactDOMServer from "react-dom/server";
+import { useAuthUser } from "../hooks/useAuthUser";
+import MessageWindow from "./MessageWindow"; // Adjust the path as per your project structure
 
 import {
   GoogleMap,
@@ -17,6 +19,7 @@ import {
 } from "lucide-react";
 
 const MapComponent = () => {
+  const { userData } = useAuthUser();
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
   });
@@ -31,6 +34,14 @@ const MapComponent = () => {
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [mapRef, setMapRef] = useState(null);
   const [mapCenter, setMapCenter] = useState(NYU_LOCATION);
+
+  const [playlists, setPlaylists] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [loadingPlaylists, setLoadingPlaylists] = useState(false);
+  const [messageModal, setMessageModal] = useState({
+    show: false,
+    message: "",
+  });
 
   // Fetch restaurants from your database
   useEffect(() => {
@@ -67,17 +78,66 @@ const MapComponent = () => {
     // ... your existing options ...
   };
 
-  // Custom marker icon for restaurants
-  // const restaurantMarkerIcon = isLoaded
-  //   ? {
-  //       path: window.google.maps.SymbolPath.CIRCLE,
-  //       fillColor: "#f97316",
-  //       fillOpacity: 1,
-  //       strokeColor: "#ea580c",
-  //       strokeWeight: 2,
-  //       scale: 8,
-  //     }
-  //   : null;
+  const fetchPlaylists = async () => {
+    if (!userData) {
+      console.error("User is not logged in.");
+      return;
+    }
+
+    setLoadingPlaylists(true);
+    try {
+      const response = await fetch(
+        `http://localhost:8000/users/${userData.username}/lists`
+      );
+      if (!response.ok) throw new Error("Failed to fetch playlists");
+      const data = await response.json();
+      setPlaylists(data);
+    } catch (err) {
+      console.error("Error fetching playlists:", err);
+    } finally {
+      setLoadingPlaylists(false);
+    }
+  };
+
+  const handleAddToPlaylist = async (listId) => {
+    if (!selectedRestaurant) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/users/${userData.username}/lists/${listId}/restaurants/add`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ place_id: selectedRestaurant.place_id }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(
+          error.detail || "Failed to add restaurant to playlist."
+        );
+      }
+
+      const data = await response.json();
+
+      // Show success message
+      setMessageModal({
+        show: true,
+        message: `"${selectedRestaurant.name}" has been added to the playlist!`,
+      });
+
+      setShowModal(false);
+    } catch (err) {
+      console.error("Error adding to playlist:", err.message);
+
+      // Show error message
+      setMessageModal({
+        show: true,
+        message: "Failed to add the restaurant. Please try again.",
+      });
+    }
+  };
 
   // Function to generate Base64 marker icon using MapPin
   const createMarkerIcon = (IconComponent, color, size) => {
@@ -129,6 +189,13 @@ const MapComponent = () => {
     setFilteredRestaurants(topRestaurants);
   };
 
+  <PlaylistModal
+    show={showModal}
+    onClose={() => setShowModal(false)}
+    playlists={playlists}
+    onAdd={(listId) => handleAddToPlaylist(listId)}
+  />;
+
   // Wrap your marker click handler
   const handleMarkerClick = (restaurant) => {
     setSkipUpdate(true); // Disable map updates temporarily
@@ -172,7 +239,6 @@ const MapComponent = () => {
           </div>
         </div>
       </div>
-
       {/* Main map component */}
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -326,22 +392,11 @@ const MapComponent = () => {
 
                 {/* Action Button */}
                 <button
-                  style={{
-                    width: "100%",
-                    padding: "10px 15px",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "#fff",
-                    backgroundColor: "#f97316",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer",
+                  onClick={() => {
+                    fetchPlaylists();
+                    setShowModal(true);
                   }}
-                  onClick={() =>
-                    alert(
-                      `Added "${selectedRestaurant.name}" to your playlist!`
-                    )
-                  }
+                  className="mt-2 bg-orange-500 text-white px-4 py-2 rounded-md"
                 >
                   Add to Playlist
                 </button>
@@ -349,8 +404,18 @@ const MapComponent = () => {
             </InfoWindowF>
           ))}
       </GoogleMap>
-
-      {/* Legend */}
+      <PlaylistModal
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        playlists={playlists}
+        onAdd={handleAddToPlaylist}
+      />
+      <MessageWindow
+        show={messageModal.show}
+        message={messageModal.message}
+        onClose={() => setMessageModal({ show: false, message: "" })}
+      />
+      ;{/* Legend */}
       <div
         className="absolute bottom-10 right-20 bg-white rounded-lg shadow-lg p-3" // Adjust `right` and `bottom` values
       >
@@ -364,6 +429,46 @@ const MapComponent = () => {
             <span className="text-sm text-gray-600">Restaurants</span>
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const PlaylistModal = ({ show, onClose, playlists, onAdd }) => {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Add to Playlist
+        </h2>
+        {playlists.length > 0 ? (
+          <ul className="space-y-2">
+            {playlists.map((playlist) => (
+              <li
+                key={playlist.id}
+                className="flex justify-between items-center"
+              >
+                <span className="text-gray-700">{playlist.name}</span>
+                <button
+                  onClick={() => onAdd(playlist.id)}
+                  className="px-3 py-1 bg-orange-500 text-white text-sm rounded-md hover:bg-orange-600"
+                >
+                  Add
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-500">You don't have any playlists yet.</p>
+        )}
+        <button
+          onClick={onClose}
+          className="mt-4 w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300"
+        >
+          Close
+        </button>
       </div>
     </div>
   );

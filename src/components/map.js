@@ -187,9 +187,10 @@ const MapComponent = () => {
         <MarkerF
           position={NYU_LOCATION}
           icon={{
-            ...restaurantMarkerIcon,
-            fillColor: "#4b5563", // Different color for NYU marker
-            strokeColor: "#374151",
+            url: createMarkerIcon(MapPin, "#6B7280", 40), // Custom gray icon
+            scaledSize: new window.google.maps.Size(25, 25),
+            origin: new window.google.maps.Point(0, 0),
+            anchor: new window.google.maps.Point(12.5, 40), // Align pin tip
           }}
         />
 
@@ -212,11 +213,11 @@ const MapComponent = () => {
           (
             <InfoWindowF
               position={{
-                lat: selectedRestaurant.location.lat + 0.0005,
+                lat: selectedRestaurant.location.lat,
                 lng: selectedRestaurant.location.lng,
               }}
               options={{
-                pixelOffset: new window.google.maps.Size(0, -25), // Move upward
+                pixelOffset: new window.google.maps.Size(0, -27), // Move upward
               }}
               onCloseClick={() => setSelectedRestaurant(null)}
             >
@@ -350,7 +351,9 @@ const MapComponent = () => {
       </GoogleMap>
 
       {/* Legend */}
-      <div className="absolute bottom-8 right-8 bg-white rounded-lg shadow-lg p-3">
+      <div
+        className="absolute bottom-10 right-20 bg-white rounded-lg shadow-lg p-3" // Adjust `right` and `bottom` values
+      >
         <div className="flex flex-col space-y-2">
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 rounded-full bg-gray-600"></div>

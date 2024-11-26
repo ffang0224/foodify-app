@@ -22,6 +22,7 @@ import ProfilePage from "./components/ProfilePage";
 import IconDropdown from "./components/IconDropdown";
 import SettingsPage from "./components/settings.js";
 import RefreshCacheButton from "./components/refreshRestaurantCache.js";
+import EditPlaylist from "./components/EditPlaylist";
 // Ensure to import the HelpPage
 import HelpPage from "./components/HelpPage"; 
 const NavBar = () => {
@@ -202,6 +203,7 @@ const App = () => {
         <Route path="/profile" element={<ProfilePageWithNav />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/DisplayUser" element={<DisplayUser />} />
+        <Route path="/lists/:listId/edit" element={<EditPlaylist /> } />
 
         <Route
           path="/lists"

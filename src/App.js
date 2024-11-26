@@ -110,12 +110,7 @@ const NavBar = () => {
                 style={{ marginTop: '8px', zIndex: 50 }}  // Adjust margin-top and ensure dropdown is above other elements
               >
                 <ul className="py-2 text-gray-700">
-                  <li>
-                    <span className="block px-4 py-2 text-sm">{`EA Elyazia Abbas`}</span>
-                  </li>
-                  <li>
-                    <span className="block px-4 py-2 text-sm">{`ea2749@nyu.edu`}</span>
-                  </li>
+
                   <li>
                     <button 
                       onClick={() => navigate("/profile")}

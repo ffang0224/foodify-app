@@ -197,9 +197,26 @@ const MapComponent = () => {
   />;
 
   // Wrap your marker click handler
-  const handleMarkerClick = (restaurant) => {
+  const handleMarkerClick = async (restaurant) => {
     setSkipUpdate(true); // Disable map updates temporarily
     setSelectedRestaurant(restaurant);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/restaurant-photo/${restaurant.place_id}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch photo");
+      const data = await response.json();
+
+      // Update restaurant with photo URL
+      setSelectedRestaurant({
+        ...restaurant,
+        image: data.photo_url || "placeholder.jpg",
+      });
+    } catch (err) {
+      console.error("Error fetching restaurant photo:", err.message);
+    }
+
     setTimeout(() => setSkipUpdate(false), 1000); // Re-enable updates after 1 second
   };
 
@@ -290,7 +307,6 @@ const MapComponent = () => {
               <div
                 style={{
                   maxWidth: "300px",
-                  padding: "15px",
                   borderRadius: "12px",
                   boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
                   backgroundColor: "#ffffff",
@@ -298,12 +314,14 @@ const MapComponent = () => {
                 }}
               >
                 {/* Header Section */}
+
                 <h3
                   style={{
-                    fontSize: "18px",
-                    fontWeight: "600",
+                    fontSize: "20px",
+                    fontWeight: "700",
                     color: "#333",
-                    marginBottom: "10px",
+                    marginBottom: "15px",
+                    textAlign: "center", // Center align the heading
                   }}
                 >
                   {selectedRestaurant.name}
@@ -317,9 +335,7 @@ const MapComponent = () => {
                     marginBottom: "10px",
                     backgroundColor: "#f2f2f2",
                     borderRadius: "8px",
-                    backgroundImage: `url(${
-                      selectedRestaurant.image || "placeholder.jpg"
-                    })`,
+                    backgroundImage: `url(${selectedRestaurant.image})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                   }}

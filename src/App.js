@@ -89,7 +89,7 @@ const NavBar = () => {
             {/* Add Search Other Foodies Section */}
             <button
               onClick={() => navigate("/DisplayUser")}
-              className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
+              className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200 font-bold text-lg"
             >
               <span>Search Other Foodies</span>
             </button>

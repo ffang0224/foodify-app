@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { List, Copy, Loader, Star } from "lucide-react";
+import { List, Copy, Loader, Star, ArrowLeft} from "lucide-react";
 import { useAuthUser } from "../hooks/useAuthUser"; // Import the auth hook
 
 const DisplayUser = () => {
@@ -118,6 +118,15 @@ const DisplayUser = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center p-8">
+      <div className="w-full max-w-3xl">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200 mb-8"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          <span>Back</span>
+        </button>
+      </div>
       <h2 className="text-4xl font-extrabold text-center text-orange-600 mb-8">
         Discover Food Lists
       </h2>

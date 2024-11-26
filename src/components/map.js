@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ReactDOMServer from "react-dom/server";
 import { useAuthUser } from "../hooks/useAuthUser";
-import MessageWindow from "./MessageWindow"; // Adjust the path as per your project structure
+import MessageWindow from "./MessageWindow";
 
 import {
   GoogleMap,
@@ -50,6 +50,7 @@ const MapComponent = () => {
         const response = await fetch("http://localhost:8000/restaurants");
         if (!response.ok) throw new Error("Failed to fetch restaurants");
         const data = await response.json();
+        console.log(data)
         setRestaurants(data);
       } catch (err) {
         console.error("Error fetching restaurants:", err);
@@ -60,10 +61,12 @@ const MapComponent = () => {
     };
 
     fetchRestaurants();
-  }, []); // Dependencies are empty, runs only once on mount
+  }, []);
 
-  const getPriceLevel = (level) => {
-    return level ? "$$$$".slice(0, level) : "N/A";
+  const getPriceLevel = (priceObj) => {
+    if (!priceObj || !priceObj.gmaps || !priceObj.gmaps.normalized) return "N/A";
+    const level = priceObj.gmaps.normalized;
+    return "$$$$".slice(0, level);
   };
 
   const containerStyle = {
@@ -71,11 +74,6 @@ const MapComponent = () => {
     height: "calc(100vh - 64px)",
     borderRadius: "12px",
     overflow: "hidden",
-  };
-
-  // Map options remain the same
-  const options = {
-    // ... your existing options ...
   };
 
   const fetchPlaylists = async () => {
@@ -108,30 +106,26 @@ const MapComponent = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ place_id: selectedRestaurant.place_id }),
+          body: JSON.stringify({
+            place_id: selectedRestaurant.additional_info.gmaps.place_id
+          }),
         }
       );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(
-          error.detail || "Failed to add restaurant to playlist."
-        );
+        throw new Error(error.detail || "Failed to add restaurant to playlist.");
       }
 
       const data = await response.json();
-
-      // Show success message
       setMessageModal({
         show: true,
-        message: `"${selectedRestaurant.name}" has been added to the playlist!`,
+        message: `"${selectedRestaurant.name.gmaps}" has been added to the playlist!`,
       });
 
       setShowModal(false);
     } catch (err) {
       console.error("Error adding to playlist:", err.message);
-
-      // Show error message
       setMessageModal({
         show: true,
         message: "Failed to add the restaurant. Please try again.",
@@ -139,7 +133,6 @@ const MapComponent = () => {
     }
   };
 
-  // Function to generate Base64 marker icon using MapPin
   const createMarkerIcon = (IconComponent, color, size) => {
     const svgString = ReactDOMServer.renderToStaticMarkup(
       <IconComponent color={color} width={size} height={size} />
@@ -147,14 +140,13 @@ const MapComponent = () => {
     return `data:image/svg+xml;base64,${btoa(svgString)}`;
   };
 
-  // New custom marker icon using MapPin
   const restaurantMarkerIcon = isLoaded
     ? {
-        url: createMarkerIcon(MapPin, "#f97316", 40),
-        scaledSize: new window.google.maps.Size(25, 25),
-        origin: new window.google.maps.Point(0, 0),
-        anchor: new window.google.maps.Point(12.5, 40),
-      }
+      url: createMarkerIcon(MapPin, "#f97316", 40),
+      scaledSize: new window.google.maps.Size(25, 25),
+      origin: new window.google.maps.Point(0, 0),
+      anchor: new window.google.maps.Point(12.5, 40),
+    }
     : null;
 
   const [skipUpdate, setSkipUpdate] = useState(false);
@@ -177,34 +169,63 @@ const MapComponent = () => {
 
     const topRestaurants = restaurants
       .filter((restaurant) => {
-        const { lat, lng } = restaurant.location;
+        const { lat, lng } = restaurant.location.gmaps;
         return bounds.contains(new window.google.maps.LatLng(lat, lng));
       })
       .sort(
         (a, b) =>
-          b.rating - a.rating || b.user_ratings_total - a.user_ratings_total
+          b.ratings.gmaps.rating - a.ratings.gmaps.rating ||
+          b.ratings.gmaps.total_ratings - a.ratings.gmaps.total_ratings
       )
       .slice(0, 80);
 
     setFilteredRestaurants(topRestaurants);
   };
 
-  <PlaylistModal
-    show={showModal}
-    onClose={() => setShowModal(false)}
-    playlists={playlists}
-    onAdd={(listId) => handleAddToPlaylist(listId)}
-  />;
+  // Add this helper function at the component level
+  const getRestaurantAddress = (restaurant) => {
+    console.log(restaurant);
+    if (!restaurant || !restaurant.location) return "Address not available";
 
-  // Wrap your marker click handler
+    if(restaurant.location.address){
+      return restaurant.location.address;
+    }
+    // For gmaps data
+    if (restaurant.location.gmaps) {
+      if (typeof restaurant.location.gmaps.address === 'string') {
+        return restaurant.location.gmaps.address;
+      }
+
+      // If address is not a string, try to extract from coordinates
+      return `${restaurant.location.gmaps.lat}, ${restaurant.location.gmaps.lng}`;
+    }
+
+    // Fallback to yelp address if available
+    if (restaurant.location.yelp && restaurant.location.yelp.address) {
+      const yelpAddr = restaurant.location.yelp.address;
+      return [
+        yelpAddr.address1,
+        yelpAddr.address2,
+        `${yelpAddr.city}, ${yelpAddr.state} ${yelpAddr.zip_code}`
+      ].filter(Boolean).join(", ");
+    }
+
+    return "Address not available";
+  };
+
   const handleMarkerClick = async (restaurant) => {
     setSkipUpdate(true);
-    const lat = restaurant.location.gmaps.lat;
-    const lng = restaurant.location.gmaps.lng;
+
+    // Extract location from gmaps data
+    const location = {
+      lat: restaurant.location.gmaps.lat,
+      lng: restaurant.location.gmaps.lng,
+      address: restaurant.location.gmaps.address
+    };
 
     setSelectedRestaurant({
       ...restaurant,
-      location: { lat, lng },
+      location // Set the location properly
     });
 
     try {
@@ -214,26 +235,27 @@ const MapComponent = () => {
       if (!response.ok) throw new Error("Failed to fetch photo");
       const data = await response.json();
 
-      // Update selected restaurant with the fetched photo URL
       setSelectedRestaurant((prev) => ({
         ...prev,
-        image: data.photo_url || "placeholder.jpg",
+        image: data.photo_url || "/api/placeholder/400/320"
       }));
     } catch (err) {
       console.error("Error fetching restaurant photo:", err.message);
+      // Set a placeholder image on error
+      setSelectedRestaurant((prev) => ({
+        ...prev,
+        image: "/api/placeholder/400/320"
+      }));
     }
 
-    setTimeout(() => setSkipUpdate(false), 1000); // Re-enable updates after 1 second
+    setTimeout(() => setSkipUpdate(false), 1000);
   };
-
   if (loadError) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
         <MapIcon className="w-12 h-12 text-red-500 mb-4" />
         <p className="text-red-500 font-semibold">Error loading maps</p>
-        <p className="text-gray-600 mt-2">
-          Please check your internet connection
-        </p>
+        <p className="text-gray-600 mt-2">Please check your internet connection</p>
       </div>
     );
   }
@@ -249,7 +271,6 @@ const MapComponent = () => {
 
   return (
     <div className="relative p-4 bg-gray-50">
-      {/* Search bar overlay */}
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md">
         <div className="mx-4 bg-white rounded-full shadow-lg">
           <div className="flex items-center px-4 py-2">
@@ -262,37 +283,34 @@ const MapComponent = () => {
           </div>
         </div>
       </div>
-      {/* Main map component */}
+
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={mapCenter} // Ensure this doesn't change unexpectedly
+        center={mapCenter}
         zoom={16}
-        options={options}
         onLoad={(map) => setMapRef(map)}
         onIdle={() => handleBoundsChanged(mapRef)}
         onClick={() => setSelectedRestaurant(null)}
       >
-        {/* NYU Marker */}
         <MarkerF
           position={NYU_LOCATION}
           icon={{
-            url: createMarkerIcon(MapPin, "#6B7280", 40), // Custom gray icon
+            url: createMarkerIcon(MapPin, "#6B7280", 40),
             scaledSize: new window.google.maps.Size(25, 25),
             origin: new window.google.maps.Point(0, 0),
-            anchor: new window.google.maps.Point(12.5, 40), // Align pin tip
+            anchor: new window.google.maps.Point(12.5, 40),
           }}
         />
 
-        {/* Restaurant Markers */}
         {restaurants.map((restaurant, index) => {
           const lat = restaurant.location.gmaps.lat;
           const lng = restaurant.location.gmaps.lng;
 
-          if (!lat || !lng) return null; // Skip if lat/lng is missing
+          if (!lat || !lng) return null;
 
           return (
             <MarkerF
-              key={restaurant.additional_info.gmaps.place_id || index} // Ensure unique keys
+              key={restaurant.additional_info.gmaps.place_id || index}
               position={{ lat, lng }}
               icon={restaurantMarkerIcon}
               onClick={() => handleMarkerClick(restaurant)}
@@ -300,162 +318,100 @@ const MapComponent = () => {
           );
         })}
 
-        {/* Enhanced InfoWindow for Selected Restaurant */}
-        {selectedRestaurant &&
-          (console.log("Rendering InfoWindow for:", selectedRestaurant),
-          (
-            <InfoWindowF
-              position={{
-                lat: selectedRestaurant.location.lat,
-                lng: selectedRestaurant.location.lng,
-              }}
-              options={{
-                pixelOffset: new window.google.maps.Size(0, -27), // Move upward
-              }}
-              onCloseClick={() => setSelectedRestaurant(null)}
-            >
+        {selectedRestaurant && (
+          <InfoWindowF
+            position={{
+              lat: selectedRestaurant.location.lat,
+              lng: selectedRestaurant.location.lng,
+            }}
+            options={{
+              pixelOffset: new window.google.maps.Size(0, -27),
+            }}
+            onCloseClick={() => setSelectedRestaurant(null)}
+          >
+            <div className="max-w-sm p-4 bg-white rounded-lg shadow-lg">
+              <h3 className="text-xl font-bold mb-2 text-center">
+                {selectedRestaurant.name.gmaps}
+              </h3>
+
               <div
+                className="h-32 mb-4 bg-gray-200 rounded-lg bg-cover bg-center"
                 style={{
-                  maxWidth: "300px",
-                  borderRadius: "12px",
-                  boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-                  backgroundColor: "#ffffff",
-                  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                  backgroundImage: `url(${selectedRestaurant.image || '/api/placeholder/400/320'})`
                 }}
-              >
-                {/* Header Section */}
+              />
 
-                <h3
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: "700",
-                    color: "#333",
-                    marginBottom: "15px",
-                    textAlign: "center", // Center align the heading
-                  }}
-                >
-                  {selectedRestaurant.name}
-                </h3>
+              <p className="flex items-center text-gray-600 mb-2">
+                <MapPin className="w-4 h-4 mr-2" />
+                {getRestaurantAddress(selectedRestaurant)}
+              </p>
 
-                {/* Image Section */}
-                <div
-                  style={{
-                    width: "100%",
-                    height: "120px",
-                    marginBottom: "10px",
-                    backgroundColor: "#f2f2f2",
-                    borderRadius: "8px",
-                    backgroundImage: `url(${selectedRestaurant.image})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                ></div>
-
-                {/* Address Section */}
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "#555",
-                    marginBottom: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <MapPin style={{ marginRight: "5px" }} size={14} />
-                  {selectedRestaurant.address}
-                </p>
-
-                {/* Rating and Price Level */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <Star
-                      style={{ marginRight: "5px" }}
-                      size={14}
-                      color="#f59e0b"
-                    />
-                    <span>{selectedRestaurant.rating}</span>
-                    <span style={{ marginLeft: "5px", color: "#888" }}>
-                      ({selectedRestaurant.user_ratings_total})
-                    </span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <DollarSign style={{ marginRight: "5px" }} size={14} />
-                    <span>{getPriceLevel(selectedRestaurant.price_level)}</span>
-                  </div>
+              <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center">
+                  <Star className="w-4 h-4 text-yellow-500 mr-1" />
+                  <span className="font-medium">
+                    {selectedRestaurant.ratings?.gmaps?.rating || 'N/A'}
+                  </span>
+                  <span className="text-gray-500 ml-1">
+                    ({selectedRestaurant.ratings?.gmaps?.total_ratings || 0})
+                  </span>
                 </div>
-
-                {/* Tags */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "5px",
-                    marginBottom: "10px",
-                  }}
-                >
-                  {selectedRestaurant.types.slice(0, 3).map((type, index) => (
-                    <span
-                      key={index}
-                      style={{
-                        fontSize: "12px",
-                        padding: "5px 8px",
-                        borderRadius: "20px",
-                        backgroundColor: "#f3f3f3",
-                        color: "#666",
-                      }}
-                    >
-                      {type.replace(/_/g, " ")}
-                    </span>
-                  ))}
+                <div className="flex items-center">
+                  <DollarSign className="w-4 h-4 text-gray-500 mr-1" />
+                  <span>{getPriceLevel(selectedRestaurant.price_level)}</span>
                 </div>
-
-                {/* Action Button */}
-                <button
-                  onClick={() => {
-                    fetchPlaylists();
-                    setShowModal(true);
-                  }}
-                  className="mt-2 bg-orange-500 text-white px-6 py-3 rounded-md w-full hover:bg-orange-600"
-                >
-                  Add to My Playlist
-                </button>
               </div>
-            </InfoWindowF>
-          ))}
+
+              <div className="flex flex-wrap gap-2 mb-3">
+                {(selectedRestaurant.types?.gmaps || []).slice(0, 3).map((type, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-1 bg-gray-100 rounded-full text-sm text-gray-600"
+                  >
+                    {type.replace(/_/g, " ")}
+                  </span>
+                ))}
+              </div>
+
+              <button
+                onClick={() => {
+                  fetchPlaylists();
+                  setShowModal(true);
+                }}
+                className="w-full bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 transition-colors"
+              >
+                Add to My Playlist
+              </button>
+            </div>
+          </InfoWindowF>
+        )}
       </GoogleMap>
+
+      <div className="absolute bottom-10 right-10 bg-white p-3 rounded-lg shadow-lg">
+        <div className="flex flex-col space-y-2">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full bg-gray-600" />
+            <span className="text-sm text-gray-600">NYU Location</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full bg-orange-500" />
+            <span className="text-sm text-gray-600">Restaurants</span>
+          </div>
+        </div>
+      </div>
+
       <PlaylistModal
         show={showModal}
         onClose={() => setShowModal(false)}
         playlists={playlists}
         onAdd={handleAddToPlaylist}
       />
+
       <MessageWindow
         show={messageModal.show}
         message={messageModal.message}
         onClose={() => setMessageModal({ show: false, message: "" })}
       />
-      ;{/* Legend */}
-      <div
-        className="absolute bottom-10 right-20 bg-white rounded-lg shadow-lg p-3" // Adjust `right` and `bottom` values
-      >
-        <div className="flex flex-col space-y-2">
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-gray-600"></div>
-            <span className="text-sm text-gray-600">NYU Location</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-            <span className="text-sm text-gray-600">Restaurants</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

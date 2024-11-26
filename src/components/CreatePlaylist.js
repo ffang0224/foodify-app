@@ -34,11 +34,65 @@ const CreatePlaylist = () => {
 
   const colorPalette = [
     { value: "#facc15", name: "Yellow" },
-    { value: "#f97316", name: "Orange"},
+    { value: "#f97316", name: "Orange" },
     { value: "#bf4240", name: "Red - Orange" },
     { value: "#8a4647", name: "Brown - Red" },
     { value: "#d3829c", name: "Pink" },
   ];
+
+  // Helper functions for handling the new data structure
+  const getRestaurantName = (restaurant) => {
+    return restaurant.name.gmaps || restaurant.name.yelp || "Unnamed Restaurant";
+  };
+
+  const getRestaurantRating = (restaurant) => {
+    const gmapsRating = restaurant.ratings?.gmaps?.rating;
+    const yelpRating = restaurant.ratings?.yelp?.rating;
+    return gmapsRating || yelpRating || 0;
+  };
+
+  const getTotalRatings = (restaurant) => {
+    const gmapsTotal = restaurant.ratings?.gmaps?.total_ratings || 0;
+    const yelpTotal = restaurant.ratings?.yelp?.total_ratings || 0;
+    return gmapsTotal + yelpTotal;
+  };
+
+  const getAddress = (restaurant) => {
+    if (restaurant.location?.gmaps?.address) {
+      return restaurant.location.gmaps.address;
+    }
+    if (restaurant.location?.yelp?.address) {
+      const addr = restaurant.location.yelp.address;
+      return `${addr.address1}${addr.address2 ? `, ${addr.address2}` : ''}, ${addr.city}, ${addr.state} ${addr.zip_code}`;
+    }
+    return "Address unavailable";
+  };
+
+  const getPriceLevel = (restaurant) => {
+    const composite = restaurant.price_level?.composite;
+    if (composite?.average) return "$$$$".slice(0, Math.round(composite.average));
+
+    const gmapsPrice = restaurant.price_level?.gmaps?.normalized;
+    const yelpPrice = restaurant.price_level?.yelp?.normalized;
+
+    if (gmapsPrice !== null) return "$$$$".slice(0, gmapsPrice);
+    if (yelpPrice !== null) return "$$$$".slice(0, yelpPrice);
+
+    return "N/A";
+  };
+
+  const getTypes = (restaurant) => {
+    const gmapsTypes = restaurant.types?.gmaps || [];
+    const yelpTypes = restaurant.types?.yelp || [];
+    const allTypes = [...new Set([...gmapsTypes, ...yelpTypes])];
+    return allTypes.map(type => type.replace(/_/g, ' '));
+  };
+
+  const getPlaceId = (restaurant) => {
+    return restaurant.additional_info?.gmaps?.place_id ||
+      restaurant.additional_info?.yelp?.yelp_id ||
+      Math.random().toString(36).substr(2, 9);
+  };
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -75,15 +129,17 @@ const CreatePlaylist = () => {
   useEffect(() => {
     const filtered = allRestaurants.filter((restaurant) => {
       const matchesSearch =
-        restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (restaurant.types &&
-          restaurant.types.some((type) =>
-            type.toLowerCase().includes(searchQuery.toLowerCase())
-          ));
-      const matchesPrice =
-        restaurant.price_level >= priceRange[0] &&
-        restaurant.price_level <= priceRange[1];
-      const matchesRating = restaurant.rating >= ratingRange;
+        getRestaurantName(restaurant).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        getTypes(restaurant).some(type =>
+          type.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+      const rating = getRestaurantRating(restaurant);
+      const matchesRating = rating >= ratingRange;
+
+      // Note: Price range filtering might need adjustment based on your needs
+      const price = restaurant.price_level?.composite?.average || 0;
+      const matchesPrice = !price || (price >= priceRange[0] && price <= priceRange[1]);
 
       return matchesSearch && matchesPrice && matchesRating;
     });
@@ -100,22 +156,17 @@ const CreatePlaylist = () => {
   };
 
   const toggleRestaurantSelection = (restaurant) => {
-    // Using setSelectedRestaurants with a callback function that receives previous state
     setSelectedRestaurants((prev) => {
-      // Check if restaurant is already selected by looking for matching place_id
-      const isSelected = prev.find((r) => r.place_id === restaurant.place_id);
-  
+      const placeId = getPlaceId(restaurant);
+      const isSelected = prev.find((r) => getPlaceId(r) === placeId);
+
       if (isSelected) {
-        // If restaurant was already selected, remove it by filtering it out
-        return prev.filter((r) => r.place_id !== restaurant.place_id);
+        return prev.filter((r) => getPlaceId(r) !== placeId);
       } else {
-        // If restaurant wasn't selected, add it to the array
         return [...prev, restaurant];
       }
     });
   };
-
-  const getPriceLevel = (level) => (level ? "$$$$".slice(0, level) : "N/A");
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
@@ -139,7 +190,7 @@ const CreatePlaylist = () => {
       const listData = {
         name: formData.name,
         description: formData.description,
-        restaurants: selectedRestaurants.map((r) => r.place_id),
+        restaurants: selectedRestaurants.map((r) => getPlaceId(r)),
         color: selectedColor,
         author: userData.username,
         username: userData.username,
@@ -244,11 +295,10 @@ const CreatePlaylist = () => {
                       <button
                         key={color.value}
                         onClick={() => setSelectedColor(color.value)}
-                        className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${
-                          selectedColor === color.value
-                            ? "ring-2 ring-offset-2 ring-gray-900"
-                            : ""
-                        }`}
+                        className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${selectedColor === color.value
+                          ? "ring-2 ring-offset-2 ring-gray-900"
+                          : ""
+                          }`}
                         style={{ backgroundColor: color.value }}
                         title={color.name}
                       />
@@ -330,54 +380,53 @@ const CreatePlaylist = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredRestaurants.map((restaurant) => (
                 <div
-                  key={restaurant.place_id}
+                  key={getPlaceId(restaurant)}
                   onClick={() => toggleRestaurantSelection(restaurant)}
-                  className={`bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-md ${
-                    selectedRestaurants.some(
-                      (r) => r.place_id === restaurant.place_id
-                    )
-                      ? "ring-2 ring-orange-500"
-                      : ""
-                  }`}
+                  className={`bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-md ${selectedRestaurants.some(
+                    (r) => getPlaceId(r) === getPlaceId(restaurant)
+                  )
+                    ? "ring-2 ring-orange-500"
+                    : ""
+                    }`}
                 >
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-semibold text-gray-900">
-                        {restaurant.name}
+                        {getRestaurantName(restaurant)}
                       </h3>
                       {selectedRestaurants.some(
-                        (r) => r.place_id === restaurant.place_id
+                        (r) => getPlaceId(r) === getPlaceId(restaurant)
                       ) && (
-                        <div className="bg-orange-100 rounded-full p-1">
-                          <Plus className="w-4 h-4 text-orange-500 transform rotate-45" />
-                        </div>
-                      )}
+                          <div className="bg-orange-100 rounded-full p-1">
+                            <Plus className="w-4 h-4 text-orange-500 transform rotate-45" />
+                          </div>
+                        )}
                     </div>
                     <div className="flex items-center text-sm text-gray-500 mb-2">
                       <MapPin className="w-4 h-4 mr-1" />
-                      <span>{restaurant.address}</span>
+                      <span>{getAddress(restaurant)}</span>
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center">
                         <Star className="w-4 h-4 text-yellow-400 mr-1" />
                         <span className="text-sm text-gray-600">
-                          {restaurant.rating} ({restaurant.user_ratings_total})
+                          {getRestaurantRating(restaurant).toFixed(1)} ({getTotalRatings(restaurant)})
                         </span>
                       </div>
                       <div className="flex items-center">
                         <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
                         <span className="text-sm text-gray-600">
-                          {getPriceLevel(restaurant.price_level)}
+                          {getPriceLevel(restaurant)}
                         </span>
                       </div>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
-                      {restaurant.types.slice(0, 3).map((type, index) => (
+                      {getTypes(restaurant).slice(0, 3).map((type, index) => (
                         <span
                           key={index}
                           className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
                         >
-                          {type.replace(/_/g, " ")}
+                          {type}
                         </span>
                       ))}
                     </div>
@@ -396,8 +445,11 @@ const CreatePlaylist = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
 export default CreatePlaylist;
+
+
+

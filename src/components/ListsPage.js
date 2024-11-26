@@ -12,6 +12,36 @@ const ListsPage = () => {
   const [error, setError] = useState("");
   const [incentiveMessage, setIncentiveMessage] = useState("");
 
+  // Helper function to process restaurant data in lists
+  const processRestaurantData = (lists) => {
+    return lists.map(list => ({
+      ...list,
+      restaurants: list.restaurants.map(restaurant => ({
+        id: restaurant.additional_info?.gmaps?.place_id ||
+          restaurant.additional_info?.yelp?.yelp_id ||
+          'unknown',
+        name: restaurant.name?.gmaps || restaurant.name?.yelp || 'Unknown Restaurant',
+        rating: restaurant.ratings?.gmaps?.rating ||
+          restaurant.ratings?.yelp?.rating ||
+          0,
+        totalRatings: (restaurant.ratings?.gmaps?.total_ratings || 0) +
+          (restaurant.ratings?.yelp?.total_ratings || 0),
+        address: restaurant.location?.gmaps?.address ||
+          (restaurant.location?.yelp?.address ?
+            `${restaurant.location.yelp.address.address1}, ${restaurant.location.yelp.address.city}` :
+            'Address unavailable'),
+        types: [...new Set([
+          ...(restaurant.types?.gmaps || []),
+          ...(restaurant.types?.yelp || [])
+        ])].map(type => type.replace(/_/g, ' ')),
+        price_level: restaurant.price_level?.composite?.average ||
+          restaurant.price_level?.gmaps?.normalized ||
+          restaurant.price_level?.yelp?.normalized ||
+          null
+      }))
+    }));
+  };
+
   useEffect(() => {
     const fetchLists = async () => {
       if (!userData) return;
@@ -26,10 +56,12 @@ const ListsPage = () => {
         }
 
         const userLists = await response.json();
-        setLists(userLists);
+        // Process the lists with the new restaurant data structure
+        const processedLists = processRestaurantData(userLists);
+        setLists(processedLists);
 
         // Calculate incentive message
-        const numLists = userLists.length;
+        const numLists = processedLists.length;
         const nextMilestone = Math.ceil((numLists + 1) / 10) * 10;
         const points = (nextMilestone / 10) * 10;
         const firstName = userData.firstName;
@@ -49,10 +81,8 @@ const ListsPage = () => {
         }
 
         setIncentiveMessage(
-          `Keep going, ${firstName}! Create ${
-            nextMilestone - numLists
-          } more list${nextMilestone - numLists > 1 ? "s" : ""} to reach ${
-            nextMilestone
+          `Keep going, ${firstName}! Create ${nextMilestone - numLists
+          } more list${nextMilestone - numLists > 1 ? "s" : ""} to reach ${nextMilestone
           } lists and earn ${points} points.`
         );
       } catch (err) {

@@ -1,20 +1,20 @@
-// The EditPlaylist component includes the following key features:
+// // // The EditPlaylist component includes the following key features:
 
-// 1. Fetches existing list details on mount
-// 2. Pre-populates the form with existing list name and description
-// 3. Loads existing restaurants into the selected restaurants list
-// 4. Provides a search functionality to add new restaurants
-// 5. Allows removing existing restaurants
-// 6. Validates form before submission
-// 7. Sends a PUT request to update the list
-// 8. Handles loading and error states
-// 9. Provides navigation back to the list view
+// // // 1. Fetches existing list details on mount
+// // // 2. Pre-populates the form with existing list name and description
+// // // 3. Loads existing restaurants into the selected restaurants list
+// // // 4. Provides a search functionality to add new restaurants
+// // // 5. Allows removing existing restaurants
+// // // 6. Validates form before submission
+// // // 7. Sends a PUT request to update the list
+// // // 8. Handles loading and error states
+// // // 9. Provides navigation back to the list view
 
-// Key differences from a create playlist page:
+// // // Key differences from a create playlist page:
 
-// 1. Uses a PUT method instead of POST
-// 2. Pre-populates existing data
-// 3. Fetches existing restaurant details
+// // // 1. Uses a PUT method instead of POST
+// // // 2. Pre-populates existing data
+// // // 3. Fetches existing restaurant details
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -39,16 +39,19 @@ const EditPlaylist = () => {
   const [listDescription, setListDescription] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRestaurants, setSelectedRestaurants] = useState([]);
-  const [searchResults, setSearchResults] = useState([]);
+  
+  // Restaurants state
+  const [allRestaurants, setAllRestaurants] = useState([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
 
   // UI and error state
   const [loading, setLoading] = useState(true);
-  const [searching, setSearching] = useState(false);
   const [error, setError] = useState('');
+  const [showRestaurantDropdown, setShowRestaurantDropdown] = useState(false);
 
-  // Fetch existing list details on component mount
+  // Fetch existing list details and all restaurants on component mount
   useEffect(() => {
-    const fetchListDetails = async () => {
+    const fetchInitialData = async () => {
       if (!userData) return;
 
       try {
@@ -85,69 +88,34 @@ const EditPlaylist = () => {
 
         const restaurantData = await Promise.all(restaurantPromises);
         setSelectedRestaurants(restaurantData);
+
+        // Fetch all restaurants
+        const allRestaurantsResponse = await fetch(`http://localhost:8000/restaurants`);
+        if (!allRestaurantsResponse.ok) {
+          const errorText = await allRestaurantsResponse.text();
+          throw new Error(`Failed to fetch restaurants: ${errorText}`);
+        }
+
+        const allRestaurantsData = await allRestaurantsResponse.json();
+        setAllRestaurants(allRestaurantsData);
+        setFilteredRestaurants(allRestaurantsData);
       } catch (err) {
-        console.error("Error fetching list details:", err);
+        console.error("Error fetching initial data:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchListDetails();
+    fetchInitialData();
   }, [listId, userData]);
 
-  // Helper functions for search and restaurant selection
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-
-    setSearching(true);
-    setError('');
-
-    try {
-      const response = await fetch(`http://localhost:8000/restaurants/search?query=${encodeURIComponent(searchQuery)}`);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Search failed: ${errorText}`);
-      }
-
-      const data = await response.json();
-      setSearchResults(data);
-    } catch (err) {
-      console.error("Search error:", err);
-      setError(err.message);
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  const addRestaurant = (restaurant) => {
-    // Prevent duplicates
-    if (!selectedRestaurants.some(r => 
-      r.additional_info?.gmaps?.place_id === restaurant.additional_info?.gmaps?.place_id &&
-      r.additional_info?.yelp?.yelp_id === restaurant.additional_info?.yelp?.yelp_id
-    )) {
-      setSelectedRestaurants([...selectedRestaurants, restaurant]);
-    }
-    setSearchQuery('');
-    setSearchResults([]);
-  };
-
-  const removeRestaurant = (restaurantToRemove) => {
-    setSelectedRestaurants(
-      selectedRestaurants.filter(r => 
-        r.additional_info?.gmaps?.place_id !== restaurantToRemove.additional_info?.gmaps?.place_id ||
-        r.additional_info?.yelp?.yelp_id !== restaurantToRemove.additional_info?.yelp?.yelp_id
-      )
-    );
-  };
-
-  // Helper functions for rendering restaurant details
+  // Helper function to get restaurant name
   const getRestaurantName = (restaurant) => {
     return restaurant.name?.gmaps || restaurant.name?.yelp || "Unnamed Restaurant";
   };
 
+  // Helper function to get address
   const getAddress = (restaurant) => {
     if (restaurant.location?.gmaps?.address) {
       return restaurant.location.gmaps.address;
@@ -159,12 +127,44 @@ const EditPlaylist = () => {
     return "Address unavailable";
   };
 
-  const getRestaurantRating = (restaurant) => {
-    const gmapsRating = restaurant.ratings?.gmaps?.rating;
-    const yelpRating = restaurant.ratings?.yelp?.rating;
-    return gmapsRating || yelpRating || 0;
+  // Handle search query changes
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    setShowRestaurantDropdown(true);
+
+    // Filter restaurants based on query
+    const filtered = allRestaurants.filter(restaurant => 
+      getRestaurantName(restaurant).toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredRestaurants(filtered);
   };
 
+  // Add restaurant to selected list
+  const addRestaurant = (restaurant) => {
+    // Prevent duplicates
+    if (!selectedRestaurants.some(r => 
+      r.additional_info?.gmaps?.place_id === restaurant.additional_info?.gmaps?.place_id &&
+      r.additional_info?.yelp?.yelp_id === restaurant.additional_info?.yelp?.yelp_id
+    )) {
+      setSelectedRestaurants([...selectedRestaurants, restaurant]);
+    }
+    // Clear search query and hide dropdown
+    setSearchQuery('');
+    setShowRestaurantDropdown(false);
+  };
+
+  // Remove restaurant from selected list
+  const removeRestaurant = (restaurantToRemove) => {
+    setSelectedRestaurants(
+      selectedRestaurants.filter(r => 
+        r.additional_info?.gmaps?.place_id !== restaurantToRemove.additional_info?.gmaps?.place_id ||
+        r.additional_info?.yelp?.yelp_id !== restaurantToRemove.additional_info?.yelp?.yelp_id
+      )
+    );
+  };
+
+  // Handle form submission (unchanged from previous version)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -192,8 +192,8 @@ const EditPlaylist = () => {
         name: listName,
         description: listDescription,
         restaurants: restaurantPlaceIds,
-        author: userData.username,  // Add author
-        username: userData.username  // Add username
+        author: userData.username,  
+        username: userData.username  
       };
 
       // Submit update
@@ -221,18 +221,7 @@ const EditPlaylist = () => {
     }
   };
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex items-center space-x-2 text-gray-600">
-          <Loader className="w-5 h-5 animate-spin" />
-          <span>Loading list details...</span>
-        </div>
-      </div>
-    );
-  }
-
+  // Render the rest of the component (mostly unchanged)
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-md">
@@ -259,6 +248,7 @@ const EditPlaylist = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* List Name and Description inputs (unchanged) */}
           <div>
             <label htmlFor="listName" className="block text-sm font-medium text-gray-700 mb-2">
               List Name
@@ -293,51 +283,6 @@ const EditPlaylist = () => {
               Restaurants
             </label>
 
-            {/* Search bar */}
-            <form onSubmit={handleSearch} className="mb-4 relative">
-              <div className="flex">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Search for restaurants"
-                />
-                <button
-                  type="submit"
-                  disabled={searching}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-r-md hover:bg-orange-600 transition-colors flex items-center"
-                >
-                  {searching ? <Loader className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                </button>
-              </div>
-
-              {/* Search results dropdown */}
-              {searchResults.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                  {searchResults.map((restaurant) => (
-                    <div 
-                      key={restaurant.additional_info?.gmaps?.place_id || restaurant.additional_info?.yelp?.yelp_id}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex justify-between items-center"
-                      onClick={() => addRestaurant(restaurant)}
-                    >
-                      <div>
-                        <div className="font-medium">{getRestaurantName(restaurant)}</div>
-                        <div className="text-sm text-gray-500 flex items-center">
-                          <MapPin className="w-3 h-3 mr-1" />
-                          {getAddress(restaurant)}
-                        </div>
-                      </div>
-                      <div className="flex items-center">
-                        <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                        <span>{getRestaurantRating(restaurant).toFixed(1)}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </form>
-
             {/* Selected Restaurants */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {selectedRestaurants.map((restaurant) => (
@@ -346,6 +291,7 @@ const EditPlaylist = () => {
                   className="bg-white rounded-lg shadow-md relative"
                 >
                   <button
+                    type="button"
                     onClick={() => removeRestaurant(restaurant)}
                     className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 z-10"
                   >
@@ -359,26 +305,48 @@ const EditPlaylist = () => {
                       <MapPin className="w-4 h-4 mr-1" />
                       {getAddress(restaurant)}
                     </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                        <span>{getRestaurantRating(restaurant).toFixed(1)}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
-                        <span>
-                          {"$$$$".slice(0, restaurant.price_level?.composite?.average || 
-                            restaurant.price_level?.gmaps?.normalized || 
-                            restaurant.price_level?.yelp?.normalized || 
-                            0)}
-                        </span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
+
+            {/* Search bar with dropdown */}
+            <div className="relative mb-4">
+              <div className="flex">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onFocus={() => setShowRestaurantDropdown(true)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Search for restaurants"
+                />
+              </div>
+
+              {/* Dropdown for restaurant list */}
+              {showRestaurantDropdown && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  {filteredRestaurants.length > 0 ? (
+                    filteredRestaurants.map((restaurant) => (
+                      <div 
+                        key={restaurant.additional_info?.gmaps?.place_id || restaurant.additional_info?.yelp?.yelp_id}
+                        onClick={() => addRestaurant(restaurant)}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        <div className="font-medium">{getRestaurantName(restaurant)}</div>
+                        <div className="text-sm text-gray-500 flex items-center">
+                          <MapPin className="w-3 h-3 mr-1" />
+                          {getAddress(restaurant)}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-4 py-2 text-gray-500">No restaurants found</div>
+                  )}
+                </div>
+              )}
+            </div>
 
           <div className="flex justify-end space-x-4">
             <button

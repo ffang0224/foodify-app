@@ -19,6 +19,7 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
+import RestaurantDetailsModal from "./restaurantModal";
 
 const MapComponent = () => {
   const { userData } = useAuthUser();
@@ -56,6 +57,7 @@ const MapComponent = () => {
     show: false,
     message: "",
   });
+  const [showDetailedModal, setShowDetailedModal] = useState(false);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -520,7 +522,7 @@ const MapComponent = () => {
             }}
             onCloseClick={() => setSelectedRestaurant(null)}
           >
-            <div className="max-w-sm p-4 bg-white rounded-lg">
+            <div className="w-68 p-4 bg-white rounded-lg">
               <h3 className="text-xl font-bold mb-2 text-center">
                 {selectedRestaurant.name.gmaps}
               </h3>
@@ -563,15 +565,23 @@ const MapComponent = () => {
                   </span>
                 ))}
               </div>
-
               <button
                 onClick={() => {
                   fetchPlaylists();
                   setShowModal(true);
                 }}
-                className="w-full bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 transition-colors"
+                className="w-full bg-orange-500 mt-4 text-white py-2 px-4 rounded-md hover:bg-orange-600 transition-colors"
               >
                 Add to My Playlist
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDetailedModal(true);
+                }}
+                className="w-full bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 transition-colors mt-2"
+              >
+                View Details
               </button>
             </div>
           </InfoWindowF>
@@ -619,6 +629,11 @@ const MapComponent = () => {
         show={messageModal.show}
         message={messageModal.message}
         onClose={() => setMessageModal({ show: false, message: "" })}
+      />
+      <RestaurantDetailsModal
+        show={showDetailedModal}
+        onClose={() => setShowDetailedModal(false)}
+        restaurant={selectedRestaurant}
       />
     </div>
   );

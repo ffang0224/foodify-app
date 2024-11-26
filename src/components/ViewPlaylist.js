@@ -24,9 +24,12 @@ const ViewPlaylist = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isOwner, setIsOwner] = useState(false);
+  const [photoUrls, setPhotoUrls] = useState({});
+  const [photoLoading, setPhotoLoading] = useState({});
 
   // Helper functions for the new data structure
   const getRestaurantName = (restaurant) => {
+    console.log(restaurant);
     return restaurant.name?.gmaps || restaurant.name?.yelp || "Unnamed Restaurant";
   };
 
@@ -127,6 +130,40 @@ const ViewPlaylist = () => {
 
     fetchListData();
   }, [listId, userData]);
+
+  useEffect(() => {
+    const fetchPhotosForRestaurants = async () => {
+      const newPhotoUrls = {};
+      const newPhotoLoading = {};
+
+      for (const restaurant of restaurants) {
+        const placeId = restaurant.additional_info?.gmaps?.place_id;
+        if (!placeId) continue;
+
+        newPhotoLoading[placeId] = true;
+        try {
+          const response = await fetch(
+            `http://localhost:8000/restaurant-photo/${placeId}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            newPhotoUrls[placeId] = data.photo_url;
+          }
+        } catch (error) {
+          console.error("Error fetching photo for", placeId, error);
+        } finally {
+          newPhotoLoading[placeId] = false;
+        }
+      }
+
+      setPhotoUrls(newPhotoUrls);
+      setPhotoLoading(newPhotoLoading);
+    };
+
+    if (restaurants.length > 0) {
+      fetchPhotosForRestaurants();
+    }
+  }, [restaurants]);
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this list?")) return;
@@ -234,14 +271,31 @@ const ViewPlaylist = () => {
               key={getPlaceId(restaurant)}
               className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 hover:shadow-xl transition-all duration-300"
             >
+              {/* Image Section */}
+              <div className="h-48 overflow-hidden">
+                {photoLoading[getPlaceId(restaurant)] ? (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <Loader className="w-6 h-6 animate-spin text-gray-400" />
+                  </div>
+                ) : (
+                  <img
+                    src={photoUrls[getPlaceId(restaurant)] || '/api/placeholder/400/300'}
+                    alt={getRestaurantName(restaurant)}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+
               <div className="p-6 space-y-4">
                 <h3 className="text-xl font-semibold text-gray-800">
                   {getRestaurantName(restaurant)}
                 </h3>
+
                 <div className="flex items-center text-sm text-gray-500 mb-2">
                   <MapPin className="w-4 h-4 mr-1" />
                   {getAddress(restaurant)}
                 </div>
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <Star className="w-4 h-4 text-yellow-400 mr-1" />
@@ -256,6 +310,7 @@ const ViewPlaylist = () => {
                     </span>
                   </div>
                 </div>
+
                 <div className="flex flex-wrap gap-2">
                   {getTypes(restaurant).slice(0, 3).map((type, index) => (
                     <span
@@ -265,6 +320,29 @@ const ViewPlaylist = () => {
                       {type}
                     </span>
                   ))}
+                </div>
+
+                {/* External Links */}
+                <div className="flex gap-2 pt-4">
+                  {restaurant.additional_info?.gmaps?.place_id && (
+                    <a
+                      href={`https://www.google.com/maps/place/?q=place_id:${restaurant.additional_info.gmaps.place_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 text-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors"
+                    >
+                      View on Google Maps
+                    </a>
+                  )}
+                    {<a
+                    href={`https://www.yelp.com/biz/${restaurant.additional_info.yelp.yelp_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 text-center px-3 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
+                    >
+                      View on Yelp
+                    </a>
+                  }
                 </div>
               </div>
             </div>

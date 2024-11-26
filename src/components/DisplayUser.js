@@ -2,26 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const DisplayUser = () => {
-  const [users, setUsers] = useState([]); // Stores the list of users
+  // Hardcoded user data
+  const users = [
+    { username: "aruzhan_bolatova", restaurants: ["Cafe Baku", "Chaihana"], reviews: 34 },
+    { username: "chris", restaurants: ["Pasta Paradise", "Pizza Express"], reviews: 12 },
+    { username: "elyazia-eats", restaurants: ["Sushi World", "Taco Villa"], reviews: 56 },
+    { username: "faustofangg", restaurants: ["Burger King", "Wok Street"], reviews: 8 },
+    { username: "minseok_test", restaurants: ["Ramen House", "Sushi Spot"], reviews: 21 },
+  ];
+
   const [searchQuery, setSearchQuery] = useState(""); // Stores the current search query
-  const [filteredUsers, setFilteredUsers] = useState([]); // Stores the filtered list of users
+  const [filteredUsers, setFilteredUsers] = useState(users); // Stores the filtered list of users
   const navigate = useNavigate();
-
-  // Fetch the list of users from the API (replace the URL with your actual API endpoint)
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("https://your-api-endpoint.com/users");
-        const data = await response.json();
-        setUsers(data);
-        setFilteredUsers(data); // Initially show all users
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-
-    fetchUsers();
-  }, []);
 
   // Handle search query change
   const handleSearch = (event) => {
@@ -34,7 +26,7 @@ const DisplayUser = () => {
       user.username.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredUsers(results);
-  }, [searchQuery, users]);
+  }, [searchQuery]);
 
   // Navigate to the user's profile (you can replace this with your actual profile page navigation)
   const goToUserProfile = (username) => {
@@ -42,13 +34,13 @@ const DisplayUser = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-8">
       <h2 className="text-4xl font-extrabold text-center text-orange-600 mb-8">
         Search for Foodies
       </h2>
 
       {/* Search Bar */}
-      <div className="w-full max-w-md mb-8">
+      <div className="w-full max-w-lg mb-8">
         <input
           type="text"
           placeholder="Search for a foodie..."
@@ -59,7 +51,7 @@ const DisplayUser = () => {
       </div>
 
       {/* Display Users */}
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-lg space-y-6">
         {filteredUsers.length > 0 ? (
           filteredUsers.map((user) => (
             <div
@@ -67,7 +59,11 @@ const DisplayUser = () => {
               className="flex justify-between items-center bg-white p-6 rounded-xl shadow-md hover:bg-orange-50 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105"
               onClick={() => goToUserProfile(user.username)}
             >
-              <span className="text-2xl font-semibold text-gray-800">{user.username}</span>
+              <div className="flex flex-col">
+                <span className="text-2xl font-semibold text-gray-800">{user.username}</span>
+                <span className="text-sm text-gray-500">{user.restaurants.length} restaurants</span>
+                <span className="text-sm text-gray-500">{user.reviews} reviews</span>
+              </div>
               <button
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent triggering onClick when clicking the button

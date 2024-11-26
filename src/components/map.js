@@ -150,10 +150,10 @@ const MapComponent = () => {
   // New custom marker icon using MapPin
   const restaurantMarkerIcon = isLoaded
     ? {
-        url: createMarkerIcon(MapPin, "#f97316", 40), // Custom MapPin icon
-        scaledSize: new window.google.maps.Size(25, 25), // Adjust size
-        origin: new window.google.maps.Point(0, 0), // Top-left corner
-        anchor: new window.google.maps.Point(12.5, 40), // Pin tip
+        url: createMarkerIcon(MapPin, "#f97316", 40),
+        scaledSize: new window.google.maps.Size(25, 25),
+        origin: new window.google.maps.Point(0, 0),
+        anchor: new window.google.maps.Point(12.5, 40),
       }
     : null;
 
@@ -198,21 +198,27 @@ const MapComponent = () => {
 
   // Wrap your marker click handler
   const handleMarkerClick = async (restaurant) => {
-    setSkipUpdate(true); // Disable map updates temporarily
-    setSelectedRestaurant(restaurant);
+    setSkipUpdate(true);
+    const lat = restaurant.location.gmaps.lat;
+    const lng = restaurant.location.gmaps.lng;
+
+    setSelectedRestaurant({
+      ...restaurant,
+      location: { lat, lng },
+    });
 
     try {
       const response = await fetch(
-        `http://localhost:8000/restaurant-photo/${restaurant.place_id}`
+        `http://localhost:8000/restaurant-photo/${restaurant.additional_info.gmaps.place_id}`
       );
       if (!response.ok) throw new Error("Failed to fetch photo");
       const data = await response.json();
 
-      // Update restaurant with photo URL
-      setSelectedRestaurant({
-        ...restaurant,
+      // Update selected restaurant with the fetched photo URL
+      setSelectedRestaurant((prev) => ({
+        ...prev,
         image: data.photo_url || "placeholder.jpg",
-      });
+      }));
     } catch (err) {
       console.error("Error fetching restaurant photo:", err.message);
     }
@@ -278,17 +284,21 @@ const MapComponent = () => {
         />
 
         {/* Restaurant Markers */}
-        {filteredRestaurants.map((restaurant) => (
-          <MarkerF
-            key={restaurant.place_id}
-            position={{
-              lat: restaurant.location.lat,
-              lng: restaurant.location.lng,
-            }}
-            icon={restaurantMarkerIcon}
-            onClick={() => handleMarkerClick(restaurant)}
-          />
-        ))}
+        {restaurants.map((restaurant, index) => {
+          const lat = restaurant.location.gmaps.lat;
+          const lng = restaurant.location.gmaps.lng;
+
+          if (!lat || !lng) return null; // Skip if lat/lng is missing
+
+          return (
+            <MarkerF
+              key={restaurant.additional_info.gmaps.place_id || index} // Ensure unique keys
+              position={{ lat, lng }}
+              icon={restaurantMarkerIcon}
+              onClick={() => handleMarkerClick(restaurant)}
+            />
+          );
+        })}
 
         {/* Enhanced InfoWindow for Selected Restaurant */}
         {selectedRestaurant &&

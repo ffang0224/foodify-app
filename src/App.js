@@ -7,6 +7,7 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
+import DisplayUser from "./components/DisplayUser.js"; // Make sure the correct path to your DisplayUser component is used
 import sampleRestaurantData from "./sample-data/sampleRestaurantData.js";
 import IndivRestaurantCard from "./components/IndivRestaurantCard.js";
 import Login from "./components/login.js";
@@ -83,6 +84,14 @@ const NavBar = () => {
                 </button>
               </div>
             )}
+
+            {/* Add Search Other Foodies Section */}
+            <button
+              onClick={() => navigate("/DisplayUser")}
+              className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
+            >
+              <span>Search Other Foodies</span>
+            </button>
 
             {/* User Icon and Dropdown */}
             <div className="relative ml-4">
@@ -192,14 +201,18 @@ const App = () => {
         <Route path="/" element={<Navigate to="/register" replace />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        
+        {/* Pages with NavBar included */}
         <Route path="/map" element={<MapView />} />
         <Route path="/profile" element={<ProfilePageWithNav />} />
         <Route path="/settings" element={<SettingsPage />} />
-        
+        <Route path="/DisplayUser" element={<DisplayUser />} />
+
         <Route
           path="/lists"
           element={<ListsPageWithNav />}
         />
+        
         <Route
           path="/restaurants"
           element={
@@ -209,6 +222,7 @@ const App = () => {
             />
           }
         />
+        
         <Route
           path="/restaurant/:restaurantId"
           element={
@@ -220,12 +234,12 @@ const App = () => {
             </div>
           }
         />
-        {/* New route for CreatePlaylist */}
+
+        {/* Playlist routes */}
         <Route
           path="/create-playlist"
           element={<CreatePlaylist />}
         />
-        {/* Route to view individual playlist */}
         <Route
           path="/lists/:listId"
           element={<ViewPlaylist />}

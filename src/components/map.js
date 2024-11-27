@@ -61,7 +61,7 @@ const MapComponent = () => {
 
   // Filter states
   const [filters, setFilters] = useState({
-    minRating: 4.5,
+    minRating: 0,
     priceLevel: [],
     cuisine: [],
     radius: 1000, // meters

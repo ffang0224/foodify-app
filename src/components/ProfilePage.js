@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthUser } from "../hooks/useAuthUser";
 import RestaurantListCard from "./ListCard";
-import { Edit, MapPin, Mail, User, Star, Library, Plus } from "lucide-react";
+import { Edit, Mail, User, Star, Library, Plus } from "lucide-react";
 
 const ProfilePage = () => {
   const { userData, loading: userLoading } = useAuthUser();
@@ -10,6 +10,7 @@ const ProfilePage = () => {
   const [lists, setLists] = useState([]);
   const [listsLoading, setListsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [incentiveMessage, setIncentiveMessage] = useState("");
 
   useEffect(() => {
     const fetchLists = async () => {
@@ -26,6 +27,17 @@ const ProfilePage = () => {
 
         const userLists = await response.json();
         setLists(userLists);
+        
+        // Calculate incentive message
+        const numLists = userLists.length;
+        const nextMilestone = Math.ceil((numLists + 1) / 10) * 10;
+        const firstName = userData.firstName;
+        
+        setIncentiveMessage(
+          `Keep going, ${firstName}! Create ${nextMilestone - numLists} more list${
+            nextMilestone - numLists > 1 ? "s" : ""
+          } to reach ${nextMilestone} lists and earn 10 points.`
+        );
       } catch (err) {
         console.error("Error fetching lists:", err);
         setError(err.message);
@@ -50,9 +62,6 @@ const ProfilePage = () => {
       </div>
     );
   }
-
-  // Safe access to userData and points
-  const totalPoints = Object.values(userData?.points || {}).reduce((a, b) => a + b, 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,26 +97,26 @@ const ProfilePage = () => {
                 </button>
               </div>
 
-              {/* Stats Section */}
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Updated Stats Section */}
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="bg-white p-4 rounded-lg shadow-lg">
-                  <p className="text-sm text-gray-600">Total Points</p>
+                  <p className="text-sm text-gray-600">Points Earned</p>
                   <div className="flex items-center justify-between">
-                    <p className="text-2xl font-bold text-orange-600">{totalPoints}</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {userData?.points?.generalPoints || 0}
+                    </p>
                     <Star className="w-6 h-6 text-yellow-500" />
                   </div>
                 </div>
                 <div className="bg-white p-4 rounded-lg shadow-lg">
                   <p className="text-sm text-gray-600">Lists Created</p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {lists.length}
-                  </p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow-lg">
-                  <p className="text-sm text-gray-600">Reviews</p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {userData.points?.reviewPoints || 0}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-2xl font-bold text-orange-600">{lists.length}</p>
+                    <Library className="w-6 h-6 text-orange-500" />
+                  </div>
+                  {incentiveMessage && (
+                    <p className="text-xs text-gray-500 mt-2">{incentiveMessage}</p>
+                  )}
                 </div>
               </div>
             </div>

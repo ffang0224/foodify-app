@@ -45,27 +45,27 @@ const ListsPage = () => {
   useEffect(() => {
     const fetchLists = async () => {
       if (!userData) return;
-
+  
       try {
         const response = await fetch(
           `http://localhost:8000/users/${userData.username}/lists`
         );
-
+  
         if (!response.ok) {
           throw new Error("Failed to fetch lists");
         }
-
+  
         const userLists = await response.json();
         // Process the lists with the new restaurant data structure
         const processedLists = processRestaurantData(userLists);
         setLists(processedLists);
-
+  
         // Calculate incentive message
         const numLists = processedLists.length;
-        const nextMilestone = Math.ceil((numLists + 1) / 10) * 10;
-        const points = (nextMilestone / 10) * 10;
+        const nextMilestone = Math.ceil((numLists + 1) / 10) * 10; // Next multiple of 10
+        const points = 10; // Fixed 10 points for every 10 lists created
         const firstName = userData.firstName;
-
+  
         if (numLists > 0 && numLists % 10 === 0) {
           // Update points on the server
           await fetch(
@@ -79,11 +79,11 @@ const ListsPage = () => {
             }
           );
         }
-
+  
         setIncentiveMessage(
           `Keep going, ${firstName}! Create ${nextMilestone - numLists
           } more list${nextMilestone - numLists > 1 ? "s" : ""} to reach ${nextMilestone
-          } lists and earn ${points} points.`
+          } lists and earn 10 points.`
         );
       } catch (err) {
         console.error("Error fetching lists:", err);
@@ -92,9 +92,11 @@ const ListsPage = () => {
         setLoading(false);
       }
     };
-
+  
     fetchLists();
   }, [userData]);
+  
+
 
   if (loading) {
     return (

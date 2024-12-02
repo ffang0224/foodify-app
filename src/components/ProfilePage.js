@@ -1,15 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthUser } from "../hooks/useAuthUser";
-import ListCard from "./ListCard";
-import RestaurantCard from "./IndivRestaurantCard";
-import { Edit, MapPin, Mail, User, Star } from "lucide-react";
+import RestaurantListCard from "./ListCard";
+import { Edit, MapPin, Mail, User, Star, Library, Plus } from "lucide-react";
 
 const ProfilePage = () => {
-  const { userData, loading } = useAuthUser();
+  const { userData, loading: userLoading } = useAuthUser();
   const navigate = useNavigate();
+  const [lists, setLists] = useState([]);
+  const [listsLoading, setListsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (loading) {
+  useEffect(() => {
+    const fetchLists = async () => {
+      if (!userData) return;
+
+      try {
+        const response = await fetch(
+          `http://localhost:8000/users/${userData.username}/lists`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch lists");
+        }
+
+        const userLists = await response.json();
+        setLists(userLists);
+      } catch (err) {
+        console.error("Error fetching lists:", err);
+        setError(err.message);
+      } finally {
+        setListsLoading(false);
+      }
+    };
+
+    fetchLists();
+  }, [userData]);
+
+  useEffect(() => {
+    if (!userData && !userLoading) {
+      navigate("/login");
+    }
+  }, [userData, userLoading, navigate]);
+
+  if (userLoading || listsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-lg text-gray-600">Loading profile...</div>
@@ -17,12 +51,8 @@ const ProfilePage = () => {
     );
   }
 
-  if (!userData) {
-    navigate("/login");
-    return null;
-  }
-
-  const totalPoints = Object.values(userData.points).reduce((a, b) => a + b, 0);
+  // Safe access to userData and points
+  const totalPoints = Object.values(userData?.points || {}).reduce((a, b) => a + b, 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -31,8 +61,7 @@ const ProfilePage = () => {
         <div className="bg-gradient-to-r from-orange-300 to-orange-500 rounded-lg shadow-lg p-6 mb-8">
           <div className="flex items-start gap-6">
             <div className="w-32 h-32 rounded-full bg-orange-600 flex items-center justify-center text-white text-3xl font-bold transition-transform transform hover:scale-110 duration-300 ease-in-out">
-              {userData.firstName[0]}
-              {userData.lastName[0]}
+              {userData.firstName?.[0] || ""}{userData.lastName?.[0] || ""}
             </div>
             <div className="flex-grow">
               <div className="flex justify-between items-start">
@@ -71,13 +100,13 @@ const ProfilePage = () => {
                 <div className="bg-white p-4 rounded-lg shadow-lg">
                   <p className="text-sm text-gray-600">Lists Created</p>
                   <p className="text-2xl font-bold text-orange-600">
-                    {userData.playlists.length}
+                    {lists.length}
                   </p>
                 </div>
                 <div className="bg-white p-4 rounded-lg shadow-lg">
                   <p className="text-sm text-gray-600">Reviews</p>
                   <p className="text-2xl font-bold text-orange-600">
-                    {userData.points.reviewPoints}
+                    {userData.points?.reviewPoints || 0}
                   </p>
                 </div>
               </div>
@@ -88,34 +117,44 @@ const ProfilePage = () => {
         {/* Lists Section */}
         <div className="mb-12">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Your Lists</h2>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800 hover:text-orange-500 transition-all duration-300">
+                Your Lists
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Create and manage your restaurant collections
+              </p>
+            </div>
             <button
               onClick={() => navigate("/create-playlist")}
-              className="text-orange-500 hover:text-orange-600 font-semibold"
+              className="flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-400 text-white rounded-lg hover:bg-orange-600 hover:scale-105 transition-all shadow-xl transform"
             >
+              <Plus className="w-5 h-5 mr-2" />
               Create New List
             </button>
           </div>
-          {userData.playlists.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {userData.playlists.map((list, index) => (
-                <ListCard
-                  key={list.id || index}
-                  listId={list.id}
-                  header={list.name}
-                  description={`${list.restaurants.length} restaurants`}
-                  image={list.image || "/api/placeholder/200/150"}
-                />
+
+          {error && (
+            <div className="mb-8 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-lg">
+              {error}
+            </div>
+          )}
+
+          {lists.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {lists.map((list) => (
+                <RestaurantListCard key={list.id} list={list} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <p className="text-gray-600 mb-4">
+            <div className="text-center py-12 bg-gray-50 rounded-lg shadow-md">
+              <Library className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-lg text-gray-600 mb-4">
                 You haven't created any lists yet
               </p>
               <button
                 onClick={() => navigate("/create-playlist")}
-                className="text-orange-500 hover:text-orange-600 font-semibold"
+                className="text-xl text-orange-500 hover:text-orange-600 font-semibold transition-all duration-200"
               >
                 Create Your First List
               </button>

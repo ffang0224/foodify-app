@@ -57,7 +57,7 @@ const EditPlaylist = () => {
       try {
         // Fetch list details
         const listResponse = await fetch(
-          `http://localhost:8000/users/${userData.username}/lists/${listId}`
+          `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists/${listId}`
         );
 
         if (!listResponse.ok) {
@@ -78,7 +78,7 @@ const EditPlaylist = () => {
 
         // Fetch full restaurant details
         const restaurantPromises = listData.restaurants.map(async (place_id) => {
-          const res = await fetch(`http://localhost:8000/restaurants/${place_id}`);
+          const res = await fetch(`https://foodify-backend-927138020046.us-central1.run.app/restaurants/${place_id}`);
           if (!res.ok) {
             console.error(`Failed to fetch restaurant ${place_id}:`, await res.text());
             throw new Error(`Failed to fetch restaurant ${place_id}`);
@@ -90,7 +90,7 @@ const EditPlaylist = () => {
         setSelectedRestaurants(restaurantData);
 
         // Fetch all restaurants
-        const allRestaurantsResponse = await fetch(`http://localhost:8000/restaurants`);
+        const allRestaurantsResponse = await fetch(`https://foodify-backend-927138020046.us-central1.run.app/restaurants`);
         if (!allRestaurantsResponse.ok) {
           const errorText = await allRestaurantsResponse.text();
           throw new Error(`Failed to fetch restaurants: ${errorText}`);
@@ -198,7 +198,7 @@ const EditPlaylist = () => {
 
       // Submit update
       const response = await fetch(
-        `http://localhost:8000/users/${userData.username}/lists/${listId}`,
+        `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists/${listId}`,
         {
           method: 'PUT',
           headers: {

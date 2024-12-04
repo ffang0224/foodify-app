@@ -99,7 +99,7 @@ const MapComponent = () => {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const response = await fetch("http://localhost:8000/restaurants");
+        const response = await fetch("https://foodify-backend-927138020046.us-central1.run.app/restaurants");
         if (!response.ok) throw new Error("Failed to fetch restaurants");
         const data = await response.json();
         setRestaurants(data);
@@ -258,7 +258,7 @@ const MapComponent = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/restaurant-photo/${restaurant.additional_info.gmaps.place_id}`
+        `https://foodify-backend-927138020046.us-central1.run.app/restaurant-photo/${restaurant.additional_info.gmaps.place_id}`
       );
       if (!response.ok) throw new Error("Failed to fetch photo");
       const data = await response.json();
@@ -287,7 +287,7 @@ const MapComponent = () => {
     setLoadingPlaylists(true);
     try {
       const response = await fetch(
-        `http://localhost:8000/users/${userData.username}/lists`
+        `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists`
       );
       if (!response.ok) throw new Error("Failed to fetch playlists");
       const data = await response.json();
@@ -308,7 +308,7 @@ const MapComponent = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/users/${userData.username}/lists/${listId}/restaurants/add`,
+        `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists/${listId}/restaurants/add`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

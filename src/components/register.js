@@ -38,7 +38,7 @@ const Register = () => {
     setCheckingUsername(true);
     try {
       const response = await fetch(
-        `http://localhost:8000/users/${formData.username}`
+        `https://foodify-backend-927138020046.us-central1.run.app/users/${formData.username}`
       );
       setUsernameAvailable(response.status === 404); // 404 means username is available
     } catch (error) {
@@ -122,7 +122,7 @@ const Register = () => {
       };
 
       // Create user in backend
-      const response = await fetch("http://localhost:8000/users", {
+      const response = await fetch("https://foodify-backend-927138020046.us-central1.run.app/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

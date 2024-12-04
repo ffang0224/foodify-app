@@ -90,7 +90,7 @@ const ViewPlaylist = () => {
       try {
         // Fetch list data
         const listResponse = await fetch(
-          `http://localhost:8000/users/${userData.username}/lists/${listId}`
+          `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists/${listId}`
         );
 
         if (!listResponse.ok) {
@@ -110,7 +110,7 @@ const ViewPlaylist = () => {
 
         // Fetch restaurant details for each restaurant in the list
         const restaurantPromises = listData.restaurants.map(async (place_id) => {
-          const res = await fetch(`http://localhost:8000/restaurants/${place_id}`);
+          const res = await fetch(`https://foodify-backend-927138020046.us-central1.run.app/restaurants/${place_id}`);
           if (!res.ok) {
             console.error(`Failed to fetch restaurant ${place_id}:`, await res.text());
             throw new Error(`Failed to fetch restaurant ${place_id}`);
@@ -143,7 +143,7 @@ const ViewPlaylist = () => {
         newPhotoLoading[placeId] = true;
         try {
           const response = await fetch(
-            `http://localhost:8000/restaurant-photo/${placeId}`
+            `https://foodify-backend-927138020046.us-central1.run.app/restaurant-photo/${placeId}`
           );
           if (response.ok) {
             const data = await response.json();
@@ -170,7 +170,7 @@ const ViewPlaylist = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/users/${userData.username}/lists/${listId}`,
+        `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists/${listId}`,
         {
           method: "DELETE",
         }

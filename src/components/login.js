@@ -42,7 +42,7 @@ const Login = () => {
 
       if (!loginEmail.includes("@")) {
         const userResponse = await fetch(
-          `http://localhost:8000/users/${formData.emailOrUsername}`
+          `https://foodify-backend-927138020046.us-central1.run.app/users/${formData.emailOrUsername}`
         );
 
         if (!userResponse.ok) {
@@ -60,7 +60,7 @@ const Login = () => {
       );
 
       const response = await fetch(
-        `http://localhost:8000/users/auth/${userCredential.user.uid}`
+        `https://foodify-backend-927138020046.us-central1.run.app/users/auth/${userCredential.user.uid}`
       );
 
       if (!response.ok) {

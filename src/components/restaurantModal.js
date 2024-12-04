@@ -18,7 +18,7 @@ const RestaurantDetailsModal = ({ restaurant, show, onClose }) => {
             setError(null);
             try {
                 const response = await fetch(
-                    `http://localhost:8000/restaurants/${restaurant.additional_info.gmaps.place_id}/reviews`
+                    `https://foodify-backend-927138020046.us-central1.run.app/restaurants/${restaurant.additional_info.gmaps.place_id}/reviews`
                 );
                 if (!response.ok) throw new Error('Failed to fetch reviews');
                 const data = await response.json();

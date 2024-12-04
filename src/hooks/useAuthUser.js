@@ -15,7 +15,7 @@
 
 //         if (firebaseUser) {
 //           // Get the user's Firestore data
-//           const response = await fetch(`http://localhost:8000/users/auth/${firebaseUser.uid}`);
+//           const response = await fetch(`https://foodify-backend-927138020046.us-central1.run.app/users/auth/${firebaseUser.uid}`);
 
 //           if (!response.ok) {
 //             throw new Error("Failed to fetch user data");
@@ -56,7 +56,7 @@ export const useAuthUser = () => {
       
               if (firebaseUser) {
                 // Get the user's Firestore data
-                const response = await fetch(`http://localhost:8000/users/auth/${firebaseUser.uid}`);
+                const response = await fetch(`https://foodify-backend-927138020046.us-central1.run.app/users/auth/${firebaseUser.uid}`);
       
                 if (!response.ok) {
                   throw new Error("Failed to fetch user data");

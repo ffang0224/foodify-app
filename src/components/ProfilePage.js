@@ -18,7 +18,7 @@ const ProfilePage = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/users/${userData.username}/lists`
+          `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists`
         );
 
         if (!response.ok) {

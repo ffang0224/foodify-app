@@ -18,12 +18,12 @@ const DisplayUser = () => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const response = await fetch("http://localhost:8000/users");
+        const response = await fetch("https://foodify-backend-927138020046.us-central1.run.app/users");
         if (!response.ok) throw new Error("Failed to fetch users");
         const data = await response.json();
 
         const transformedUsers = await Promise.all(data.map(async (user) => {
-          const listsResponse = await fetch(`http://localhost:8000/users/${user.username}/lists/details`);
+          const listsResponse = await fetch(`https://foodify-backend-927138020046.us-central1.run.app/users/${user.username}/lists/details`);
           const lists = await listsResponse.json();
           return {
             username: user.username,
@@ -68,7 +68,7 @@ const DisplayUser = () => {
         username: userData.username
       };
 
-      const response = await fetch(`http://localhost:8000/users/${userData.username}/lists`, {
+      const response = await fetch(`https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

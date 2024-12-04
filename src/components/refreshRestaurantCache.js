@@ -4,7 +4,7 @@ import { RefreshCw } from "lucide-react";
 const RefreshCacheButton = () => {
   const refreshCache = async () => {
     try {
-      await fetch("http://localhost:8000/admin/refresh-restaurant-cache", {
+      await fetch("https://foodify-backend-927138020046.us-central1.run.app/admin/refresh-restaurant-cache", {
         method: "POST",
       });
     } catch (error) {

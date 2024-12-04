@@ -48,7 +48,7 @@ const ListsPage = () => {
   
       try {
         const response = await fetch(
-          `http://localhost:8000/users/${userData.username}/lists`
+          `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists`
         );
   
         if (!response.ok) {
@@ -69,7 +69,7 @@ const ListsPage = () => {
         if (numLists > 0 && numLists % 10 === 0) {
           // Update points on the server
           await fetch(
-            `http://localhost:8000/users/${userData.username}/updatePoints`,
+            `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/updatePoints`,
             {
               method: "POST",
               headers: {

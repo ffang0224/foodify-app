@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -7,7 +7,28 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
-import DisplayUser from "./components/DisplayUser.js"; // Make sure the correct path to your DisplayUser component is used
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  Map, 
+  List, 
+  UtensilsCrossed, 
+  Bell, 
+  Search, 
+  Settings, 
+  HelpCircle, 
+  LogOut,
+  ChevronLeft, 
+  Plus,
+  User,
+  Home,
+} from "lucide-react";
+import { useAuthUser } from "./hooks/useAuthUser";
+import { ThemeProvider } from './contexts/ThemeContext';
+import ThemeToggle from './components/ThemeToggle';
+
+// Regular imports remain the same
+import DisplayUser from "./components/DisplayUser.js";
 import sampleRestaurantData from "./sample-data/sampleRestaurantData.js";
 import IndivRestaurantCard from "./components/IndivRestaurantCard.js";
 import Login from "./components/login.js";
@@ -15,139 +36,215 @@ import Register from "./components/register.js";
 import MapComponent from "./components/map.js";
 import ListsPage from "./components/ListsPage.js";
 import { RestaurantCollectionWithNav } from "./components/IndivPlaylist.js";
-import { ArrowLeft, ArrowRight, UtensilsCrossed } from "lucide-react";
 import CreatePlaylist from "./components/CreatePlaylist";
-import ViewPlaylist from "./components/ViewPlaylist"; // Import ViewPlaylist
-import ProfilePage from "./components/ProfilePage"; 
+import ViewPlaylist from "./components/ViewPlaylist";
+import ProfilePage from "./components/ProfilePage";
 import IconDropdown from "./components/IconDropdown";
 import SettingsPage from "./components/settings.js";
 import RefreshCacheButton from "./components/refreshRestaurantCache.js";
 import EditPlaylist from "./components/EditPlaylist";
-// Ensure to import the HelpPage
-import HelpPage from "./components/HelpPage"; 
+import HelpPage from "./components/HelpPage";
+
 const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { userData } = useAuthUser();
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate("/login");
+  };
+
   const isRestaurantPage = location.pathname.includes("/restaurant");
-  const isMapPage = location.pathname === "/map";
   const isListsPage = location.pathname === "/lists";
+  const isMapPage = location.pathname === "/map";
+
+  const mainMenuItems = [
+    { icon: Home, label: 'Home', path: '/map' },
+    { icon: List, label: 'My Lists', path: '/lists' },
+    { icon: Search, label: 'Search Foodies', path: '/DisplayUser' },
+  ];
+
+  const renderCreatePlaylist = () => {
+    if (isListsPage) {
+      return (
+        <button
+          onClick={() => navigate("/create-playlist")}
+          className="w-full flex items-center px-4 py-3 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-all duration-200"
+        >
+          <Plus className="w-5 h-5 text-orange-500 dark:text-orange-400" />
+          {isExpanded && <span className="ml-4 font-medium">Create Playlist</span>}
+        </button>
+      );
+    }
+    return null;
+  };
+
+  const renderBackNavigation = () => {
+    if (isRestaurantPage) {
+      return (
+        <button
+          onClick={() => navigate("/lists")}
+          className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+        >
+          <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          {isExpanded && <span className="ml-4 text-sm text-gray-600 dark:text-gray-300">Back to Lists</span>}
+        </button>
+      );
+    }
+    return null;
+  };
+
+  const isActivePath = (path) => location.pathname === path;
 
   return (
-    <div className="bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-          {/* Logo and Title */}
-          <div className="flex items-center hover:cursor-pointer" onClick={() => navigate("/map")}>
-            <UtensilsCrossed className="w-6 h-6 text-orange-500" />
-            <h1 className="text-2xl font-bold ml-2 text-orange-500 tracking-tight">
+    <div className="h-screen flex flex-col fixed left-0 top-0 bottom-0 z-50">
+      <div className={`flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 
+        shadow-lg transition-all duration-300 ease-in-out ${isExpanded ? 'w-64' : 'w-20'}`}>
+        
+        {/* Logo Section */}
+        <div className="p-6 flex items-center">
+          <UtensilsCrossed 
+            className={`w-8 h-8 text-orange-500 transition-transform duration-300 ${
+              isExpanded ? '' : 'rotate-180'
+            }`}
+            onClick={() => navigate("/map")}
+          />
+          {isExpanded && (
+            <h1 
+              className="text-2xl font-bold ml-3 text-gray-800 dark:text-white tracking-tight cursor-pointer"
+              onClick={() => navigate("/map")}
+            >
               Foodify
             </h1>
-          </div>
+          )}
+        </div>
 
-          {/* Navigation Controls */}
-          <div className="flex items-center space-x-4">
-            {isRestaurantPage && (
+        {/* Toggle Button */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="absolute left-64 top-6 bg-white dark:bg-gray-800 rounded-full p-1.5 transform translate-x-1/2 shadow-md hover:shadow-lg transition-all duration-300"
+        >
+          <ChevronLeft 
+            className={`w-4 h-4 text-gray-600 dark:text-gray-400 transition-transform duration-300 ${
+              isExpanded ? '' : 'rotate-180'
+            }`} 
+          />
+        </button>
+
+        {renderBackNavigation()}
+
+        {/* Main Navigation */}
+        <div className="flex-1 px-4 py-4">
+          <div className="space-y-2">
+            {mainMenuItems.map((item) => (
               <button
-                onClick={() => navigate("/lists")}
-                className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActivePath(item.path)
+                    ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
               >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                <span>Back to Lists</span>
+                <item.icon 
+                  className={`w-6 h-6 ${
+                    isActivePath(item.path) 
+                      ? 'text-orange-500 dark:text-orange-400' 
+                      : 'text-gray-500 dark:text-gray-400'
+                  }`} 
+                />
+                {isExpanded && <span className="ml-4 font-medium">{item.label}</span>}
               </button>
-            )}
-            {isListsPage && (
-              <>
-                <button
-                  onClick={() => navigate("/map")}
-                  className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
-                >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
-                  <span>Back to Map</span>
-                </button>
-                <button
-                  onClick={() => navigate("/create-playlist")}
-                  className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
-                >
-                  <span>Create Playlist</span>
-                </button>
-              </>
-            )}
-            {isMapPage && (
-              <div>
-                <button
-                  onClick={() => navigate("/lists")}
-                  className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
-                >
-                  <span>Lists</span>
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </button>
-              </div>
-            )}
+            ))}
+            {renderCreatePlaylist()}
+          </div>
+        </div>
 
-            {/* Add Search Other Foodies Section */}
-            <button
-              onClick={() => navigate("/DisplayUser")}
-              className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200 font-bold text-lg"
+        {/* Notification and Theme Section */}
+        <div className="px-4 space-y-2">
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+          >
+            <div className="relative">
+              <Bell className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+              <span className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
+            </div>
+            {isExpanded && <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">Notifications</span>}
+          </button>
+          <ThemeToggle />
+        </div>
+
+        {/* User Profile Section */}
+        <div className="border-t border-gray-100 dark:border-gray-800 p-4 mt-auto">
+          <div className="relative">
+            <button 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
             >
-              <span>Search Other Foodies</span>
+              <div className="relative">
+                <div className="w-10 h-10 rounded-full ring-2 ring-orange-500 ring-offset-2 dark:ring-offset-gray-900 bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-500 dark:text-orange-400 font-semibold text-lg">
+                  {userData?.firstName?.[0]}{userData?.lastName?.[0]}
+                </div>
+                <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-400 rounded-full border-2 border-white dark:border-gray-900" />
+              </div>
+              {isExpanded && (
+                <div className="ml-4 text-left">
+                  <p className="text-sm font-medium text-gray-800 dark:text-white">
+                    {userData?.firstName} {userData?.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    @{userData?.username}
+                  </p>
+                </div>
+              )}
             </button>
 
-            {/* User Icon and Dropdown */}
-            <div className="relative ml-4">
-              <button 
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="focus:outline-none"
-              >
-                <img 
-                  src="https://static.vecteezy.com/system/resources/thumbnails/019/896/012/small_2x/female-user-avatar-icon-in-flat-design-style-person-signs-illustration-png.png" 
-                  alt="User" 
-                  className="w-10 h-10 rounded-full"
-                />
-              </button>
-              <div 
-                className={`absolute right-0 mt-2 bg-white shadow-lg rounded-md w-48 ${isDropdownOpen ? 'block' : 'hidden'}`}
-                style={{ marginTop: '8px', zIndex: 50 }}  // Adjust margin-top and ensure dropdown is above other elements
-              >
-                <ul className="py-2 text-gray-700">
-
-                  <li>
-                    <button 
-                      onClick={() => navigate("/profile")}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:text-orange-500 transition-colors duration-200"
-                    >
-                      Profile
-                    </button>
-                  </li>
-                  <li>
-                    <button 
-                      onClick={() => navigate("/settings")}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:text-orange-500 transition-colors duration-200"
-                    >
-                      Account Settings
-                    </button>
-                  </li>
-                  {/* Move Help to the dropdown */}
-                  <li>
-                    <button 
-                      onClick={() => navigate("/help")}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:text-orange-500 transition-colors duration-200"
-                    >
-                      Help
-                    </button>
-                  </li>
-                  <li>
-                    <button 
-                      onClick={() => alert("Logging out...")} // You can handle actual logout here
-                      className="block px-4 py-2 text-sm text-red-500 hover:text-red-700 transition-colors duration-200"
-                    >
-                      Log Out
-                    </button>
-                  </li>
-                </ul>
+            {/* User Dropdown Menu */}
+            {isDropdownOpen && (
+              <div className="absolute bottom-full mb-2 left-0 w-full px-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg py-2 w-full">
+                  <button 
+                    onClick={() => {
+                      navigate("/profile");
+                      setIsDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    Profile
+                  </button>
+                  <button 
+                    onClick={() => {
+                      navigate("/settings");
+                      setIsDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    Account Settings
+                  </button>
+                  <button 
+                    onClick={() => {
+                      navigate("/help");
+                      setIsDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    Help
+                  </button>
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full flex items-center px-4 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    Log Out
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -155,11 +252,8 @@ const NavBar = () => {
   );
 };
 
-
-
-// Profile Page with navigation
 const ProfilePageWithNav = () => (
-  <div className="min-h-screen bg-gray-50">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
     <NavBar />
     <div className="max-w-7xl mx-auto px-4 py-8">
       <ProfilePage />
@@ -167,9 +261,8 @@ const ProfilePageWithNav = () => (
   </div>
 );
 
-// Map view with navigation
 const MapView = () => (
-  <div className="min-h-screen bg-gray-50">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
     <NavBar />
     <div className="max-w-7xl mx-auto px-4 py-8">
       <MapComponent />
@@ -177,9 +270,8 @@ const MapView = () => (
   </div>
 );
 
-// Lists Page with navigation
 const ListsPageWithNav = ({ userPlaylists }) => (
-  <div className="min-h-screen flex flex-col bg-gray-50">
+  <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
     <NavBar />
     <div className="flex-grow">
       <ListsPage />
@@ -189,60 +281,48 @@ const ListsPageWithNav = ({ userPlaylists }) => (
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        {/* Add HelpPage Route */}
-        <Route path="/help" element={<HelpPage />} />
-        
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        
-        {/* Pages with NavBar included */}
-        <Route path="/map" element={<MapView />} />
-        <Route path="/profile" element={<ProfilePageWithNav />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/DisplayUser" element={<DisplayUser />} />
-        <Route path="/lists/:listId/edit" element={<EditPlaylist /> } />
-
-        <Route
-          path="/lists"
-          element={<ListsPageWithNav />}
-        />
-        
-        <Route
-          path="/restaurants"
-          element={
-            <RestaurantCollectionWithNav
-              data={sampleRestaurantData}
-              NavBar={NavBar}
+    <ThemeProvider>
+      <div className="min-h-screen bg-white dark:bg-gray-900"> {/* Add root dark mode class */}
+        <Router>
+          <Routes>
+            <Route path="/help" element={<HelpPage />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/map" element={<MapView />} />
+            <Route path="/profile" element={<ProfilePageWithNav />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/DisplayUser" element={<DisplayUser />} />
+            <Route path="/lists/:listId/edit" element={<EditPlaylist />} />
+            <Route path="/lists" element={<ListsPageWithNav />} />
+            <Route
+              path="/restaurants"
+              element={
+                <RestaurantCollectionWithNav
+                  data={sampleRestaurantData}
+                  NavBar={NavBar}
+                />
+              }
             />
-          }
-        />
-        
-        <Route
-          path="/restaurant/:restaurantId"
-          element={
-            <div className="min-h-screen bg-gray-50">
-              <NavBar />
-              <div className="max-w-7xl mx-auto px-4 py-8">
-                <IndivRestaurantCard />
-              </div>
-            </div>
-          }
-        />
+            <Route
+              path="/restaurant/:restaurantId"
+              element={
+                <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                  <NavBar />
+                  <div className="max-w-7xl mx-auto px-4 py-8">
+                    <IndivRestaurantCard />
+                  </div>
+                </div>
+              }
+            />
+            <Route path="/create-playlist" element={<CreatePlaylist />} />
+            <Route path="/lists/:listId" element={<ViewPlaylist />} />
+        </Routes>
+      
+      </Router>
+    </div>
+  </ThemeProvider>
 
-        {/* Playlist routes */}
-        <Route
-          path="/create-playlist"
-          element={<CreatePlaylist />}
-        />
-        <Route
-          path="/lists/:listId"
-          element={<ViewPlaylist />}
-        />
-      </Routes>
-    </Router>
   );
 };
 

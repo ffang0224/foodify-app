@@ -115,7 +115,7 @@ const ListsPage = () => {
     const fetchPopularLists = async () => {
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/popularLists"
+          "https://foodify-backend-927138020046.us-central1.run.app/popularLists"
         );
   
         if (!response.ok) {

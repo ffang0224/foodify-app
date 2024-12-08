@@ -1,23 +1,27 @@
-// src/components/ThemeToggle.js
 import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
-const ThemeToggle = () => {  // Changed to const declaration
-  const { isDarkMode, toggleTheme } = useTheme();  // Changed from toggleDarkMode to toggleTheme
+const ThemeToggle = ({ isExpanded }) => {
+  const { isDarkMode, toggleTheme } = useTheme();
 
   return (
     <button
-      onClick={toggleTheme}  // Changed from toggleDarkMode to toggleTheme
-      className="p-2 rounded-lg transition-colors duration-200
-        dark:bg-gray-800 bg-gray-100
-        dark:hover:bg-gray-700 hover:bg-gray-200"
-      aria-label="Toggle dark mode"
+      onClick={toggleTheme}
+      className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+      title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
     >
-      {isDarkMode ? (
-        <Sun className="w-5 h-5 text-yellow-500" />
-      ) : (
-        <Moon className="w-5 h-5 text-gray-600" />
+      <div className="w-6 h-6 flex items-center justify-center">
+        {isDarkMode ? (
+          <Sun className="text-gray-500 dark:text-gray-400" />
+        ) : (
+          <Moon className="text-gray-500 dark:text-gray-400" />
+        )}
+      </div>
+      {isExpanded && (
+        <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">
+          {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+        </span>
       )}
     </button>
   );

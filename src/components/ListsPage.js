@@ -58,6 +58,7 @@ const ListsPage = () => {
         }
   
         const userLists = await response.json();
+        console.log(userLists);
   
         // Process the lists
         const processedLists = processRestaurantData(userLists);
@@ -222,7 +223,7 @@ const ListsPage = () => {
               You don't have any favorite lists yet
             </p>
             <button
-              onClick={() => navigate("/explore")}
+              onClick={() => navigate("/DisplayUser")}
               className="text-xl text-orange-500 hover:text-orange-600 font-semibold transition-all duration-200"
             >
               Explore and Add Favorites

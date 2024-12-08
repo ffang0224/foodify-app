@@ -192,29 +192,39 @@ const ViewPlaylist = () => {
   };
 
   const handleLike = async () => {
+    if (!userData) return; // Ensure user is logged in
+  
     try {
-      const username = userData.username; // Assuming you have the user's username
-      const response = await fetch(`/allLists/${listId}/like`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, unlike: false }), // Set 'unlike' to true to unlike the list
-      });
+      const response = await fetch(
+        `http://127.0.0.1:8000/lists/${listId}/like`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            username: userData.username 
+          })
+        }
+      );
   
       if (!response.ok) {
         throw new Error('Failed to like/unlike the list');
       }
   
-      const { num_likes, favorited_by } = await response.json();
-      // Update the UI with the new like count and favorited_by list
-      setNumLikes(num_likes);
-      setFavoritedBy(favorited_by);
+      const result = await response.json();
+  
+      // Update the list's like information
+      setList(prevList => ({
+        ...prevList,
+        num_likes: result.num_likes,
+        favorited_by: result.favorited_by
+      }));
     } catch (error) {
       console.error('Error liking/unliking the list:', error);
-      // Handle the error, e.g., show an error message to the user
+      // Optionally show an error message to the user
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -255,9 +265,12 @@ const ViewPlaylist = () => {
               {!isOwner && (
                 <button 
                   onClick={handleLike}
-                  className="text-gray-600 hover:text-orange-500"
+                  className={`text-gray-600 hover:text-orange-500 flex items-center space-x-1`}
                 >
-                  <Heart className="w-5 h-5" />
+                  <Heart 
+                    className={`w-5 h-5 ${list.favorited_by?.includes(userData.username) ? 'fill-red-500 text-red-500' : ''}`} 
+                  />
+                  <span>{list.num_likes}</span>
                 </button>
               )}
               {isOwner && (

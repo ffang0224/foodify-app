@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect ,useRef} from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -26,8 +26,6 @@ import {
 import { useAuthUser } from "./hooks/useAuthUser";
 import { ThemeProvider } from './contexts/ThemeContext';
 import ThemeToggle from './components/ThemeToggle';
-
-// Regular imports remain the same
 import DisplayUser from "./components/DisplayUser.js";
 import sampleRestaurantData from "./sample-data/sampleRestaurantData.js";
 import IndivRestaurantCard from "./components/IndivRestaurantCard.js";
@@ -52,6 +50,19 @@ const NavBar = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -69,125 +80,110 @@ const NavBar = () => {
     { icon: Search, label: 'Search Foodies', path: '/DisplayUser' },
   ];
 
-  const renderCreatePlaylist = () => {
-    if (isListsPage) {
-      return (
-        <button
-          onClick={() => navigate("/create-playlist")}
-          className="w-full flex items-center px-4 py-3 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-all duration-200"
-        >
-          <Plus className="w-5 h-5 text-orange-500 dark:text-orange-400" />
-          {isExpanded && <span className="ml-4 font-medium">Create Playlist</span>}
-        </button>
-      );
-    }
-    return null;
-  };
-
-  const renderBackNavigation = () => {
-    if (isRestaurantPage) {
-      return (
-        <button
-          onClick={() => navigate("/lists")}
-          className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
-        >
-          <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-          {isExpanded && <span className="ml-4 text-sm text-gray-600 dark:text-gray-300">Back to Lists</span>}
-        </button>
-      );
-    }
-    return null;
-  };
-
   const isActivePath = (path) => location.pathname === path;
 
   return (
-    <div className="h-screen flex flex-col fixed left-0 top-0 bottom-0 z-50">
-      <div className={`flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 
-        shadow-lg transition-all duration-300 ease-in-out ${isExpanded ? 'w-64' : 'w-20'}`}>
-        
-        {/* Logo Section */}
-        <div className="p-6 flex items-center">
-          <UtensilsCrossed 
-            className={`w-8 h-8 text-orange-500 transition-transform duration-300 ${
-              isExpanded ? '' : 'rotate-180'
-            }`}
+    <aside className="h-screen flex flex-col fixed left-0 top-0 bottom-0 z-40">
+      <div
+        className={`relative flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 
+          shadow-xl transition-all duration-300 ease-in-out ${isExpanded ? 'w-64' : 'w-20'}`}
+      >
+        {/* Logo */}
+        <div className="p-6 flex items-center justify-between">
+          <button
+            className="flex items-center space-x-3 focus:outline-none"
             onClick={() => navigate("/map")}
-          />
-          {isExpanded && (
-            <h1 
-              className="text-2xl font-bold ml-3 text-gray-800 dark:text-white tracking-tight cursor-pointer"
-              onClick={() => navigate("/map")}
-            >
-              Foodify
-            </h1>
-          )}
+          >
+            <UtensilsCrossed className="w-8 h-8 text-orange-500 shrink-0" />
+            {isExpanded && (
+              <span className="text-2xl font-bold text-gray-800 dark:text-white tracking-tight">
+                Foodify
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Toggle Button */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="absolute left-64 top-6 bg-white dark:bg-gray-800 rounded-full p-1.5 transform translate-x-1/2 shadow-md hover:shadow-lg transition-all duration-300"
+          className="absolute -right-3 top-8 bg-white dark:bg-gray-800 rounded-full p-1.5 shadow-md hover:shadow-lg transition-all duration-300 z-50"
         >
-          <ChevronLeft 
-            className={`w-4 h-4 text-gray-600 dark:text-gray-400 transition-transform duration-300 ${
-              isExpanded ? '' : 'rotate-180'
-            }`} 
+          <ChevronLeft
+            className={`w-4 h-4 text-gray-600 dark:text-gray-400 transition-transform duration-300 ${isExpanded ? '' : 'rotate-180'
+              }`}
           />
         </button>
 
-        {renderBackNavigation()}
+        {/* Back Navigation for Restaurant Pages */}
+        {isRestaurantPage && (
+          <button
+            onClick={() => navigate("/lists")}
+            className="mx-4 mb-2 flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+          >
+            <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            {isExpanded && <span className="ml-4 text-sm text-gray-600 dark:text-gray-300">Back to Lists</span>}
+          </button>
+        )}
 
         {/* Main Navigation */}
-        <div className="flex-1 px-4 py-4">
+        <nav className="flex-1 px-4 py-4 overflow-y-auto">
           <div className="space-y-2">
             {mainMenuItems.map((item) => (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
-                  isActivePath(item.path)
+                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${isActivePath(item.path)
                     ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
-                }`}
+                  }`}
               >
-                <item.icon 
-                  className={`w-6 h-6 ${
-                    isActivePath(item.path) 
-                      ? 'text-orange-500 dark:text-orange-400' 
+                <item.icon
+                  className={`w-6 h-6 ${isActivePath(item.path)
+                      ? 'text-orange-500 dark:text-orange-400'
                       : 'text-gray-500 dark:text-gray-400'
-                  }`} 
+                    }`}
                 />
                 {isExpanded && <span className="ml-4 font-medium">{item.label}</span>}
               </button>
             ))}
-            {renderCreatePlaylist()}
+
+            {/* Create Playlist Button */}
+            {isListsPage && (
+              <button
+                onClick={() => navigate("/create-playlist")}
+                className="w-full flex items-center px-4 py-3 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-all duration-200"
+              >
+                <Plus className="w-5 h-5 text-orange-500 dark:text-orange-400" />
+                {isExpanded && <span className="ml-4 font-medium">Create Playlist</span>}
+              </button>
+            )}
           </div>
-        </div>
+        </nav>
 
-        {/* Notification and Theme Section */}
-        <div className="px-4 space-y-2">
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
-          >
-            <div className="relative">
-              <Bell className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-              <span className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
-            </div>
-            {isExpanded && <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">Notifications</span>}
-          </button>
-          <ThemeToggle />
-        </div>
-
-        {/* User Profile Section */}
-        <div className="border-t border-gray-100 dark:border-gray-800 p-4 mt-auto">
-          <div className="relative">
-            <button 
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        {/* Footer Section */}
+        <div className="p-4 space-y-4">
+          {/* Notifications & Theme */}
+          <div className="space-y-2">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
               className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
             >
               <div className="relative">
+                <Bell className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                <span className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
+              </div>
+              {isExpanded && <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">Notifications (In Progress!)</span>}
+            </button>
+            <ThemeToggle />
+          </div>
+
+          {/* User Profile */}
+          <div className="relative border-t border-gray-100 dark:border-gray-800 pt-4" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+            >
+              <div className="relative flex-shrink-0">
                 <div className="w-10 h-10 rounded-full ring-2 ring-orange-500 ring-offset-2 dark:ring-offset-gray-900 bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-500 dark:text-orange-400 font-semibold text-lg">
                   {userData?.firstName?.[0]}{userData?.lastName?.[0]}
                 </div>
@@ -195,50 +191,39 @@ const NavBar = () => {
               </div>
               {isExpanded && (
                 <div className="ml-4 text-left">
-                  <p className="text-sm font-medium text-gray-800 dark:text-white">
+                  <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
                     {userData?.firstName} {userData?.lastName}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                     @{userData?.username}
                   </p>
                 </div>
               )}
             </button>
 
-            {/* User Dropdown Menu */}
+            {/* Dropdown Menu */}
             {isDropdownOpen && (
-              <div className="absolute bottom-full mb-2 left-0 w-full px-4">
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg py-2 w-full">
-                  <button 
-                    onClick={() => {
-                      navigate("/profile");
-                      setIsDropdownOpen(false);
-                    }}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Profile
-                  </button>
-                  <button 
-                    onClick={() => {
-                      navigate("/settings");
-                      setIsDropdownOpen(false);
-                    }}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Account Settings
-                  </button>
-                  <button 
-                    onClick={() => {
-                      navigate("/help");
-                      setIsDropdownOpen(false);
-                    }}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Help
-                  </button>
-                  <button 
+              <div className="absolute bottom-full left-0 w-full p-4 mb-2">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 py-1">
+                  {[
+                    { label: 'Profile', path: '/profile' },
+                    { label: 'Account Settings', path: '/settings' },
+                    { label: 'Help', path: '/help' },
+                  ].map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => {
+                        navigate(item.path);
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                  <button
                     onClick={handleLogout}
-                    className="w-full flex items-center px-4 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    className="w-full px-4 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150"
                   >
                     Log Out
                   </button>
@@ -248,10 +233,9 @@ const NavBar = () => {
           </div>
         </div>
       </div>
-    </div>
+    </aside>
   );
 };
-
 const ProfilePageWithNav = () => (
   <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
     <NavBar />

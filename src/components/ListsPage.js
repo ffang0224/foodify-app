@@ -8,6 +8,8 @@ const ListsPage = () => {
   const navigate = useNavigate();
   const { userData } = useAuthUser();
   const [lists, setLists] = useState([]);
+  const [favoriteLists, setFavoriteLists] = useState([]);
+  const [popularLists, setPopularLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [incentiveMessage, setIncentiveMessage] = useState("");
@@ -56,12 +58,23 @@ const ListsPage = () => {
         }
   
         const userLists = await response.json();
-        // Process the lists with the new restaurant data structure
-        const processedLists = processRestaurantData(userLists);
-        setLists(processedLists);
   
-        // Calculate incentive message
-        const numLists = processedLists.length;
+        // Process the lists
+        const processedLists = processRestaurantData(userLists);
+  
+        // Separate lists into "Your Lists" and "Favorite Lists"
+        const userCreatedLists = processedLists.filter(
+          (list) => list.author === userData.username
+        );
+        const favoriteLists = processedLists.filter(
+          (list) => list.author !== userData.username
+        );
+  
+        setLists(userCreatedLists); // Your Lists
+        setFavoriteLists(favoriteLists); // Favorite Lists
+  
+        // Calculate incentive message for "Your Lists"
+        const numLists = userCreatedLists.length;
         const nextMilestone = Math.ceil((numLists + 1) / 10) * 10; // Next multiple of 10
         const points = 10; // Fixed 10 points for every 10 lists created
         const firstName = userData.firstName;
@@ -81,9 +94,11 @@ const ListsPage = () => {
         }
   
         setIncentiveMessage(
-          `Keep going, ${firstName}! Create ${nextMilestone - numLists
-          } more list${nextMilestone - numLists > 1 ? "s" : ""} to reach ${nextMilestone
-          } lists and earn 10 points.`
+          `Keep going, ${firstName}! Create ${
+            nextMilestone - numLists
+          } more list${
+            nextMilestone - numLists > 1 ? "s" : ""
+          } to reach ${nextMilestone} lists and earn 10 points.`
         );
       } catch (err) {
         console.error("Error fetching lists:", err);
@@ -96,8 +111,27 @@ const ListsPage = () => {
     fetchLists();
   }, [userData]);
   
-
-
+  useEffect(() => {
+    const fetchPopularLists = async () => {
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:8000/popularLists"
+        );
+  
+        if (!response.ok) {
+          throw new Error("Failed to fetch popular lists");
+        }
+  
+        const popular = await response.json();
+        setPopularLists(popular);
+      } catch (err) {
+        console.error("Error fetching popular lists:", err);
+      }
+    };
+  
+    fetchPopularLists();
+  }, []);
+  
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto p-8 flex items-center justify-center min-h-[50vh]">
@@ -129,7 +163,7 @@ const ListsPage = () => {
       <section className="mb-12">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-3xl font-bold text-gray-800 hover:text-orange-500 transition-all duration-300">
+            <h2 className="text-3xl font-bold text-orange-500">
               Your Lists
             </h2>
             <p className="text-sm text-gray-600 mt-1">
@@ -166,6 +200,61 @@ const ListsPage = () => {
           </div>
         )}
       </section>
+
+      <section className="mb-12">
+        <h2 className="text-3xl font-bold text-orange-500">
+          Favorite Lists
+        </h2>
+        <p className="text-sm text-gray-600 mt-1">
+          Browse and revisit your favorite collections
+        </p>
+
+        {favoriteLists.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {favoriteLists.map((list) => (
+              <RestaurantListCard key={list.id} list={list} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-gray-50 rounded-lg shadow-md">
+            <Library className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-lg text-gray-600 mb-4">
+              You don't have any favorite lists yet
+            </p>
+            <button
+              onClick={() => navigate("/explore")}
+              className="text-xl text-orange-500 hover:text-orange-600 font-semibold transition-all duration-200"
+            >
+              Explore and Add Favorites
+            </button>
+          </div>
+        )}
+      </section>
+
+      <section className="mb-12">
+        <h2 className="text-3xl font-bold text-orange-500">
+          Popular Lists
+        </h2>
+        <p className="text-sm text-gray-600 mt-1">
+          Check out the most liked restaurant collections
+        </p>
+
+        {popularLists.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {popularLists.map((list) => (
+              <RestaurantListCard key={list.id} list={list} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-gray-50 rounded-lg shadow-md">
+            <Library className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-lg text-gray-600 mb-4">
+              No popular lists available yet.
+            </p>
+          </div>
+        )}
+      </section>
+
     </div>
   );
 };

@@ -26,6 +26,8 @@ const ViewPlaylist = () => {
   const [isOwner, setIsOwner] = useState(false);
   const [photoUrls, setPhotoUrls] = useState({});
   const [photoLoading, setPhotoLoading] = useState({});
+  const [numLikes, setNumLikes] = useState({});
+  const [favoritedBy, setFavoritedBy] = useState({});
 
   // Helper functions for the new data structure
   const getRestaurantName = (restaurant) => {
@@ -89,8 +91,12 @@ const ViewPlaylist = () => {
 
       try {
         // Fetch list data
+        // const listResponse = await fetch(
+        //   `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists/${listId}`
+        // );
+
         const listResponse = await fetch(
-          `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists/${listId}`
+          `http://127.0.0.1:8000/allLists/${listId}`
         );
 
         if (!listResponse.ok) {
@@ -100,6 +106,7 @@ const ViewPlaylist = () => {
         }
 
         const listData = await listResponse.json();
+        console.log(listData);
         setList(listData);
         setIsOwner(listData.username === userData.username);
 
@@ -184,6 +191,31 @@ const ViewPlaylist = () => {
     }
   };
 
+  const handleLike = async () => {
+    try {
+      const username = userData.username; // Assuming you have the user's username
+      const response = await fetch(`/allLists/${listId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, unlike: false }), // Set 'unlike' to true to unlike the list
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to like/unlike the list');
+      }
+  
+      const { num_likes, favorited_by } = await response.json();
+      // Update the UI with the new like count and favorited_by list
+      setNumLikes(num_likes);
+      setFavoritedBy(favorited_by);
+    } catch (error) {
+      console.error('Error liking/unliking the list:', error);
+      // Handle the error, e.g., show an error message to the user
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -221,7 +253,10 @@ const ViewPlaylist = () => {
                 <Share2 className="w-5 h-5" />
               </button>
               {!isOwner && (
-                <button className="text-gray-600 hover:text-orange-500">
+                <button 
+                  onClick={handleLike}
+                  className="text-gray-600 hover:text-orange-500"
+                >
                   <Heart className="w-5 h-5" />
                 </button>
               )}
@@ -262,6 +297,8 @@ const ViewPlaylist = () => {
             <span>Created by @{list.author}</span>
             <span className="mx-2">•</span>
             <span>{restaurants.length} restaurants</span>
+            <span className="mx-2">•</span>
+            <span>{list.num_likes} likes</span>
           </div>
         </div>
 

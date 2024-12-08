@@ -55,6 +55,7 @@ const MapComponent = () => {
   const [loadingPlaylists, setLoadingPlaylists] = useState(false);
   const [messageModal, setMessageModal] = useState({
     show: false,
+    title: "",
     message: "",
   });
   const [showDetailedModal, setShowDetailedModal] = useState(false);
@@ -99,16 +100,18 @@ const MapComponent = () => {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const response = await fetch("https://foodify-backend-927138020046.us-central1.run.app/restaurants");
+        const response = await fetch(
+          "https://foodify-backend-927138020046.us-central1.run.app/restaurants"
+        );
         if (!response.ok) throw new Error("Failed to fetch restaurants");
         const data = await response.json();
         setRestaurants(data);
 
         // Extract unique cuisines for filter options
         const cuisines = new Set();
-        data.forEach(restaurant => {
+        data.forEach((restaurant) => {
           if (restaurant.types?.gmaps) {
-            restaurant.types.gmaps.forEach(type => cuisines.add(type));
+            restaurant.types.gmaps.forEach((type) => cuisines.add(type));
           }
         });
         setCuisineOptions(Array.from(cuisines));
@@ -132,35 +135,37 @@ const MapComponent = () => {
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(restaurant =>
+      filtered = filtered.filter((restaurant) =>
         restaurant.name.gmaps.toLowerCase().includes(query)
       );
     }
 
     // Apply rating filter
     if (filters.minRating > 0) {
-      filtered = filtered.filter(restaurant =>
-        restaurant.ratings?.gmaps?.rating >= filters.minRating
+      filtered = filtered.filter(
+        (restaurant) => restaurant.ratings?.gmaps?.rating >= filters.minRating
       );
     }
 
     // Apply price filter
     if (filters.priceLevel.length) {
-      filtered = filtered.filter(restaurant =>
-        filters.priceLevel.includes(restaurant.price_level?.gmaps?.normalized || 0)
+      filtered = filtered.filter((restaurant) =>
+        filters.priceLevel.includes(
+          restaurant.price_level?.gmaps?.normalized || 0
+        )
       );
     }
 
     // Apply cuisine filter
     if (filters.cuisine.length) {
-      filtered = filtered.filter(restaurant =>
-        restaurant.types?.gmaps?.some(type => filters.cuisine.includes(type))
+      filtered = filtered.filter((restaurant) =>
+        restaurant.types?.gmaps?.some((type) => filters.cuisine.includes(type))
       );
     }
 
     // Apply radius filter from map center
     if (filters.radius) {
-      filtered = filtered.filter(restaurant => {
+      filtered = filtered.filter((restaurant) => {
         const distance = getDistance(
           mapCenter.lat,
           mapCenter.lng,
@@ -194,14 +199,14 @@ const MapComponent = () => {
   // Utility functions
   const getDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371e3; // Earth's radius in meters
-    const φ1 = lat1 * Math.PI / 180;
-    const φ2 = lat2 * Math.PI / 180;
-    const Δφ = (lat2 - lat1) * Math.PI / 180;
-    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) *
-      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
@@ -215,7 +220,8 @@ const MapComponent = () => {
   };
 
   const getPriceLevel = (priceObj) => {
-    if (!priceObj || !priceObj.gmaps || !priceObj.gmaps.normalized) return "N/A";
+    if (!priceObj || !priceObj.gmaps || !priceObj.gmaps.normalized)
+      return "N/A";
     const level = priceObj.gmaps.normalized;
     return "$".repeat(level);
   };
@@ -227,7 +233,7 @@ const MapComponent = () => {
       return restaurant.location.address;
     }
     if (restaurant.location.gmaps) {
-      if (typeof restaurant.location.gmaps.address === 'string') {
+      if (typeof restaurant.location.gmaps.address === "string") {
         return restaurant.location.gmaps.address;
       }
       return `${restaurant.location.gmaps.lat}, ${restaurant.location.gmaps.lng}`;
@@ -237,8 +243,10 @@ const MapComponent = () => {
       return [
         yelpAddr.address1,
         yelpAddr.address2,
-        `${yelpAddr.city}, ${yelpAddr.state} ${yelpAddr.zip_code}`
-      ].filter(Boolean).join(", ");
+        `${yelpAddr.city}, ${yelpAddr.state} ${yelpAddr.zip_code}`,
+      ]
+        .filter(Boolean)
+        .join(", ");
     }
     return "Address not available";
   };
@@ -248,12 +256,12 @@ const MapComponent = () => {
     const location = {
       lat: restaurant.location.gmaps.lat,
       lng: restaurant.location.gmaps.lng,
-      address: restaurant.location.gmaps.address
+      address: restaurant.location.gmaps.address,
     };
 
     setSelectedRestaurant({
       ...restaurant,
-      location
+      location,
     });
 
     try {
@@ -265,13 +273,13 @@ const MapComponent = () => {
 
       setSelectedRestaurant((prev) => ({
         ...prev,
-        image: data.photo_url || "/api/placeholder/400/320"
+        image: data.photo_url || "/api/placeholder/400/320",
       }));
     } catch (err) {
       console.error("Error fetching restaurant photo:", err.message);
       setSelectedRestaurant((prev) => ({
         ...prev,
-        image: "/api/placeholder/400/320"
+        image: "/api/placeholder/400/320",
       }));
     }
 
@@ -300,7 +308,7 @@ const MapComponent = () => {
   };
   const truncateText = (text, maxLength = 20) => {
     if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
+    return text.substring(0, maxLength) + "...";
   };
 
   const handleAddToPlaylist = async (listId) => {
@@ -313,19 +321,21 @@ const MapComponent = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            place_id: selectedRestaurant.additional_info.gmaps.place_id
+            place_id: selectedRestaurant.additional_info.gmaps.place_id,
           }),
         }
       );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.detail || "Failed to add restaurant to playlist.");
+        throw new Error(
+          error.detail || "Failed to add restaurant to playlist."
+        );
       }
 
-      const data = await response.json();
       setMessageModal({
         show: true,
+        title: `Restaurant Added!`,
         message: `"${selectedRestaurant.name.gmaps}" has been added to the playlist!`,
       });
 
@@ -334,6 +344,7 @@ const MapComponent = () => {
       console.error("Error adding to playlist:", err);
       setMessageModal({
         show: true,
+        title: "Oops!",
         message: "Failed to add the restaurant. Please try again.",
       });
     }
@@ -384,7 +395,9 @@ const MapComponent = () => {
       <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
         <MapIcon className="w-12 h-12 text-red-500 mb-4" />
         <p className="text-red-500 font-semibold">Error loading maps</p>
-        <p className="text-gray-600 mt-2">Please check your internet connection</p>
+        <p className="text-gray-600 mt-2">
+          Please check your internet connection
+        </p>
       </div>
     );
   }
@@ -457,7 +470,8 @@ const MapComponent = () => {
           }}
           label={{
             text: "NYU",
-            className: "bg-white mt-16 px-2 py-1 rounded-md shadow-sm text-gray-600 font-bold",
+            className:
+              "bg-white mt-16 px-2 py-1 rounded-md shadow-sm text-gray-600 font-bold",
             fontSize: "12px",
             anchor: new window.google.maps.Point(20, -10),
           }}
@@ -475,7 +489,8 @@ const MapComponent = () => {
             }}
             label={{
               text: "You",
-              className: "bg-white mt-16 px-2 py-1 rounded-md shadow-sm text-blue-500 font-bold",
+              className:
+                "bg-white mt-16 px-2 py-1 rounded-md shadow-sm text-blue-500 font-bold",
               fontSize: "12px",
               anchor: new window.google.maps.Point(20, -10),
             }}
@@ -501,7 +516,8 @@ const MapComponent = () => {
               }}
               label={{
                 text: truncateText(restaurant.name.gmaps),
-                className: "bg-white mt-16 px-2 py-1 rounded-md shadow-sm text-gray-800 font-medium",
+                className:
+                  "bg-white mt-16 px-2 py-1 rounded-md shadow-sm text-gray-800 font-medium",
                 fontSize: "15px",
                 anchor: new window.google.maps.Point(20, -10),
               }}
@@ -530,7 +546,9 @@ const MapComponent = () => {
               <div
                 className="h-32 mb-4 bg-gray-200 rounded-lg bg-cover bg-center"
                 style={{
-                  backgroundImage: `url(${selectedRestaurant.image || '/api/placeholder/400/320'})`
+                  backgroundImage: `url(${
+                    selectedRestaurant.image || "/api/placeholder/400/320"
+                  })`,
                 }}
               />
 
@@ -543,7 +561,7 @@ const MapComponent = () => {
                 <div className="flex items-center">
                   <Star className="w-4 h-4 text-yellow-500 mr-1" />
                   <span className="font-medium">
-                    {selectedRestaurant.ratings?.gmaps?.rating || 'N/A'}
+                    {selectedRestaurant.ratings?.gmaps?.rating || "N/A"}
                   </span>
                   <span className="text-gray-500 ml-1">
                     ({selectedRestaurant.ratings?.gmaps?.total_ratings || 0})
@@ -556,14 +574,16 @@ const MapComponent = () => {
               </div>
 
               <div className="flex flex-wrap gap-2 mb-3">
-                {(selectedRestaurant.types?.gmaps || []).slice(0, 3).map((type, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-1 bg-gray-100 rounded-full text-sm text-gray-600"
-                  >
-                    {type.replace(/_/g, " ")}
-                  </span>
-                ))}
+                {(selectedRestaurant.types?.gmaps || [])
+                  .slice(0, 3)
+                  .map((type, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-gray-100 rounded-full text-sm text-gray-600"
+                    >
+                      {type.replace(/_/g, " ")}
+                    </span>
+                  ))}
               </div>
               <button
                 onClick={() => {
@@ -591,11 +611,20 @@ const MapComponent = () => {
       {/* Stats Panel */}
       <div className="absolute bottom-20 left-10 bg-white p-4 rounded-lg shadow-lg">
         <h3 className="font-semibold mb-2">Statistics</h3>
-        <p>Showing: {filteredRestaurants.length} of {restaurants.length} restaurants</p>
-        <p>Average Rating: {
-          (filteredRestaurants.reduce((acc, r) => acc + (r.ratings?.gmaps?.rating || 0), 0) /
-            filteredRestaurants.length || 0).toFixed(1)
-        } ⭐</p>
+        <p>
+          Showing: {filteredRestaurants.length} of {restaurants.length}{" "}
+          restaurants
+        </p>
+        <p>
+          Average Rating:{" "}
+          {(
+            filteredRestaurants.reduce(
+              (acc, r) => acc + (r.ratings?.gmaps?.rating || 0),
+              0
+            ) / filteredRestaurants.length || 0
+          ).toFixed(1)}{" "}
+          ⭐
+        </p>
       </div>
 
       {/* Legend */}
@@ -627,8 +656,11 @@ const MapComponent = () => {
 
       <MessageWindow
         show={messageModal.show}
+        title={messageModal.title}
         message={messageModal.message}
-        onClose={() => setMessageModal({ show: false, message: "" })}
+        onClose={() =>
+          setMessageModal({ show: false, title: null, message: "" })
+        }
       />
       <RestaurantDetailsModal
         show={showDetailedModal}
@@ -639,12 +671,7 @@ const MapComponent = () => {
   );
 };
 
-const FilterPanel = ({
-  filters,
-  setFilters,
-  cuisineOptions,
-  onClose
-}) => (
+const FilterPanel = ({ filters, setFilters, cuisineOptions, onClose }) => (
   <div className="absolute top-20 left-4 bg-white p-4 rounded-lg shadow-lg max-w-xs w-full z-20">
     <div className="flex justify-between items-center mb-4">
       <h3 className="font-semibold">Filters</h3>
@@ -662,7 +689,12 @@ const FilterPanel = ({
           max="5"
           step="0.5"
           value={filters.minRating}
-          onChange={(e) => setFilters(prev => ({ ...prev, minRating: parseFloat(e.target.value) }))}
+          onChange={(e) =>
+            setFilters((prev) => ({
+              ...prev,
+              minRating: parseFloat(e.target.value),
+            }))
+          }
           className="w-full"
         />
         <span className="text-sm">{filters.minRating} stars</span>
@@ -671,23 +703,24 @@ const FilterPanel = ({
       <div>
         <label className="block text-sm font-medium mb-1">Price Level</label>
         <div className="flex gap-2">
-          {[1, 2, 3, 4].map(price => (
+          {[1, 2, 3, 4].map((price) => (
             <button
               key={price}
               onClick={() => {
-                setFilters(prev => ({
+                setFilters((prev) => ({
                   ...prev,
                   priceLevel: prev.priceLevel.includes(price)
-                    ? prev.priceLevel.filter(p => p !== price)
-                    : [...prev.priceLevel, price]
+                    ? prev.priceLevel.filter((p) => p !== price)
+                    : [...prev.priceLevel, price],
                 }));
               }}
-              className={`px-3 py-1 rounded ${filters.priceLevel.includes(price)
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-gray-200'
-                }`}
+              className={`px-3 py-1 rounded ${
+                filters.priceLevel.includes(price)
+                  ? "bg-orange-500 text-white"
+                  : "bg-gray-200"
+              }`}
             >
-              {'$'.repeat(price)}
+              {"$".repeat(price)}
             </button>
           ))}
         </div>
@@ -697,7 +730,12 @@ const FilterPanel = ({
         <label className="block text-sm font-medium mb-1">Search Radius</label>
         <select
           value={filters.radius}
-          onChange={(e) => setFilters(prev => ({ ...prev, radius: parseInt(e.target.value) }))}
+          onChange={(e) =>
+            setFilters((prev) => ({
+              ...prev,
+              radius: parseInt(e.target.value),
+            }))
+          }
           className="w-full p-2 border rounded"
         >
           <option value={500}>500m</option>
@@ -710,33 +748,35 @@ const FilterPanel = ({
       <div>
         <label className="block text-sm font-medium mb-1">Cuisine Types</label>
         <div className="max-h-40 overflow-y-auto">
-          {cuisineOptions.map(cuisine => (
+          {cuisineOptions.map((cuisine) => (
             <label key={cuisine} className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={filters.cuisine.includes(cuisine)}
                 onChange={() => {
-                  setFilters(prev => ({
+                  setFilters((prev) => ({
                     ...prev,
                     cuisine: prev.cuisine.includes(cuisine)
-                      ? prev.cuisine.filter(c => c !== cuisine)
-                      : [...prev.cuisine, cuisine]
+                      ? prev.cuisine.filter((c) => c !== cuisine)
+                      : [...prev.cuisine, cuisine],
                   }));
                 }}
               />
-              <span className="text-sm">{cuisine.replace(/_/g, ' ')}</span>
+              <span className="text-sm">{cuisine.replace(/_/g, " ")}</span>
             </label>
           ))}
         </div>
       </div>
 
       <button
-        onClick={() => setFilters({
-          minRating: 0,
-          priceLevel: [],
-          cuisine: [],
-          radius: 1000,
-        })}
+        onClick={() =>
+          setFilters({
+            minRating: 0,
+            priceLevel: [],
+            cuisine: [],
+            radius: 1000,
+          })
+        }
         className="w-full bg-gray-200 py-2 rounded hover:bg-gray-300"
       >
         Reset Filters

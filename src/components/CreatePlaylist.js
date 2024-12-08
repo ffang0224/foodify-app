@@ -225,7 +225,7 @@ const CreatePlaylist = () => {
       };
 
       const allListsResponse = await fetch(
-        `http://127.0.0.1:8000/allLists`,
+        `https://foodify-backend-927138020046.us-central1.run.app/allLists`,
         {
           method: "POST",
           headers: {

@@ -96,7 +96,7 @@ const ViewPlaylist = () => {
         // );
 
         const listResponse = await fetch(
-          `http://127.0.0.1:8000/allLists/${listId}`
+          `https://foodify-backend-927138020046.us-central1.run.app/allLists/${listId}`
         );
 
         if (!listResponse.ok) {

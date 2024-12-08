@@ -183,23 +183,17 @@ const CreatePlaylist = () => {
     setError("");
 
     try {
-      if (!userData) {
-        throw new Error("You must be logged in to create a list");
-      }
-
       const listData = {
         name: formData.name,
         description: formData.description,
         restaurants: selectedRestaurants.map((r) => getPlaceId(r)),
         color: selectedColor,
         author: userData.username,
-        username: userData.username,
-        createdAt: new Date().toISOString(),
+        username: userData.username
       };
 
-      // First POST request to user-specific lists
-      const userListResponse = await fetch(
-      `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists`,
+      const response = await fetch(
+        `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists`,
         {
           method: "POST",
           headers: {
@@ -209,34 +203,8 @@ const CreatePlaylist = () => {
         }
       );
 
-      if (!userListResponse.ok) {
-        throw new Error("Failed to create list in user lists");
-      }
-
-      // Parse the response to get the list ID or details
-      const createdList = await userListResponse.json();
-
-      // Second POST request to allLists with additional fields
-      const allListsData = {
-        ...listData,
-        num_likes: 0, // Initialize likes to 0
-        favorited_by: [], // Initialize as an empty array of users who favorited the list
-        id: createdList.id // Ensure the same ID is used across both endpoints
-      };
-
-      const allListsResponse = await fetch(
-        `https://foodify-backend-927138020046.us-central1.run.app/allLists`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(allListsData),
-        }
-      );
-
-      if (!allListsResponse.ok) {
-        throw new Error("Failed to create list in all lists");
+      if (!response.ok) {
+        throw new Error("Failed to create list");
       }
 
       navigate("/lists");

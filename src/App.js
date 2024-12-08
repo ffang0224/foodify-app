@@ -196,7 +196,7 @@ const NavBar = () => {
 
           {/* Achievements Button */}
           <button
-            onClick={() => navigate("/achievements")}
+            // onClick={() => navigate("/achievements")}
             className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
           >
             <Trophy className="w-6 h-6 text-gray-500 dark:text-gray-400" />

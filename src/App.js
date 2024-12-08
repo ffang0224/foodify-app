@@ -174,7 +174,7 @@ const NavBar = () => {
               </div>
               {isExpanded && <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">Notifications (In Progress!)</span>}
             </button>
-            <ThemeToggle />
+            <ThemeToggle isExpanded={isExpanded}/>
           </div>
 
           {/* User Profile */}

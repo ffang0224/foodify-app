@@ -65,10 +65,11 @@ const ListsPage = () => {
   
         // Separate lists into "Your Lists" and "Favorite Lists"
         const userCreatedLists = processedLists.filter(
-          (list) => list.author === userData.username
+          (list) => list.author === userData.username && !list.is_favorite
         );
         const favoriteLists = processedLists.filter(
-          (list) => list.author !== userData.username
+          (list) => (list.is_favorite || list.author !== userData.username) && 
+                  list.author !== userData.username
         );
   
         setLists(userCreatedLists); // Your Lists

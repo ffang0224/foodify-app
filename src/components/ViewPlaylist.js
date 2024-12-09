@@ -257,39 +257,6 @@ const ViewPlaylist = () => {
               <ArrowLeft className="w-5 h-5 mr-2" />
               <span>Back to Lists</span>
             </button>
-
-            <div className="flex items-center space-x-4">
-              <button className="text-gray-600 hover:text-orange-500">
-                <Share2 className="w-5 h-5" />
-              </button>
-              {!isOwner && (
-                <button 
-                  onClick={handleLike}
-                  className={`text-gray-600 hover:text-orange-500 flex items-center space-x-1`}
-                >
-                  <Heart 
-                    className={`w-5 h-5 ${list.favorited_by?.includes(userData.username) ? 'fill-red-500 text-red-500' : ''}`} 
-                  />
-                  <span>{list.num_likes}</span>
-                </button>
-              )}
-              {isOwner && (
-                <>
-                  <button
-                    onClick={() => navigate(`/lists/${listId}/edit`)}
-                    className="text-gray-600 hover:text-orange-500"
-                  >
-                    <Edit2 className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </>
-              )}
-            </div>
           </div>
         </div>
       </div>
@@ -302,16 +269,55 @@ const ViewPlaylist = () => {
         )}
 
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">{list.name}</h2>
-          {list.description && (
-            <p className="text-gray-600 mb-4">{list.description}</p>
-          )}
-          <div className="flex items-center text-sm text-gray-500">
-            <span>Created by @{list.author}</span>
-            <span className="mx-2">•</span>
-            <span>{restaurants.length} restaurants</span>
-            <span className="mx-2">•</span>
-            <span>{list.num_likes} likes</span>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">{list.name}</h2>
+              {list.description && (
+                <p className="text-gray-600 mb-4">{list.description}</p>
+              )}
+              <div className="flex items-center text-sm text-gray-500">
+                <span>Created by @{list.author}</span>
+                <span className="mx-2">•</span>
+                <span>{restaurants.length} restaurants</span>
+                <span className="mx-2">•</span>
+                <span>{list.num_likes} likes</span>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button className="text-gray-600 hover:text-orange-500 tooltip" data-tooltip="Share List">
+                <Share2 className="w-5 h-5" />
+              </button>
+              {!isOwner && (
+                <button 
+                  onClick={handleLike}
+                  className={`text-gray-600 hover:text-orange-500 flex items-center space-x-1 tooltip`}
+                  data-tooltip="Like List"
+                >
+                  <Heart 
+                    className={`w-5 h-5 ${list.favorited_by?.includes(userData.username) ? 'fill-red-500 text-red-500' : ''}`} 
+                  />
+                  <span>{list.num_likes}</span>
+                </button>
+              )}
+              {isOwner && (
+                <>
+                  <button
+                    onClick={() => navigate(`/lists/${listId}/edit`)}
+                    className="text-gray-600 hover:text-orange-500 tooltip"
+                    data-tooltip="Edit List"
+                  >
+                    <Edit2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="text-red-600 hover:text-red-700 tooltip"
+                    data-tooltip="Delete List"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 

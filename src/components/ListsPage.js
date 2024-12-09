@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthUser } from "../hooks/useAuthUser";
 import { Plus, Library, Loader, Star } from "lucide-react";
-import RestaurantListCard from './ListCard';
+import RestaurantListCard from "./ListCard";
 
 const ListsPage = () => {
   const navigate = useNavigate();
@@ -16,71 +16,82 @@ const ListsPage = () => {
 
   // Helper function to process restaurant data in lists
   const processRestaurantData = (lists) => {
-    return lists.map(list => ({
+    return lists.map((list) => ({
       ...list,
-      restaurants: list.restaurants.map(restaurant => ({
-        id: restaurant.additional_info?.gmaps?.place_id ||
+      restaurants: list.restaurants.map((restaurant) => ({
+        id:
+          restaurant.additional_info?.gmaps?.place_id ||
           restaurant.additional_info?.yelp?.yelp_id ||
-          'unknown',
-        name: restaurant.name?.gmaps || restaurant.name?.yelp || 'Unknown Restaurant',
-        rating: restaurant.ratings?.gmaps?.rating ||
+          "unknown",
+        name:
+          restaurant.name?.gmaps ||
+          restaurant.name?.yelp ||
+          "Unknown Restaurant",
+        rating:
+          restaurant.ratings?.gmaps?.rating ||
           restaurant.ratings?.yelp?.rating ||
           0,
-        totalRatings: (restaurant.ratings?.gmaps?.total_ratings || 0) +
+        totalRatings:
+          (restaurant.ratings?.gmaps?.total_ratings || 0) +
           (restaurant.ratings?.yelp?.total_ratings || 0),
-        address: restaurant.location?.gmaps?.address ||
-          (restaurant.location?.yelp?.address ?
-            `${restaurant.location.yelp.address.address1}, ${restaurant.location.yelp.address.city}` :
-            'Address unavailable'),
-        types: [...new Set([
-          ...(restaurant.types?.gmaps || []),
-          ...(restaurant.types?.yelp || [])
-        ])].map(type => type.replace(/_/g, ' ')),
-        price_level: restaurant.price_level?.composite?.average ||
+        address:
+          restaurant.location?.gmaps?.address ||
+          (restaurant.location?.yelp?.address
+            ? `${restaurant.location.yelp.address.address1}, ${restaurant.location.yelp.address.city}`
+            : "Address unavailable"),
+        types: [
+          ...new Set([
+            ...(restaurant.types?.gmaps || []),
+            ...(restaurant.types?.yelp || []),
+          ]),
+        ].map((type) => type.replace(/_/g, " ")),
+        price_level:
+          restaurant.price_level?.composite?.average ||
           restaurant.price_level?.gmaps?.normalized ||
           restaurant.price_level?.yelp?.normalized ||
-          null
-      }))
+          null,
+      })),
     }));
   };
 
   useEffect(() => {
     const fetchLists = async () => {
       if (!userData) return;
-  
+
       try {
         const response = await fetch(
           `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists`
         );
-  
+
         if (!response.ok) {
           throw new Error("Failed to fetch lists");
         }
-  
+
         const userLists = await response.json();
-        console.log(userLists);
-  
+        // console.log(userLists);
+
         // Process the lists
         const processedLists = processRestaurantData(userLists);
-  
+
         // Separate lists into "Your Lists" and "Favorite Lists"
         const userCreatedLists = processedLists.filter(
           (list) => list.author === userData.username && !list.is_favorite
         );
         const favoriteLists = processedLists.filter(
-          (list) => (list.is_favorite || list.author !== userData.username) && 
-                  list.author !== userData.username
+          (list) =>
+            (list.is_favorite || list.author !== userData.username) &&
+            list.author !== userData.username
         );
-  
+
         setLists(userCreatedLists); // Your Lists
         setFavoriteLists(favoriteLists); // Favorite Lists
-  
+
         // Calculate incentive message for "Your Lists"
         const numLists = userCreatedLists.length;
         const nextMilestone = Math.ceil((numLists + 1) / 10) * 10; // Next multiple of 10
         const points = 10; // Fixed 10 points for every 10 lists created
         const firstName = userData.firstName;
-  
+
         if (numLists > 0 && numLists % 10 === 0) {
           // Update points on the server
           await fetch(
@@ -94,7 +105,7 @@ const ListsPage = () => {
             }
           );
         }
-  
+
         setIncentiveMessage(
           `Keep going, ${firstName}! Create ${
             nextMilestone - numLists
@@ -109,31 +120,31 @@ const ListsPage = () => {
         setLoading(false);
       }
     };
-  
+
     fetchLists();
   }, [userData]);
-  
+
   useEffect(() => {
     const fetchPopularLists = async () => {
       try {
         const response = await fetch(
           "https://foodify-backend-927138020046.us-central1.run.app/popularLists"
         );
-  
+
         if (!response.ok) {
           throw new Error("Failed to fetch popular lists");
         }
-  
+
         const popular = await response.json();
         setPopularLists(popular);
       } catch (err) {
         console.error("Error fetching popular lists:", err);
       }
     };
-  
+
     fetchPopularLists();
   }, []);
-  
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto p-8 flex items-center justify-center min-h-[50vh]">
@@ -155,9 +166,7 @@ const ListsPage = () => {
 
       {incentiveMessage && (
         <div className="mb-8 p-6 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-md shadow-lg animate-pulse">
-          <h3 className="text-yellow-600 font-semibold text-xl">
-            Keep Going!
-          </h3>
+          <h3 className="text-yellow-600 font-semibold text-xl">Keep Going!</h3>
           <p className="text-gray-700">{incentiveMessage}</p>
         </div>
       )}
@@ -165,9 +174,7 @@ const ListsPage = () => {
       <section className="mb-12">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-3xl font-bold text-orange-500">
-              Your Lists
-            </h2>
+            <h2 className="text-3xl font-bold text-orange-500">Your Lists</h2>
             <p className="text-sm text-gray-600 mt-1">
               Create and manage your restaurant collections
             </p>
@@ -204,9 +211,7 @@ const ListsPage = () => {
       </section>
 
       <section className="mb-12">
-        <h2 className="text-3xl font-bold text-orange-500">
-          Favorite Lists
-        </h2>
+        <h2 className="text-3xl font-bold text-orange-500">Favorite Lists</h2>
         <p className="text-sm text-gray-600 mt-1">
           Browse and revisit your favorite collections
         </p>
@@ -234,9 +239,7 @@ const ListsPage = () => {
       </section>
 
       <section className="mb-12">
-        <h2 className="text-3xl font-bold text-orange-500">
-          Popular Lists
-        </h2>
+        <h2 className="text-3xl font-bold text-orange-500">Popular Lists</h2>
         <p className="text-sm text-gray-600 mt-1">
           Check out the most liked restaurant collections
         </p>
@@ -256,7 +259,6 @@ const ListsPage = () => {
           </div>
         )}
       </section>
-
     </div>
   );
 };

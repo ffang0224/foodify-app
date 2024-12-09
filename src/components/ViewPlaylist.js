@@ -31,8 +31,10 @@ const ViewPlaylist = () => {
 
   // Helper functions for the new data structure
   const getRestaurantName = (restaurant) => {
-    console.log(restaurant);
-    return restaurant.name?.gmaps || restaurant.name?.yelp || "Unnamed Restaurant";
+    // console.log(restaurant);
+    return (
+      restaurant.name?.gmaps || restaurant.name?.yelp || "Unnamed Restaurant"
+    );
   };
 
   const getRestaurantRating = (restaurant) => {
@@ -53,14 +55,17 @@ const ViewPlaylist = () => {
     }
     if (restaurant.location?.yelp?.address) {
       const addr = restaurant.location.yelp.address;
-      return `${addr.address1}${addr.address2 ? `, ${addr.address2}` : ''}, ${addr.city}, ${addr.state} ${addr.zip_code}`;
+      return `${addr.address1}${addr.address2 ? `, ${addr.address2}` : ""}, ${
+        addr.city
+      }, ${addr.state} ${addr.zip_code}`;
     }
     return "Address unavailable";
   };
 
   const getPriceLevel = (restaurant) => {
     const composite = restaurant.price_level?.composite;
-    if (composite?.average) return "$$$$".slice(0, Math.round(composite.average));
+    if (composite?.average)
+      return "$$$$".slice(0, Math.round(composite.average));
 
     const gmapsPrice = restaurant.price_level?.gmaps?.normalized;
     const yelpPrice = restaurant.price_level?.yelp?.normalized;
@@ -74,15 +79,17 @@ const ViewPlaylist = () => {
   const getTypes = (restaurant) => {
     const gmapsTypes = restaurant.types?.gmaps || [];
     const yelpTypes = restaurant.types?.yelp || [];
-    return [...new Set([...gmapsTypes, ...yelpTypes])].map(type =>
-      type.replace(/_/g, ' ')
+    return [...new Set([...gmapsTypes, ...yelpTypes])].map((type) =>
+      type.replace(/_/g, " ")
     );
   };
 
   const getPlaceId = (restaurant) => {
-    return restaurant.additional_info?.gmaps?.place_id ||
+    return (
+      restaurant.additional_info?.gmaps?.place_id ||
       restaurant.additional_info?.yelp?.yelp_id ||
-      'unknown';
+      "unknown"
+    );
   };
 
   useEffect(() => {
@@ -101,29 +108,36 @@ const ViewPlaylist = () => {
 
         if (!listResponse.ok) {
           const errorText = await listResponse.text();
-          console.error('List response error:', errorText);
+          console.error("List response error:", errorText);
           throw new Error(`Failed to fetch list: ${errorText}`);
         }
 
         const listData = await listResponse.json();
-        console.log(listData);
+        // console.log(listData);
         setList(listData);
         setIsOwner(listData.username === userData.username);
 
         if (!listData.restaurants || !Array.isArray(listData.restaurants)) {
-          console.error('No restaurants array in list data:', listData);
+          console.error("No restaurants array in list data:", listData);
           return;
         }
 
         // Fetch restaurant details for each restaurant in the list
-        const restaurantPromises = listData.restaurants.map(async (place_id) => {
-          const res = await fetch(`https://foodify-backend-927138020046.us-central1.run.app/restaurants/${place_id}`);
-          if (!res.ok) {
-            console.error(`Failed to fetch restaurant ${place_id}:`, await res.text());
-            throw new Error(`Failed to fetch restaurant ${place_id}`);
+        const restaurantPromises = listData.restaurants.map(
+          async (place_id) => {
+            const res = await fetch(
+              `https://foodify-backend-927138020046.us-central1.run.app/restaurants/${place_id}`
+            );
+            if (!res.ok) {
+              console.error(
+                `Failed to fetch restaurant ${place_id}:`,
+                await res.text()
+              );
+              throw new Error(`Failed to fetch restaurant ${place_id}`);
+            }
+            return res.json();
           }
-          return res.json();
-        });
+        );
 
         const restaurantData = await Promise.all(restaurantPromises);
         setRestaurants(restaurantData);
@@ -193,35 +207,35 @@ const ViewPlaylist = () => {
 
   const handleLike = async () => {
     if (!userData) return; // Ensure user is logged in
-  
+
     try {
       const response = await fetch(
         `https://foodify-backend-927138020046.us-central1.run.app/lists/${listId}/like`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ 
-            username: userData.username 
-          })
+          body: JSON.stringify({
+            username: userData.username,
+          }),
         }
       );
-  
+
       if (!response.ok) {
-        throw new Error('Failed to like/unlike the list');
+        throw new Error("Failed to like/unlike the list");
       }
-  
+
       const result = await response.json();
-  
+
       // Update the list's like information
-      setList(prevList => ({
+      setList((prevList) => ({
         ...prevList,
         num_likes: result.num_likes,
-        favorited_by: result.favorited_by
+        favorited_by: result.favorited_by,
       }));
     } catch (error) {
-      console.error('Error liking/unliking the list:', error);
+      console.error("Error liking/unliking the list:", error);
       // Optionally show an error message to the user
     }
   };
@@ -271,7 +285,9 @@ const ViewPlaylist = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">{list.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                {list.name}
+              </h2>
               {list.description && (
                 <p className="text-gray-600 mb-4">{list.description}</p>
               )}
@@ -284,17 +300,24 @@ const ViewPlaylist = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="text-gray-600 hover:text-orange-500 tooltip" data-tooltip="Share List">
+              <button
+                className="text-gray-600 hover:text-orange-500 tooltip"
+                data-tooltip="Share List"
+              >
                 <Share2 className="w-5 h-5" />
               </button>
               {!isOwner && (
-                <button 
+                <button
                   onClick={handleLike}
                   className={`text-gray-600 hover:text-orange-500 flex items-center space-x-1 tooltip`}
                   data-tooltip="Like List"
                 >
-                  <Heart 
-                    className={`w-5 h-5 ${list.favorited_by?.includes(userData.username) ? 'fill-red-500 text-red-500' : ''}`} 
+                  <Heart
+                    className={`w-5 h-5 ${
+                      list.favorited_by?.includes(userData.username)
+                        ? "fill-red-500 text-red-500"
+                        : ""
+                    }`}
                   />
                   <span>{list.num_likes}</span>
                 </button>
@@ -335,7 +358,10 @@ const ViewPlaylist = () => {
                   </div>
                 ) : (
                   <img
-                    src={photoUrls[getPlaceId(restaurant)] || '/api/placeholder/400/300'}
+                    src={
+                      photoUrls[getPlaceId(restaurant)] ||
+                      "/api/placeholder/400/300"
+                    }
                     alt={getRestaurantName(restaurant)}
                     className="w-full h-full object-cover"
                   />
@@ -356,7 +382,8 @@ const ViewPlaylist = () => {
                   <div className="flex items-center">
                     <Star className="w-4 h-4 text-yellow-400 mr-1" />
                     <span className="text-sm text-gray-600">
-                      {getRestaurantRating(restaurant).toFixed(1)} ({getTotalRatings(restaurant)})
+                      {getRestaurantRating(restaurant).toFixed(1)} (
+                      {getTotalRatings(restaurant)})
                     </span>
                   </div>
                   <div className="flex items-center">
@@ -368,14 +395,16 @@ const ViewPlaylist = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {getTypes(restaurant).slice(0, 3).map((type, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 text-xs bg-orange-50 text-orange-600 rounded-md"
-                    >
-                      {type}
-                    </span>
-                  ))}
+                  {getTypes(restaurant)
+                    .slice(0, 3)
+                    .map((type, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 text-xs bg-orange-50 text-orange-600 rounded-md"
+                      >
+                        {type}
+                      </span>
+                    ))}
                 </div>
 
                 {/* External Links */}
@@ -390,8 +419,9 @@ const ViewPlaylist = () => {
                       View on Google Maps
                     </a>
                   )}
-                    {<a
-                    href={`https://www.yelp.com/biz/${restaurant.additional_info.yelp.yelp_id}`}
+                  {
+                    <a
+                      href={`https://www.yelp.com/biz/${restaurant.additional_info.yelp.yelp_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1 text-center px-3 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"

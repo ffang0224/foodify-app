@@ -196,7 +196,7 @@ const ViewPlaylist = () => {
   
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/lists/${listId}/like`,
+        `https://foodify-backend-927138020046.us-central1.run.app/lists/${listId}/like`,
         {
           method: 'POST',
           headers: {

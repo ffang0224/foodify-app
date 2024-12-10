@@ -50,8 +50,10 @@ const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { userData } = useAuthUser();
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [showNotifications, setShowNotifications] = useState(false);
+  // In NavBar component, update the initial state
+  const [isExpanded, setIsExpanded] = useState(window.innerWidth > 768);
+  const [showNotifications, setShowNotifications] = 
+  useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleLogout = () => {
@@ -109,13 +111,12 @@ const NavBar = () => {
   const isActivePath = (path) => location.pathname === path;
 
   return (
-    <div className="h-screen flex flex-col fixed left-0 top-0 bottom-0 z-50">
-      <div
-        className={`flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 
+// Update the main NavBar container
+    <div className="h-screen flex flex-col fixed left-0 top-0 bottom-0 z-50 md:relative">
+      <div className={`flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 
         shadow-lg transition-all duration-300 ease-in-out relative ${
-          isExpanded ? "w-64" : "w-20"
-        }`}
-      >
+          isExpanded ? "w-64" : "w-16 sm:w-20"
+        }`}>
         {/* Logo Section */}
         <div className="p-6 flex items-center">
           <UtensilsCrossed
@@ -238,13 +239,11 @@ const NavBar = () => {
 
             {/* Updated User Dropdown Menu */}
             {isDropdownOpen && (
-              <div
-                className={`absolute bottom-full mb-2 ${
+              <div className={`absolute bottom-full mb-2 z-50 ${
                   isExpanded
                     ? "left-0 w-full px-4"
-                    : "left-full ml-2 w-48 -translate-y-12"
-                }`}
-              >
+                    : "left-0 md:left-full ml-2 w-48 -translate-y-12"
+                  }`}>
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg py-2 w-full">
                   <button
                     onClick={() => {
@@ -294,38 +293,36 @@ const NavBar = () => {
 };
 
 const ProfilePageWithNav = () => (
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col md:flex-row">
     <NavBar />
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="flex-1 px-4 md:px-8 py-4 md:py-8 ml-16 md:ml-0">
       <ProfilePage />
     </div>
   </div>
 );
 
+
 const MapView = () => (
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col md:flex-row">
     <NavBar />
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="flex-1 px-4 md:px-8 py-4 md:py-8 ml-16 md:ml-0">
       <MapComponent />
     </div>
   </div>
 );
 
 const ListsPageWithNav = ({ userPlaylists }) => (
-  <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+  <div className="min-h-screen flex flex-col md:flex-row bg-gray-50 dark:bg-gray-900">
     <NavBar />
-    <div className="flex-grow">
+    <div className="flex-1 px-4 md:px-8 py-4 md:py-8 ml-16 md:ml-0">
       <ListsPage />
     </div>
   </div>
 );
-
 const App = () => {
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-white dark:bg-gray-900">
-        {" "}
-        {/* Add root dark mode class */}
+      <div className="min-h-screen bg-white dark:bg-gray-900 overflow-x-hidden">
         <Router>
           <Routes>
             <Route path="/help" element={<HelpPage />} />
@@ -360,7 +357,7 @@ const App = () => {
             />
             <Route path="/create-playlist" element={<CreatePlaylist />} />
             <Route path="/lists/:listId" element={<ViewPlaylist />} />
-          </Routes>
+            </Routes>
         </Router>
       </div>
     </ThemeProvider>

@@ -84,47 +84,48 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Left side - Image section */}
-      <div className="hidden md:flex md:w-1/2 bg-gray-100 items-center justify-center h-screen">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col md:flex-row">
+      {/* Left side - Image section - Hidden on mobile */}
+      <div className="hidden md:flex md:w-1/2 bg-gray-100 dark:bg-gray-800 items-center justify-center">
         <img
           src="/app_image.jpg"
           alt="App Image"
-          className="w-full h-full object-cover rounded-lg"
+          className="w-full h-full object-cover"
         />
       </div>
 
       {/* Right side - Login form */}
-      <div className="flex items-center justify-center w-full md:w-1/2 p-8 bg-white">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 bg-white dark:bg-gray-800">
         <div className="w-full max-w-md space-y-6">
+          {/* Logo */}
           <div className="flex justify-center">
-            <UtensilsCrossed className="w-24 h-24 text-orange-500" />
+            <UtensilsCrossed className="w-16 h-16 sm:w-24 sm:h-24 text-orange-500" />
           </div>
 
-          <h2 className="mt-4 text-center text-3xl font-bold text-gray-900">
+          <h2 className="mt-4 text-center text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             Log in to Foodify
           </h2>
 
           {/* Success Message */}
           {successMessage && (
-            <div className="mt-4 p-4 bg-green-100 text-green-800 rounded-md shadow-sm border border-green-300">
+            <div className="mt-4 p-3 sm:p-4 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-md shadow-sm border border-green-300 dark:border-green-800 text-sm sm:text-base">
               {successMessage}
             </div>
           )}
 
           {/* Error Message */}
           {error && (
-            <div className="mt-4 p-4 bg-red-100 text-red-800 rounded-md shadow-sm border border-red-300">
-              <AlertCircle className="inline-block w-5 h-5 mr-2" />
-              {error}
+            <div className="mt-4 p-3 sm:p-4 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-md shadow-sm border border-red-300 dark:border-red-800 flex items-center text-sm sm:text-base">
+              <AlertCircle className="flex-shrink-0 w-5 h-5 mr-2" />
+              <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div>
               <label
                 htmlFor="emailOrUsername"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
                 Email or Username
               </label>
@@ -135,7 +136,7 @@ const Login = () => {
                 value={formData.emailOrUsername}
                 onChange={handleChange}
                 required
-                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500"
+                className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base"
                 placeholder="Enter your email or username"
               />
             </div>
@@ -144,7 +145,7 @@ const Login = () => {
               <div className="flex items-center justify-between">
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
                   Password
                 </label>
@@ -157,13 +158,13 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500 pr-10"
+                  className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 pr-10 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -173,7 +174,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-md bg-orange-500 py-2 text-sm font-semibold text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
+              className="w-full rounded-md bg-orange-500 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -186,12 +187,12 @@ const Login = () => {
             </button>
 
             <div className="text-center mt-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Don't have an account?{" "}
                 <button
                   type="button"
                   onClick={() => navigate("/register")}
-                  className="text-orange-500 hover:text-orange-600 font-semibold"
+                  className="text-orange-500 hover:text-orange-600 font-semibold transition-colors"
                 >
                   Sign up
                 </button>

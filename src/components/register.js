@@ -162,42 +162,40 @@ const Register = () => {
     }
   };
 
+  
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50 dark:bg-gray-900">
       {/* Left side - Image section */}
-      <div className="hidden md:flex md:w-1/2 bg-gray-100 items-center justify-center">
+      <div className="hidden md:flex md:w-1/2 bg-gray-100 dark:bg-gray-800 items-center justify-center">
         <img
           src="/app_image.jpg"
           alt="App Image"
-          className="w-full h-full object-cover rounded-lg"
+          className="w-full h-full object-cover"
         />
       </div>
 
       {/* Right side - Register form */}
-      <div className="flex items-center justify-center w-full md:w-1/2 p-12 bg-white">
-        <div className="w-full max-w-md">
-          <div className="mx-auto flex items-center text-center justify-center">
-            <UtensilsCrossed className="w-32 h-32 text-orange-500" />
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 bg-white dark:bg-gray-800">
+        <div className="w-full max-w-md space-y-6">
+          <div className="flex justify-center">
+            <UtensilsCrossed className="w-20 h-20 sm:w-32 sm:h-32 text-orange-500" />
           </div>
 
-          <h2 className="mt-8 text-center text-2xl font-bold tracking-tight text-gray-900">
+          <h2 className="text-center text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             Sign up for Foodify
           </h2>
 
           {error && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
-              <AlertCircle className="w-5 h-5 mr-2" />
-              {error}
+            <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg flex items-center text-red-700 dark:text-red-300 text-sm">
+              <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Email field */}
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email
               </label>
               <input
@@ -207,19 +205,16 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500"
+                className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
-            {/* Username field with manual availability check */}
+            {/* Username field with availability check */}
             <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Username
               </label>
-              <div className="flex items-center space-x-2 mt-2">
+              <div className="flex items-center space-x-2">
                 <input
                   id="username"
                   name="username"
@@ -227,48 +222,41 @@ const Register = () => {
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  className={`block w-full rounded-md border px-3 py-2 focus:ring-orange-500 ${
+                  className={`block w-full rounded-md px-3 py-2 bg-white dark:bg-gray-700 focus:ring-orange-500 ${
                     usernameAvailable === null
-                      ? "border-gray-300"
+                      ? "border-gray-300 dark:border-gray-600"
                       : usernameAvailable
-                      ? "border-green-500 focus:border-green-500"
-                      : "border-red-500 focus:border-red-500"
+                      ? "border-green-500 dark:border-green-600"
+                      : "border-red-500 dark:border-red-600"
                   }`}
                 />
                 <button
                   type="button"
                   onClick={checkUsername}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors"
                 >
                   Check
                 </button>
               </div>
 
               {checkingUsername && (
-                <div className="mt-1 text-sm text-gray-500">
+                <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Checking availability...
                 </div>
               )}
               {!checkingUsername && usernameAvailable !== null && (
-                <div
-                  className={`mt-1 text-sm ${
-                    usernameAvailable ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {usernameAvailable
-                    ? "Username is available"
-                    : "Username is taken"}
+                <div className={`mt-1 text-sm ${
+                  usernameAvailable ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                }`}>
+                  {usernameAvailable ? "Username is available" : "Username is taken"}
                 </div>
               )}
             </div>
 
-            {/* Name fields */}
-            <div className="flex space-x-4">
-              <div className="w-1/2">
-                <label
-                  htmlFor="firstName"
-                  className="block text-sm font-medium text-gray-700"
-                >
+            {/* Name fields - Stack on mobile */}
+            <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+              <div className="w-full sm:w-1/2">
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   First Name
                 </label>
                 <input
@@ -278,15 +266,12 @@ const Register = () => {
                   value={formData.firstName}
                   onChange={handleChange}
                   required
-                  className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
 
-              <div className="w-1/2">
-                <label
-                  htmlFor="lastName"
-                  className="block text-sm font-medium text-gray-700"
-                >
+              <div className="w-full sm:w-1/2">
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Last Name
                 </label>
                 <input
@@ -296,17 +281,14 @@ const Register = () => {
                   value={formData.lastName}
                   onChange={handleChange}
                   required
-                  className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
             </div>
 
             {/* Password fields */}
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Password
               </label>
               <div className="relative">
@@ -317,12 +299,12 @@ const Register = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-orange-500 focus:border-orange-500 pr-10"
+                  className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 pr-10 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-orange-500 focus:border-orange-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -362,10 +344,8 @@ const Register = () => {
 
             <button
               type="submit"
-              disabled={
-                loading || checkingUsername || usernameAvailable === false
-              }
-              className="w-full rounded-md bg-orange-500 py-2 px-3 text-sm font-semibold text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
+              disabled={loading || checkingUsername || usernameAvailable === false}
+              className="w-full rounded-md bg-orange-500 py-3 text-sm font-semibold text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -378,12 +358,12 @@ const Register = () => {
             </button>
 
             <div className="text-center">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
                 Already have an account?{" "}
                 <button
                   type="button"
                   onClick={() => navigate("/login")}
-                  className="text-orange-500 hover:text-orange-600 font-semibold"
+                  className="text-orange-500 hover:text-orange-600 font-semibold transition-colors"
                 >
                   Log in
                 </button>

@@ -32,7 +32,7 @@ const MapComponent = () => {
 
   const containerStyle = {
     width: "100%",
-    height: "calc(100vh - 64px)",
+    height: "calc(100vh - 64px - env(safe-area-inset-bottom))", // Account for mobile safe areas
     borderRadius: "12px",
     overflow: "hidden",
   };
@@ -412,36 +412,42 @@ const MapComponent = () => {
   }
 
   return (
-    <div className="relative p-4 bg-gray-50">
-      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md">
-        <div className="mx-4 bg-white rounded-full shadow-lg flex">
-          <div className="flex-1 flex items-center px-4 py-2">
-            <Search className="w-5 h-5 text-gray-400" />
+    <div className="relative bg-gray-50 dark:bg-gray-900">
+      {/* Search Bar - Made mobile responsive */}
+      <div className="absolute top-4 sm:top-8 left-1/2 transform -translate-x-1/2 z-10 w-[90%] sm:w-full max-w-md">
+        <div className="mx-2 sm:mx-4 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center">
+          <div className="flex-1 flex items-center px-3 py-2">
+            <Search className="w-5 h-5 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for restaurants..."
-              className="w-full px-3 py-2 bg-transparent outline-none text-gray-700 placeholder-gray-400"
+              placeholder="Search restaurants..."
+              className="w-full px-3 py-1.5 bg-transparent outline-none text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-4 flex items-center text-gray-600 hover:text-gray-800"
+            className="px-4 py-2 flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
           >
             <SlidersHorizontal className="w-5 h-5" />
           </button>
         </div>
       </div>
 
+       
       {showFilters && (
-        <FilterPanel
-          filters={filters}
-          setFilters={setFilters}
-          cuisineOptions={cuisineOptions}
-          onClose={() => setShowFilters(false)}
-        />
-      )}
+  <div className="fixed inset-0 bg-black bg-opacity-50 z-40 sm:bg-transparent sm:relative">
+    <div className="absolute right-0 top-0 h-full w-[85vw] sm:w-auto sm:max-w-xs sm:h-auto sm:top-20 sm:left-4 bg-white dark:bg-gray-800 p-4 rounded-l-lg sm:rounded-lg shadow-lg z-50 overflow-y-auto">
+      <FilterPanel
+        filters={filters}
+        setFilters={setFilters}
+        cuisineOptions={cuisineOptions}
+        onClose={() => setShowFilters(false)}
+      />
+    </div>
+  </div>
+)}
 
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -453,12 +459,13 @@ const MapComponent = () => {
         options={{
           styles: mapStyles,
           disableDefaultUI: false,
-          zoomControl: true,
+          zoomControl: window.innerWidth > 640, // Only show on desktop
           mapTypeControl: false,
           streetViewControl: false,
-          fullscreenControl: true,
+          fullscreenControl: window.innerWidth > 640,
         }}
       >
+      
         {/* NYU Location Marker */}
         <MarkerF
           position={NYU_LOCATION}
@@ -609,13 +616,14 @@ const MapComponent = () => {
       </GoogleMap>
 
       {/* Stats Panel */}
-      <div className="absolute bottom-20 left-10 bg-white p-4 rounded-lg shadow-lg">
-        <h3 className="font-semibold mb-2">Statistics</h3>
-        <p>
-          Showing: {filteredRestaurants.length} of {restaurants.length}{" "}
-          restaurants
-        </p>
-        <p>
+      <div className="fixed bottom-0 left-0 right-0 sm:absolute sm:bottom-20 sm:left-10 sm:right-auto bg-white dark:bg-gray-800 p-4 rounded-none sm:rounded-lg shadow-lg w-full sm:w-auto">
+        <div className="flex justify-between items-center">
+          <h3 className="font-semibold dark:text-white">Statistics</h3>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {filteredRestaurants.length} of {restaurants.length} restaurants
+          </span>
+        </div>
+        <p className="text-gray-600 dark:text-gray-300 mt-2">
           Average Rating:{" "}
           {(
             filteredRestaurants.reduce(
@@ -628,7 +636,7 @@ const MapComponent = () => {
       </div>
 
       {/* Legend */}
-      <div className="absolute top-10 left-10 bg-white p-3 rounded-lg shadow-lg">
+      <div className="hidden sm:block absolute top-10 left-10 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg">
         <div className="flex flex-col space-y-2">
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 rounded-full bg-gray-600" />
@@ -653,14 +661,11 @@ const MapComponent = () => {
         playlists={playlists}
         onAdd={handleAddToPlaylist}
       />
-
       <MessageWindow
         show={messageModal.show}
         title={messageModal.title}
         message={messageModal.message}
-        onClose={() =>
-          setMessageModal({ show: false, title: null, message: "" })
-        }
+        onClose={() => setMessageModal({ show: false, title: null, message: "" })}
       />
       <RestaurantDetailsModal
         show={showDetailedModal}
@@ -672,15 +677,18 @@ const MapComponent = () => {
 };
 
 const FilterPanel = ({ filters, setFilters, cuisineOptions, onClose }) => (
-  <div className="absolute top-20 left-4 bg-white p-4 rounded-lg shadow-lg max-w-xs w-full z-20">
+  <div className="h-full sm:h-auto">
     <div className="flex justify-between items-center mb-4">
-      <h3 className="font-semibold">Filters</h3>
-      <button onClick={onClose}>
-        <X className="w-4 h-4" />
+      <h3 className="font-semibold dark:text-white">Filters</h3>
+      <button 
+        onClick={onClose}
+        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+      >
+        <X className="w-5 h-5 dark:text-white" />
       </button>
     </div>
 
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-y-auto max-h-[calc(100vh-120px)] sm:max-h-[70vh] pb-4">
       <div>
         <label className="block text-sm font-medium mb-1">Minimum Rating</label>
         <input

@@ -48,7 +48,6 @@ import EditPlaylist from "./components/EditPlaylist";
 import HelpPage from "./components/HelpPage";
 import AchievementsPage from "./components/achievements.js";
 
-
 const PageLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -360,28 +359,113 @@ const App = () => {
             <Route path="/login" element={<Login />} />
 
             {/* Routes with PageLayout */}
-            <Route path="/help" element={<PageLayout><HelpPage /></PageLayout>} />
-            <Route path="/map" element={<PageLayout><MapComponent /></PageLayout>} />
-            <Route path="/profile" element={<PageLayout><ProfilePage /></PageLayout>} />
-            <Route path="/settings" element={<PageLayout><SettingsPage /></PageLayout>} />
-            <Route path="/DisplayUser" element={<PageLayout><DisplayUser /></PageLayout>} />
-            <Route path="/lists/:listId/edit" element={<PageLayout><EditPlaylist /></PageLayout>} />
-            <Route path="/lists" element={<PageLayout><ListsPage /></PageLayout>} />
-            <Route 
-              path="/restaurants" 
+            <Route
+              path="/help"
+              element={
+                <PageLayout>
+                  <HelpPage />
+                </PageLayout>
+              }
+            />
+            <Route
+              path="/map"
+              element={
+                <PageLayout>
+                  <MapComponent />
+                </PageLayout>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PageLayout>
+                  <ProfilePage />
+                </PageLayout>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <PageLayout>
+                  <SettingsPage />
+                </PageLayout>
+              }
+            />
+            <Route
+              path="/DisplayUser"
+              element={
+                <PageLayout>
+                  <DisplayUser />
+                </PageLayout>
+              }
+            />
+            <Route
+              path="/lists/:listId/edit"
+              element={
+                <PageLayout>
+                  <EditPlaylist />
+                </PageLayout>
+              }
+            />
+            <Route
+              path="/lists"
+              element={
+                <PageLayout>
+                  <ListsPage />
+                </PageLayout>
+              }
+            />
+            <Route
+              path="/restaurants"
               element={
                 <PageLayout>
                   <RestaurantCollectionWithNav data={sampleRestaurantData} />
                 </PageLayout>
               }
             />
-            <Route 
-              path="/restaurant/:restaurantId" 
-              element={<PageLayout><IndivRestaurantCard /></PageLayout>} 
+            <Route
+              path="/restaurant/:restaurantId"
+              element={
+                <PageLayout>
+                  <IndivRestaurantCard />
+                </PageLayout>
+              }
             />
-            <Route path="/create-playlist" element={<PageLayout><CreatePlaylist /></PageLayout>} />
-            <Route path="/lists/:listId" element={<PageLayout><ViewPlaylist /></PageLayout>} />
-            <Route path="/discover" element={<PageLayout><RestaurantTinder /></PageLayout>} />
+            <Route
+              path="/achievements"
+              element={
+                <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                  <NavBar />
+                  <div className="max-w-7xl mx-auto px-4 py-8">
+                    <AchievementsPage />
+                  </div>
+                </div>
+              }
+            />
+            <Route
+              path="/create-playlist"
+              element={
+                <PageLayout>
+                  <CreatePlaylist />
+                </PageLayout>
+              }
+            />
+            <Route
+              path="/lists/:listId"
+              element={
+                <PageLayout>
+                  <ViewPlaylist />
+                </PageLayout>
+              }
+            />
+            <Route
+              path="/discover"
+              element={
+                <PageLayout>
+                  <RestaurantTinder />
+                </PageLayout>
+              }
+            />
           </Routes>
         </Router>
       </div>

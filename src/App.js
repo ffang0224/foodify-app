@@ -50,7 +50,6 @@ export const NavBar = () => {
   const location = useLocation();
   const { userData } = useAuthUser();
   // Always expanded for desktop
-  const [showNotifications, setShowNotifications] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleLogout = () => {
@@ -150,18 +149,7 @@ export const NavBar = () => {
 
         {/* Notification and Theme Section */}
         <div className="px-4 space-y-2">
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
-          >
-            <div className="relative">
-              <Bell className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-              <span className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
-            </div>
-            <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">
-              Notifications
-            </span>
-          </button>
+        
 
           {/* Achievements Button */}
           <button

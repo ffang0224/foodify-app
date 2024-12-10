@@ -186,7 +186,7 @@ const RestaurantTinder = () => {
             setMessageModal({
                 show: true,
                 title: "Oops!",
-                message: "Failed to add the restaurant. Please try again.",
+                message: "Failed to add the restaurant. Maybe it's already in your list?",
             });
         }
     };

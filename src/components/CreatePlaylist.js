@@ -191,19 +191,16 @@ const CreatePlaylist = () => {
   };
 
   const handleAchievement = (achievementData) => {
-    console.log("handleachive");
     const points = achievementData["points"];
-    console.log(8);
+
     const id = formatString(achievementData["id"]);
-    console.log(9);
+
     setModalData({
       title: "New Achievement",
       subtitle: id,
       message: `Congrats! You earned ${points} points!`,
     });
-    console.log(10);
     setModalVisible(true);
-    console.log(11);
   };
 
   const handleSave = async () => {
@@ -246,20 +243,14 @@ const CreatePlaylist = () => {
       if (!response.ok) {
         throw new Error("Failed to create list");
       }
-      console.log(1);
+
       // Check for new achievements
       if (data.newAchievements.length > 0) {
-        console.log(2);
-        console.log(data);
-        console.log(data.newAchievements);
         handleAchievement(data.newAchievements[0]);
       }
-      console.log(3);
     } catch (err) {
-      console.log(4);
       setError(err.message);
     } finally {
-      console.log(5);
       setLoading(false);
     }
   };

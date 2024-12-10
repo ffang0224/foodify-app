@@ -166,7 +166,6 @@ const Register = () => {
       await auth.signOut();
 
       if (response.ok) {
-        console.log(data);
         const achievement = data.newAchievements;
         handleAchievement(achievement); // Display modal with points and id
       } else {

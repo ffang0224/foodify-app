@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 const ViewPlaylist = () => {
-
   const { listId } = useParams();
   const navigate = useNavigate();
   const { userData } = useAuthUser();
@@ -243,8 +242,8 @@ const ViewPlaylist = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex items-center space-x-2 text-gray-600">
           <Loader className="w-5 h-5 animate-spin" />
           <span>Loading list...</span>
         </div>
@@ -254,72 +253,64 @@ const ViewPlaylist = () => {
 
   if (!list) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-300">List not found</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">List not found</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header Section */}
-      <div className="sticky top-0 bg-white dark:bg-gray-800 shadow-md z-10">
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <button
               onClick={() => navigate("/lists")}
-              className="flex items-center text-gray-700 dark:text-gray-300 hover:text-orange-500 transition-colors"
+              className="flex items-center text-gray-700 hover:text-orange-500 transition-colors duration-200"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
-              <span className="hidden sm:inline">Back to Lists</span>
+              <span>Back to Lists</span>
             </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-4 sm:p-8">
-        {/* Error Message */}
+      <div className="max-w-7xl mx-auto p-8">
         {error && (
-          <div className="mb-4 sm:mb-6 p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 rounded">
+          <div className="mb-6 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
             {error}
           </div>
         )}
 
-
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-2">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
                 {list.name}
               </h2>
               {list.description && (
-                <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm sm:text-base">
-                  {list.description}
-                </p>
+                <p className="text-gray-600 mb-4">{list.description}</p>
               )}
-              <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center text-sm text-gray-500">
                 <span>Created by @{list.author}</span>
-                <span className="hidden sm:inline">•</span>
+                <span className="mx-2">•</span>
                 <span>{restaurants.length} restaurants</span>
-                <span className="hidden sm:inline">•</span>
+                <span className="mx-2">•</span>
                 <span>{list.num_likes} likes</span>
               </div>
             </div>
-
-
-
-            <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-4">
               <button
-                className="p-2 text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
-                aria-label="Share List"
+                className="text-gray-600 hover:text-orange-500 tooltip"
+                data-tooltip="Share List"
               >
                 <Share2 className="w-5 h-5" />
               </button>
               {!isOwner && (
                 <button
                   onClick={handleLike}
-                  className="p-2 text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors flex items-center gap-2"
-                  aria-label={list.favorited_by?.includes(userData.username) ? "Unlike List" : "Like List"}
+                  className={`text-gray-600 hover:text-orange-500 flex items-center space-x-1 tooltip`}
+                  data-tooltip="Like List"
                 >
                   <Heart
                     className={`w-5 h-5 ${
@@ -335,15 +326,15 @@ const ViewPlaylist = () => {
                 <>
                   <button
                     onClick={() => navigate(`/lists/${listId}/edit`)}
-                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
-                    aria-label="Edit List"
+                    className="text-gray-600 hover:text-orange-500 tooltip"
+                    data-tooltip="Edit List"
                   >
                     <Edit2 className="w-5 h-5" />
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="p-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
-                    aria-label="Delete List"
+                    className="text-red-600 hover:text-red-700 tooltip"
+                    data-tooltip="Delete List"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
@@ -353,50 +344,51 @@ const ViewPlaylist = () => {
           </div>
         </div>
 
-
-
-        <div className="grid gap-4 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {restaurants.map((restaurant) => (
             <div
               key={getPlaceId(restaurant)}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:scale-105 hover:shadow-xl transition-all duration-300"
+              className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 hover:shadow-xl transition-all duration-300"
             >
-              {/* Restaurant Image */}
-              <div className="h-40 sm:h-48 overflow-hidden">
+              {/* Image Section */}
+              <div className="h-48 overflow-hidden">
                 {photoLoading[getPlaceId(restaurant)] ? (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-700">
-                    <Loader className="w-6 h-6 animate-spin text-gray-400 dark:text-gray-500" />
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <Loader className="w-6 h-6 animate-spin text-gray-400" />
                   </div>
                 ) : (
                   <img
-                    src={photoUrls[getPlaceId(restaurant)] || "/api/placeholder/400/300"}
+                    src={
+                      photoUrls[getPlaceId(restaurant)] ||
+                      "/api/placeholder/400/300"
+                    }
                     alt={getRestaurantName(restaurant)}
                     className="w-full h-full object-cover"
                   />
                 )}
               </div>
 
-              {/* Restaurant Details */}
-              <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-white">
+              <div className="p-6 space-y-4">
+                <h3 className="text-xl font-semibold text-gray-800">
                   {getRestaurantName(restaurant)}
                 </h3>
 
-                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-                  <span className="truncate">{getAddress(restaurant)}</span>
+                <div className="flex items-center text-sm text-gray-500 mb-2">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {getAddress(restaurant)}
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                    <span className="text-sm text-gray-600 dark:text-gray-300">
-                      {getRestaurantRating(restaurant).toFixed(1)} ({getTotalRatings(restaurant)})
+                    <span className="text-sm text-gray-600">
+                      {getRestaurantRating(restaurant).toFixed(1)} (
+                      {getTotalRatings(restaurant)})
                     </span>
                   </div>
                   <div className="flex items-center">
                     <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
-                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                    <span className="text-sm text-gray-600">
                       {getPriceLevel(restaurant)}
                     </span>
                   </div>
@@ -408,7 +400,7 @@ const ViewPlaylist = () => {
                     .map((type, index) => (
                       <span
                         key={index}
-                        className="px-2 py-1 text-xs bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-md"
+                        className="px-2 py-1 text-xs bg-orange-50 text-orange-600 rounded-md"
                       >
                         {type}
                       </span>
@@ -416,27 +408,27 @@ const ViewPlaylist = () => {
                 </div>
 
                 {/* External Links */}
-                <div className="flex gap-2 pt-3">
+                <div className="flex gap-2 pt-4">
                   {restaurant.additional_info?.gmaps?.place_id && (
                     <a
                       href={`https://www.google.com/maps/place/?q=place_id:${restaurant.additional_info.gmaps.place_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 text-center px-3 py-2.5 text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                      className="flex-1 text-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors"
                     >
-                      View on Maps
+                      View on Google Maps
                     </a>
                   )}
-                  {restaurant.additional_info?.yelp?.yelp_id && (
+                  {
                     <a
                       href={`https://www.yelp.com/biz/${restaurant.additional_info.yelp.yelp_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 text-center px-3 py-2.5 text-sm bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                      className="flex-1 text-center px-3 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
                     >
                       View on Yelp
                     </a>
-                  )}
+                  }
                 </div>
               </div>
             </div>

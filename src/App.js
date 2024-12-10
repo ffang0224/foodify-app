@@ -27,7 +27,7 @@ import {
 import { useAuthUser } from "./hooks/useAuthUser";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
-import RestaurantTinder from './components/RestaurantTinder';
+import RestaurantTinder from "./components/RestaurantTinder";
 
 // Regular imports remain the same
 import DisplayUser from "./components/DisplayUser.js";
@@ -46,6 +46,7 @@ import SettingsPage from "./components/settings.js";
 import RefreshCacheButton from "./components/refreshRestaurantCache.js";
 import EditPlaylist from "./components/EditPlaylist";
 import HelpPage from "./components/HelpPage";
+import AchievementsPage from "./components/achievements.js";
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -198,10 +199,12 @@ const NavBar = () => {
 
           {/* Achievements Button */}
           <button
-            // onClick={() => navigate("/achievements")}
+            onClick={() => navigate("/achievements")}
             className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
           >
-            <Trophy className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+            <div className="relative">
+              <Trophy className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+            </div>
             {isExpanded && (
               <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">
                 Achievements
@@ -362,14 +365,28 @@ const App = () => {
             />
             <Route path="/create-playlist" element={<CreatePlaylist />} />
             <Route path="/lists/:listId" element={<ViewPlaylist />} />
-            <Route path="/discover" element={
-              <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                <NavBar />
-                <div className="pl-20 lg:pl-64">
-                  <RestaurantTinder />
+            <Route
+              path="/discover"
+              element={
+                <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                  <NavBar />
+                  <div className="pl-20 lg:pl-64">
+                    <RestaurantTinder />
+                  </div>
                 </div>
-              </div>
-            } />
+              }
+            />
+            <Route
+              path="/achievements"
+              element={
+                <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                  <NavBar />
+                  <div className="max-w-7xl mx-auto px-4 py-8">
+                    <AchievementsPage />
+                  </div>
+                </div>
+              }
+            />
           </Routes>
         </Router>
       </div>

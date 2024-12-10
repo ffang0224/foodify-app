@@ -27,16 +27,18 @@ const ProfilePage = () => {
 
         const userLists = await response.json();
         setLists(userLists);
-        
+
         // Calculate incentive message
         const numLists = userLists.length;
         const nextMilestone = Math.ceil((numLists + 1) / 10) * 10;
         const firstName = userData.firstName;
-        
+
         setIncentiveMessage(
-          `Keep going, ${firstName}! Create ${nextMilestone - numLists} more list${
+          `Keep going, ${firstName}! Create ${
+            nextMilestone - numLists
+          } more list${
             nextMilestone - numLists > 1 ? "s" : ""
-          } to reach ${nextMilestone} lists and earn 10 points.`
+          } to reach ${nextMilestone} lists and earn more points.`
         );
       } catch (err) {
         console.error("Error fetching lists:", err);
@@ -70,7 +72,8 @@ const ProfilePage = () => {
         <div className="bg-gradient-to-r from-orange-300 to-orange-500 rounded-lg shadow-lg p-6 mb-8">
           <div className="flex items-start gap-6">
             <div className="w-32 h-32 rounded-full bg-orange-600 flex items-center justify-center text-white text-3xl font-bold transition-transform transform hover:scale-110 duration-300 ease-in-out">
-              {userData.firstName?.[0] || ""}{userData.lastName?.[0] || ""}
+              {userData.firstName?.[0] || ""}
+              {userData.lastName?.[0] || ""}
             </div>
             <div className="flex-grow">
               <div className="flex justify-between items-start">
@@ -111,11 +114,15 @@ const ProfilePage = () => {
                 <div className="bg-white p-4 rounded-lg shadow-lg">
                   <p className="text-sm text-gray-600">Lists Created</p>
                   <div className="flex items-center justify-between">
-                    <p className="text-2xl font-bold text-orange-600">{lists.length}</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {lists.length}
+                    </p>
                     <Library className="w-6 h-6 text-orange-500" />
                   </div>
                   {incentiveMessage && (
-                    <p className="text-xs text-gray-500 mt-2">{incentiveMessage}</p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      {incentiveMessage}
+                    </p>
                   )}
                 </div>
               </div>

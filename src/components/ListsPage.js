@@ -111,7 +111,7 @@ const ListsPage = () => {
             nextMilestone - numLists
           } more list${
             nextMilestone - numLists > 1 ? "s" : ""
-          } to reach ${nextMilestone} lists and earn 10 points.`
+          } to reach ${nextMilestone} lists and earn more points.`
         );
       } catch (err) {
         console.error("Error fetching lists:", err);

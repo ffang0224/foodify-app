@@ -228,7 +228,7 @@ const CreatePlaylist = () => {
       };
 
       const response = await fetch(
-        `https://foodify-backend-927138020046.us-central1.run.app/${userData.username}/lists`,
+        `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists`,
         {
           method: "POST",
           headers: {

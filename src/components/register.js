@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import MessageModal from "./MessageWindow";
 import {
   UtensilsCrossed,
   Eye,
@@ -9,6 +10,14 @@ import {
 } from "lucide-react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
+
+// For formatting achievement id
+const formatString = (str) => {
+  return str
+    .split("_") // Split the string by underscores
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+    .join(" "); // Join the words with spaces
+};
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -25,6 +34,8 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalData, setModalData] = useState({ title: "", message: "" });
 
   const navigate = useNavigate();
 
@@ -77,6 +88,16 @@ const Register = () => {
     setError("");
   };
 
+  const handleAchievement = (achievementData) => {
+    const points = achievementData["points"]; // Extract id and points from the response
+    const id = formatString(achievementData["id"]);
+    setModalData({
+      title: `New Achievement: ${id}`, // Include the achievement ID in the title
+      message: `Congrats! You earned ${points} points!`, // Include points in the message
+    });
+    setModalVisible(true); // Show the modal
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -120,6 +141,7 @@ const Register = () => {
         playlists: [],
         emailVerified: false,
         achievements: [],
+        numOfLists: 0,
       };
 
       // Create user in backend
@@ -145,12 +167,16 @@ const Register = () => {
       // Sign out after successful registration
       await auth.signOut();
 
-      // Navigate to login with success message
-      navigate("/login", {
-        state: {
-          message: "Account created successfully! Please log in.",
-        },
-      });
+      if (response.ok) {
+        const achievement = data.newAchievements;
+        handleAchievement(achievement); // Display modal with points and id
+      } else {
+        setModalData({
+          title: "Account Created!",
+          message: "Your account has been successfully created. Please log in.",
+        });
+        setModalVisible(true);
+      }
     } catch (err) {
       setError(err.message);
       // Clean up: If there was an error and auth user was created, delete it
@@ -160,6 +186,13 @@ const Register = () => {
     } finally {
       setLoading(false);
     }
+
+    // // Navigate to login with success message
+    // navigate("/login", {
+    //   state: {
+    //     message: "Account created successfully! Please log in.",
+    //   },
+    // });
   };
 
   return (
@@ -392,6 +425,20 @@ const Register = () => {
           </form>
         </div>
       </div>
+      {/* MessageModal */}
+      <MessageModal
+        show={modalVisible}
+        title={modalData.title}
+        message={modalData.message}
+        onClose={() => {
+          setModalVisible(false); // Close the modal
+          navigate("/login", {
+            state: {
+              message: "Account created successfully! Please log in.",
+            },
+          }); // Navigate to login
+        }}
+      />
     </div>
   );
 };

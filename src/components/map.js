@@ -274,7 +274,7 @@ const MapComponent = () => {
 
       setSelectedRestaurant((prev) => ({
         ...prev,
-        image: data.photo_url || "/api/placeholder/400/320",
+        image: data.photo_url,
       }));
     } catch (err) {
       console.error("Error fetching restaurant photo:", err.message);

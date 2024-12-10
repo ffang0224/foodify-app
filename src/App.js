@@ -8,9 +8,6 @@ import {
   useLocation,
 } from "react-router-dom";
 import {
-  ArrowLeft,
-  ArrowRight,
-  Map,
   List,
   UtensilsCrossed,
   Bell,
@@ -27,44 +24,32 @@ import {
 import { useAuthUser } from "./hooks/useAuthUser";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
-import RestaurantTinder from "./components/RestaurantTinder";
 
-// Regular imports remain the same
-import DisplayUser from "./components/DisplayUser.js";
-import sampleRestaurantData from "./sample-data/sampleRestaurantData.js";
-import IndivRestaurantCard from "./components/IndivRestaurantCard.js";
-import Login from "./components/login.js";
-import Register from "./components/register.js";
-import MapComponent from "./components/map.js";
-import ListsPage from "./components/ListsPage.js";
-import { RestaurantCollectionWithNav } from "./components/IndivPlaylist.js";
+// Component imports
+import RestaurantTinder from "./components/RestaurantTinder";
+import DisplayUser from "./components/DisplayUser";
+import sampleRestaurantData from "./sample-data/sampleRestaurantData";
+import IndivRestaurantCard from "./components/IndivRestaurantCard";
+import Login from "./components/login";
+import Register from "./components/register";
+import MapComponent from "./components/map";
+import ListsPage from "./components/ListsPage";
+import { RestaurantCollectionWithNav } from "./components/IndivPlaylist";
 import CreatePlaylist from "./components/CreatePlaylist";
 import ViewPlaylist from "./components/ViewPlaylist";
 import ProfilePage from "./components/ProfilePage";
-import IconDropdown from "./components/IconDropdown";
-import SettingsPage from "./components/settings.js";
-import RefreshCacheButton from "./components/refreshRestaurantCache.js";
+import SettingsPage from "./components/settings";
 import EditPlaylist from "./components/EditPlaylist";
 import HelpPage from "./components/HelpPage";
-import AchievementsPage from "./components/achievements.js";
+import AchievementsPage from "./components/achievements";
+import ResponsiveLayout from "./components/ResponsiveLayout";
 
-const PageLayout = ({ children }) => {
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <NavBar />
-      <main className="pl-20 lg:pl-64 min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children}
-        </div>
-      </main>
-    </div>
-  );
-};
-const NavBar = () => {
+// Export NavBar so it can be used by ResponsiveLayout
+export const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { userData } = useAuthUser();
-  const [isExpanded, setIsExpanded] = useState(true);
+  // Always expanded for desktop
   const [showNotifications, setShowNotifications] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -76,7 +61,6 @@ const NavBar = () => {
 
   const isRestaurantPage = location.pathname.includes("/restaurant");
   const isListsPage = location.pathname === "/lists";
-  const isMapPage = location.pathname === "/map";
 
   const mainMenuItems = [
     { icon: Home, label: "Home", path: "/map" },
@@ -86,80 +70,54 @@ const NavBar = () => {
   ];
 
   const renderCreatePlaylist = () => {
-    if (isListsPage) {
-      return (
-        <button
-          onClick={() => navigate("/create-playlist")}
-          className="w-full flex items-center px-4 py-3 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-all duration-200"
-        >
-          <Plus className="w-5 h-5 text-orange-500 dark:text-orange-400" />
-          {isExpanded && (
-            <span className="ml-4 font-medium">Create Playlist</span>
-          )}
-        </button>
-      );
-    }
-    return null;
+    if (!isListsPage) return null;
+
+    return (
+      <button
+        onClick={() => navigate("/create-playlist")}
+        className="w-full flex items-center px-4 py-3 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-all duration-200"
+      >
+        <Plus className="w-5 h-5 text-orange-500 dark:text-orange-400" />
+        <span className="ml-4 font-medium">Create Playlist</span>
+      </button>
+    );
   };
 
   const renderBackNavigation = () => {
-    if (isRestaurantPage) {
-      return (
-        <button
-          onClick={() => navigate("/lists")}
-          className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
-        >
-          <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-          {isExpanded && (
-            <span className="ml-4 text-sm text-gray-600 dark:text-gray-300">
-              Back to Lists
-            </span>
-          )}
-        </button>
-      );
-    }
-    return null;
+    if (!isRestaurantPage) return null;
+
+    return (
+      <button
+        onClick={() => navigate("/lists")}
+        className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+      >
+        <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+        <span className="ml-4 text-sm text-gray-600 dark:text-gray-300">
+          Back to Lists
+        </span>
+      </button>
+    );
   };
 
   const isActivePath = (path) => location.pathname === path;
 
   return (
     <div className="h-screen flex flex-col fixed left-0 top-0 bottom-0 z-50">
-      <div
-        className={`flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 
-        shadow-lg transition-all duration-300 ease-in-out relative ${
-          isExpanded ? "w-64" : "w-20"
-        }`}
-      >
+      <div className="flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 
+        shadow-lg transition-all duration-300 ease-in-out relative w-64">
         {/* Logo Section */}
         <div className="p-6 flex items-center">
           <UtensilsCrossed
-            className={`w-8 h-8 text-orange-500 transition-transform duration-300 ${
-              isExpanded ? "" : "rotate-180"
-            }`}
+            className="w-8 h-8 text-orange-500 cursor-pointer"
             onClick={() => navigate("/map")}
           />
-          {isExpanded && (
-            <h1
-              className="text-2xl font-bold ml-3 text-gray-800 dark:text-white tracking-tight cursor-pointer"
-              onClick={() => navigate("/map")}
-            >
-              Foodify
-            </h1>
-          )}
+          <h1
+            className="text-2xl font-bold ml-3 text-gray-800 dark:text-white tracking-tight cursor-pointer"
+            onClick={() => navigate("/map")}
+          >
+            Foodify
+          </h1>
         </div>
-
-        {/* Toggle Button - Updated positioning */}
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="absolute -right-3 top-8 bg-white dark:bg-gray-800 rounded-full p-1.5 shadow-md hover:shadow-lg transition-all duration-300"
-        >
-          <ChevronLeft
-            className={`w-4 h-4 text-gray-600 dark:text-gray-400 transition-transform duration-300 ${
-              isExpanded ? "" : "rotate-180"
-            }`}
-          />
-        </button>
 
         {renderBackNavigation()}
 
@@ -183,9 +141,7 @@ const NavBar = () => {
                       : "text-gray-500 dark:text-gray-400"
                   }`}
                 />
-                {isExpanded && (
-                  <span className="ml-4 font-medium">{item.label}</span>
-                )}
+                <span className="ml-4 font-medium">{item.label}</span>
               </button>
             ))}
             {renderCreatePlaylist()}
@@ -202,11 +158,9 @@ const NavBar = () => {
               <Bell className="w-6 h-6 text-gray-500 dark:text-gray-400" />
               <span className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
             </div>
-            {isExpanded && (
-              <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">
-                Notifications
-              </span>
-            )}
+            <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">
+              Notifications
+            </span>
           </button>
 
           {/* Achievements Button */}
@@ -218,26 +172,22 @@ const NavBar = () => {
                 : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"
             }`}
           >
-            <div className="relative">
-              <Trophy
-                className={`w-6 h-6 text-gray-500 dark:text-gray-400 ${
-                  isActivePath("/achievements")
-                    ? "text-orange-500 dark:text-orange-400"
-                    : "text-gray-500 dark:text-gray-400"
-                }`}
-              />
-            </div>
-            {isExpanded && (
-              <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">
-                Achievements
-              </span>
-            )}
+            <Trophy
+              className={`w-6 h-6 ${
+                isActivePath("/achievements")
+                  ? "text-orange-500 dark:text-orange-400"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
+            />
+            <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">
+              Achievements
+            </span>
           </button>
 
           <ThemeToggle />
         </div>
 
-        {/* User Profile Section - Updated dropdown positioning */}
+        {/* User Profile Section */}
         <div className="border-t border-gray-100 dark:border-gray-800 p-4 mt-auto">
           <div className="relative">
             <button
@@ -251,27 +201,19 @@ const NavBar = () => {
                 </div>
                 <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-400 rounded-full border-2 border-white dark:border-gray-900" />
               </div>
-              {isExpanded && (
-                <div className="ml-4 text-left">
-                  <p className="text-sm font-medium text-gray-800 dark:text-white">
-                    {userData?.firstName} {userData?.lastName}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    @{userData?.username}
-                  </p>
-                </div>
-              )}
+              <div className="ml-4 text-left">
+                <p className="text-sm font-medium text-gray-800 dark:text-white">
+                  {userData?.firstName} {userData?.lastName}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  @{userData?.username}
+                </p>
+              </div>
             </button>
 
-            {/* Updated User Dropdown Menu */}
+            {/* Dropdown Menu */}
             {isDropdownOpen && (
-              <div
-                className={`absolute bottom-full mb-2 ${
-                  isExpanded
-                    ? "left-0 w-full px-4"
-                    : "left-full ml-2 w-48 -translate-y-12"
-                }`}
-              >
+              <div className="absolute bottom-full mb-2 left-0 w-full px-4">
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg py-2 w-full">
                   <button
                     onClick={() => {
@@ -320,152 +262,31 @@ const NavBar = () => {
   );
 };
 
-const ProfilePageWithNav = () => (
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <NavBar />
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <ProfilePage />
-    </div>
-  </div>
-);
-
-const MapView = () => (
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <NavBar />
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <MapComponent />
-    </div>
-  </div>
-);
-
-const ListsPageWithNav = ({ userPlaylists }) => (
-  <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-    <NavBar />
-    <div className="flex-grow">
-      <ListsPage />
-    </div>
-  </div>
-);
-
 const App = () => {
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-white dark:bg-gray-900">
         <Router>
           <Routes>
-            {/* Auth routes without navbar */}
+            {/* Auth routes without layout */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
 
-            {/* Routes with PageLayout */}
-            <Route
-              path="/help"
-              element={
-                <PageLayout>
-                  <HelpPage />
-                </PageLayout>
-              }
-            />
-            <Route
-              path="/map"
-              element={
-                <PageLayout>
-                  <MapComponent />
-                </PageLayout>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <PageLayout>
-                  <ProfilePage />
-                </PageLayout>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <PageLayout>
-                  <SettingsPage />
-                </PageLayout>
-              }
-            />
-            <Route
-              path="/DisplayUser"
-              element={
-                <PageLayout>
-                  <DisplayUser />
-                </PageLayout>
-              }
-            />
-            <Route
-              path="/lists/:listId/edit"
-              element={
-                <PageLayout>
-                  <EditPlaylist />
-                </PageLayout>
-              }
-            />
-            <Route
-              path="/lists"
-              element={
-                <PageLayout>
-                  <ListsPage />
-                </PageLayout>
-              }
-            />
-            <Route
-              path="/restaurants"
-              element={
-                <PageLayout>
-                  <RestaurantCollectionWithNav data={sampleRestaurantData} />
-                </PageLayout>
-              }
-            />
-            <Route
-              path="/restaurant/:restaurantId"
-              element={
-                <PageLayout>
-                  <IndivRestaurantCard />
-                </PageLayout>
-              }
-            />
-            <Route
-              path="/achievements"
-              element={
-                <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                  <NavBar />
-                  <div className="max-w-7xl mx-auto px-4 py-8">
-                    <AchievementsPage />
-                  </div>
-                </div>
-              }
-            />
-            <Route
-              path="/create-playlist"
-              element={
-                <PageLayout>
-                  <CreatePlaylist />
-                </PageLayout>
-              }
-            />
-            <Route
-              path="/lists/:listId"
-              element={
-                <PageLayout>
-                  <ViewPlaylist />
-                </PageLayout>
-              }
-            />
-            <Route
-              path="/discover"
-              element={
-                <PageLayout>
-                  <RestaurantTinder />
-                </PageLayout>
-              }
-            />
+            {/* Routes with ResponsiveLayout */}
+            <Route path="/map" element={<ResponsiveLayout><MapComponent /></ResponsiveLayout>} />
+            <Route path="/profile" element={<ResponsiveLayout><ProfilePage /></ResponsiveLayout>} />
+            <Route path="/settings" element={<ResponsiveLayout><SettingsPage /></ResponsiveLayout>} />
+            <Route path="/DisplayUser" element={<ResponsiveLayout><DisplayUser /></ResponsiveLayout>} />
+            <Route path="/lists/:listId/edit" element={<ResponsiveLayout><EditPlaylist /></ResponsiveLayout>} />
+            <Route path="/lists" element={<ResponsiveLayout><ListsPage /></ResponsiveLayout>} />
+            <Route path="/restaurants" element={<ResponsiveLayout><RestaurantCollectionWithNav data={sampleRestaurantData} /></ResponsiveLayout>} />
+            <Route path="/restaurant/:restaurantId" element={<ResponsiveLayout><IndivRestaurantCard /></ResponsiveLayout>} />
+            <Route path="/achievements" element={<ResponsiveLayout><AchievementsPage /></ResponsiveLayout>} />
+            <Route path="/create-playlist" element={<ResponsiveLayout><CreatePlaylist /></ResponsiveLayout>} />
+            <Route path="/lists/:listId" element={<ResponsiveLayout><ViewPlaylist /></ResponsiveLayout>} />
+            <Route path="/discover" element={<ResponsiveLayout><RestaurantTinder /></ResponsiveLayout>} />
+            <Route path="/help" element={<ResponsiveLayout><HelpPage /></ResponsiveLayout>} />
           </Routes>
         </Router>
       </div>

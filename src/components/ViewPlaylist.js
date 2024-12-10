@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../hooks/useAuthUser";
+import { formatString } from "../utils/stringUtils";
+import MessageModal from "./MessageWindow";
+
 import {
   UtensilsCrossed,
   ArrowLeft,
@@ -28,6 +31,12 @@ const ViewPlaylist = () => {
   const [photoLoading, setPhotoLoading] = useState({});
   const [numLikes, setNumLikes] = useState({});
   const [favoritedBy, setFavoritedBy] = useState({});
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalData, setModalData] = useState({
+    title: "",
+    subtitle: "",
+    message: "",
+  });
 
   // Helper functions for the new data structure
   const getRestaurantName = (restaurant) => {
@@ -234,9 +243,30 @@ const ViewPlaylist = () => {
         num_likes: result.num_likes,
         favorited_by: result.favorited_by,
       }));
+
+      // Check for new achievements
+      if (result.newAchievements && result.newAchievements.length > 0) {
+        // Find the achievement with the key 'giver_achievement_id'
+        const giverAchievement = result.newAchievements.find(
+          (achievement) => "giver_achievement_id" in achievement
+        );
+
+        if (giverAchievement) {
+          // Display the achievement as a modal or notification
+          const id = giverAchievement.giver_achievement_id;
+          const points = giverAchievement.giver_points;
+
+          setModalData({
+            title: "New Achievement",
+            subtitle: formatString(id),
+            message: `Congrats! You earned ${points} points!`,
+          });
+          setModalVisible(true);
+        }
+      }
     } catch (error) {
       console.error("Error liking/unliking the list:", error);
-      // Optionally show an error message to the user
+      setError("Something went wrong while liking the list.");
     }
   };
 
@@ -435,6 +465,15 @@ const ViewPlaylist = () => {
           ))}
         </div>
       </div>
+      {modalVisible && (
+        <MessageModal
+          show={modalVisible}
+          title={modalData.title}
+          subtitle={modalData.subtitle}
+          message={modalData.message}
+          onClose={() => setModalVisible(false)}
+        />
+      )}
     </div>
   );
 };

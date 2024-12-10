@@ -27,6 +27,7 @@ import {
 import { useAuthUser } from "./hooks/useAuthUser";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
+import RestaurantTinder from './components/RestaurantTinder';
 
 // Regular imports remain the same
 import DisplayUser from "./components/DisplayUser.js";
@@ -67,6 +68,7 @@ const NavBar = () => {
   const mainMenuItems = [
     { icon: Home, label: "Home", path: "/map" },
     { icon: List, label: "My Lists", path: "/lists" },
+    { icon: UtensilsCrossed, label: "Discover", path: "/discover" },
     { icon: Search, label: "Search Foodies", path: "/DisplayUser" },
   ];
 
@@ -360,6 +362,14 @@ const App = () => {
             />
             <Route path="/create-playlist" element={<CreatePlaylist />} />
             <Route path="/lists/:listId" element={<ViewPlaylist />} />
+            <Route path="/discover" element={
+              <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                <NavBar />
+                <div className="pl-20 lg:pl-64">
+                  <RestaurantTinder />
+                </div>
+              </div>
+            } />
           </Routes>
         </Router>
       </div>

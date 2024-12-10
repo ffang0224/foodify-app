@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthUser } from "../hooks/useAuthUser";
+import MessageModal from "./MessageWindow";
+
 import {
   Search,
   ArrowLeft,
@@ -13,6 +15,7 @@ import {
   Star,
   DollarSign,
 } from "lucide-react";
+import { formatString } from "../utils/stringUtils";
 
 const CreatePlaylist = () => {
   const [formData, setFormData] = useState({
@@ -28,6 +31,12 @@ const CreatePlaylist = () => {
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalData, setModalData] = useState({
+    title: "",
+    message: "",
+    subtitle: "",
+  });
 
   const navigate = useNavigate();
   const { userData } = useAuthUser();
@@ -42,7 +51,9 @@ const CreatePlaylist = () => {
 
   // Helper functions for handling the new data structure
   const getRestaurantName = (restaurant) => {
-    return restaurant.name.gmaps || restaurant.name.yelp || "Unnamed Restaurant";
+    return (
+      restaurant.name.gmaps || restaurant.name.yelp || "Unnamed Restaurant"
+    );
   };
 
   const getRestaurantRating = (restaurant) => {
@@ -63,14 +74,17 @@ const CreatePlaylist = () => {
     }
     if (restaurant.location?.yelp?.address) {
       const addr = restaurant.location.yelp.address;
-      return `${addr.address1}${addr.address2 ? `, ${addr.address2}` : ''}, ${addr.city}, ${addr.state} ${addr.zip_code}`;
+      return `${addr.address1}${addr.address2 ? `, ${addr.address2}` : ""}, ${
+        addr.city
+      }, ${addr.state} ${addr.zip_code}`;
     }
     return "Address unavailable";
   };
 
   const getPriceLevel = (restaurant) => {
     const composite = restaurant.price_level?.composite;
-    if (composite?.average) return "$$$$".slice(0, Math.round(composite.average));
+    if (composite?.average)
+      return "$$$$".slice(0, Math.round(composite.average));
 
     const gmapsPrice = restaurant.price_level?.gmaps?.normalized;
     const yelpPrice = restaurant.price_level?.yelp?.normalized;
@@ -85,26 +99,31 @@ const CreatePlaylist = () => {
     const gmapsTypes = restaurant.types?.gmaps || [];
     const yelpTypes = restaurant.types?.yelp || [];
     const allTypes = [...new Set([...gmapsTypes, ...yelpTypes])];
-    return allTypes.map(type => type.replace(/_/g, ' '));
+    return allTypes.map((type) => type.replace(/_/g, " "));
   };
 
   const getPlaceId = (restaurant) => {
-    return restaurant.additional_info?.gmaps?.place_id ||
+    return (
+      restaurant.additional_info?.gmaps?.place_id ||
       restaurant.additional_info?.yelp?.yelp_id ||
-      Math.random().toString(36).substr(2, 9);
+      Math.random().toString(36).substr(2, 9)
+    );
   };
 
   useEffect(() => {
     const fetchRestaurants = async () => {
       setLoading(true);
       try {
-        const response = await fetch("https://foodify-backend-927138020046.us-central1.run.app/restaurants", {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          "https://foodify-backend-927138020046.us-central1.run.app/restaurants",
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -129,8 +148,10 @@ const CreatePlaylist = () => {
   useEffect(() => {
     const filtered = allRestaurants.filter((restaurant) => {
       const matchesSearch =
-        getRestaurantName(restaurant).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        getTypes(restaurant).some(type =>
+        getRestaurantName(restaurant)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        getTypes(restaurant).some((type) =>
           type.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
@@ -139,7 +160,8 @@ const CreatePlaylist = () => {
 
       // Note: Price range filtering might need adjustment based on your needs
       const price = restaurant.price_level?.composite?.average || 0;
-      const matchesPrice = !price || (price >= priceRange[0] && price <= priceRange[1]);
+      const matchesPrice =
+        !price || (price >= priceRange[0] && price <= priceRange[1]);
 
       return matchesSearch && matchesPrice && matchesRating;
     });
@@ -168,6 +190,22 @@ const CreatePlaylist = () => {
     });
   };
 
+  const handleAchievement = (achievementData) => {
+    console.log("handleachive");
+    const points = achievementData["points"];
+    console.log(8);
+    const id = formatString(achievementData["id"]);
+    console.log(9);
+    setModalData({
+      title: "New Achievement",
+      subtitle: id,
+      message: `Congrats! You earned ${points} points!`,
+    });
+    console.log(10);
+    setModalVisible(true);
+    console.log(11);
+  };
+
   const handleSave = async () => {
     if (!formData.name.trim()) {
       setError("Please enter a list name");
@@ -189,11 +227,11 @@ const CreatePlaylist = () => {
         restaurants: selectedRestaurants.map((r) => getPlaceId(r)),
         color: selectedColor,
         author: userData.username,
-        username: userData.username
+        username: userData.username,
       };
 
       const response = await fetch(
-        `https://foodify-backend-927138020046.us-central1.run.app/users/${userData.username}/lists`,
+        `https://foodify-backend-927138020046.us-central1.run.app/${userData.username}/lists`,
         {
           method: "POST",
           headers: {
@@ -203,14 +241,25 @@ const CreatePlaylist = () => {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
         throw new Error("Failed to create list");
       }
-
-      navigate("/lists");
+      console.log(1);
+      // Check for new achievements
+      if (data.newAchievements.length > 0) {
+        console.log(2);
+        console.log(data);
+        console.log(data.newAchievements);
+        handleAchievement(data.newAchievements[0]);
+      }
+      console.log(3);
     } catch (err) {
+      console.log(4);
       setError(err.message);
     } finally {
+      console.log(5);
       setLoading(false);
     }
   };
@@ -290,10 +339,11 @@ const CreatePlaylist = () => {
                       <button
                         key={color.value}
                         onClick={() => setSelectedColor(color.value)}
-                        className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${selectedColor === color.value
-                          ? "ring-2 ring-offset-2 ring-gray-900"
-                          : ""
-                          }`}
+                        className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${
+                          selectedColor === color.value
+                            ? "ring-2 ring-offset-2 ring-gray-900"
+                            : ""
+                        }`}
                         style={{ backgroundColor: color.value }}
                         title={color.name}
                       />
@@ -377,12 +427,13 @@ const CreatePlaylist = () => {
                 <div
                   key={getPlaceId(restaurant)}
                   onClick={() => toggleRestaurantSelection(restaurant)}
-                  className={`bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-md ${selectedRestaurants.some(
-                    (r) => getPlaceId(r) === getPlaceId(restaurant)
-                  )
-                    ? "ring-2 ring-orange-500"
-                    : ""
-                    }`}
+                  className={`bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+                    selectedRestaurants.some(
+                      (r) => getPlaceId(r) === getPlaceId(restaurant)
+                    )
+                      ? "ring-2 ring-orange-500"
+                      : ""
+                  }`}
                 >
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
@@ -392,10 +443,10 @@ const CreatePlaylist = () => {
                       {selectedRestaurants.some(
                         (r) => getPlaceId(r) === getPlaceId(restaurant)
                       ) && (
-                          <div className="bg-orange-100 rounded-full p-1">
-                            <Plus className="w-4 h-4 text-orange-500 transform rotate-45" />
-                          </div>
-                        )}
+                        <div className="bg-orange-100 rounded-full p-1">
+                          <Plus className="w-4 h-4 text-orange-500 transform rotate-45" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center text-sm text-gray-500 mb-2">
                       <MapPin className="w-4 h-4 mr-1" />
@@ -405,7 +456,8 @@ const CreatePlaylist = () => {
                       <div className="flex items-center">
                         <Star className="w-4 h-4 text-yellow-400 mr-1" />
                         <span className="text-sm text-gray-600">
-                          {getRestaurantRating(restaurant).toFixed(1)} ({getTotalRatings(restaurant)})
+                          {getRestaurantRating(restaurant).toFixed(1)} (
+                          {getTotalRatings(restaurant)})
                         </span>
                       </div>
                       <div className="flex items-center">
@@ -416,14 +468,16 @@ const CreatePlaylist = () => {
                       </div>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
-                      {getTypes(restaurant).slice(0, 3).map((type, index) => (
-                        <span
-                          key={index}
-                          className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
-                        >
-                          {type}
-                        </span>
-                      ))}
+                      {getTypes(restaurant)
+                        .slice(0, 3)
+                        .map((type, index) => (
+                          <span
+                            key={index}
+                            className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
+                          >
+                            {type}
+                          </span>
+                        ))}
                     </div>
                   </div>
                 </div>
@@ -440,11 +494,19 @@ const CreatePlaylist = () => {
           </div>
         </div>
       </div>
-    </div >
+
+      <MessageModal
+        show={modalVisible}
+        title={modalData.title}
+        subtitle={modalData.subtitle}
+        message={modalData.message}
+        onClose={() => {
+          setModalVisible(false);
+          navigate("/lists");
+        }}
+      />
+    </div>
   );
 };
 
 export default CreatePlaylist;
-
-
-

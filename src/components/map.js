@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import RestaurantDetailsModal from "./restaurantModal";
+import OptimizedMarkers from "./MarkerCluster";
 
 const MapComponent = () => {
   const { userData } = useAuthUser();
@@ -498,33 +499,11 @@ const MapComponent = () => {
         )}
 
         {/* Restaurant Markers */}
-        {filteredRestaurants.map((restaurant) => {
-          const lat = restaurant.location.gmaps.lat;
-          const lng = restaurant.location.gmaps.lng;
-
-          if (!lat || !lng) return null;
-
-          return (
-            <MarkerF
-              key={restaurant.additional_info.gmaps.place_id}
-              position={{ lat, lng }}
-              icon={{
-                url: createMarkerIcon(MapPin, "#f97316", 40),
-                scaledSize: new window.google.maps.Size(25, 25),
-                origin: new window.google.maps.Point(0, 0),
-                anchor: new window.google.maps.Point(12.5, 40),
-              }}
-              label={{
-                text: truncateText(restaurant.name.gmaps),
-                className:
-                  "bg-white mt-16 px-2 py-1 rounded-md shadow-sm text-gray-800 font-medium",
-                fontSize: "15px",
-                anchor: new window.google.maps.Point(20, -10),
-              }}
-              onClick={() => handleMarkerClick(restaurant)}
-            />
-          );
-        })}
+        <OptimizedMarkers
+          restaurants={filteredRestaurants}
+          onMarkerClick={handleMarkerClick}
+          createMarkerIcon={createMarkerIcon}
+        />
 
         {/* Info Window for Selected Restaurant */}
         {selectedRestaurant && (

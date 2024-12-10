@@ -200,10 +200,20 @@ const NavBar = () => {
           {/* Achievements Button */}
           <button
             onClick={() => navigate("/achievements")}
-            className="w-full flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+            className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+              isActivePath("/achievements")
+                ? "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
+                : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"
+            }`}
           >
             <div className="relative">
-              <Trophy className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+              <Trophy
+                className={`w-6 h-6 text-gray-500 dark:text-gray-400 ${
+                  isActivePath("/achievements")
+                    ? "text-orange-500 dark:text-orange-400"
+                    : "text-gray-500 dark:text-gray-400"
+                }`}
+              />
             </div>
             {isExpanded && (
               <span className="ml-4 font-medium text-gray-600 dark:text-gray-300">

@@ -4,6 +4,7 @@ import { useAuthUser } from '../hooks/useAuthUser';
 import { X, Heart, UtensilsCrossed, Star, MapPin, DollarSign, Loader2 ,Globe, Navigation} from 'lucide-react';
 import MessageWindow from './MessageWindow';
 import RestaurantDetails from './RestaurantDetails';
+import TutorialOverlay from './SwipeTutorial';
 
 const RestaurantTinder = () => {
     const navigate = useNavigate();
@@ -24,7 +25,10 @@ const RestaurantTinder = () => {
     const [userLocation, setUserLocation] = useState(null);
     const [dragStart, setDragStart] = useState(null);
     const cardRef = useRef(null);
-
+    const [showTutorial, setShowTutorial] = useState(() => {
+        // Check if user has seen the tutorial before
+        return !localStorage.getItem('hasSeenTutorial');
+    });
     // Get user location when component mounts
     useEffect(() => {
         if (navigator.geolocation) {
@@ -512,6 +516,10 @@ const RestaurantTinder = () => {
                 message={messageModal.message}
                 onClose={() => setMessageModal({ show: false, title: "", message: "" })}
             />
+            {showTutorial && <TutorialOverlay onComplete={() => {
+                setShowTutorial(false);
+                localStorage.setItem('hasSeenTutorial', 'true');
+            }} />}
         </div>
     );
 };

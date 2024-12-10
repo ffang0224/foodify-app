@@ -13,7 +13,21 @@ module.exports = {
           DEFAULT: '#FB923C',
           dark: '#EA580C'
         }
-      }
+      },
+      keyframes: {
+        'slide-right': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        'slide-left': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+      },
+      animation: {
+        'slide-right': 'slide-right 0.5s ease-out',
+        'slide-left': 'slide-left 0.5s ease-out',
+      },
     }
   },
   plugins: [],

@@ -44,6 +44,28 @@ import HelpPage from "./components/HelpPage";
 import AchievementsPage from "./components/achievements";
 import ResponsiveLayout from "./components/ResponsiveLayout";
 
+
+const PrivateRoute = ({ children }) => {
+  const { userData, loading } = useAuthUser();
+  const navigate = useNavigate();
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+      </div>
+    );
+  }
+
+  // If no user data, redirect to login
+  if (!userData) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // If authenticated, render the protected route
+  return children;
+};
 // Export NavBar so it can be used by ResponsiveLayout
 export const NavBar = () => {
   const navigate = useNavigate();
@@ -256,25 +278,108 @@ const App = () => {
       <div className="min-h-screen bg-white dark:bg-gray-900">
         <Router>
           <Routes>
-            {/* Auth routes without layout */}
+            {/* Public routes */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
 
-            {/* Routes with ResponsiveLayout */}
-            <Route path="/map" element={<ResponsiveLayout><MapComponent /></ResponsiveLayout>} />
-            <Route path="/profile" element={<ResponsiveLayout><ProfilePage /></ResponsiveLayout>} />
-            <Route path="/settings" element={<ResponsiveLayout><SettingsPage /></ResponsiveLayout>} />
-            <Route path="/DisplayUser" element={<ResponsiveLayout><DisplayUser /></ResponsiveLayout>} />
-            <Route path="/lists/:listId/edit" element={<ResponsiveLayout><EditPlaylist /></ResponsiveLayout>} />
-            <Route path="/lists" element={<ResponsiveLayout><ListsPage /></ResponsiveLayout>} />
-            <Route path="/restaurants" element={<ResponsiveLayout><RestaurantCollectionWithNav data={sampleRestaurantData} /></ResponsiveLayout>} />
-            <Route path="/restaurant/:restaurantId" element={<ResponsiveLayout><IndivRestaurantCard /></ResponsiveLayout>} />
-            <Route path="/achievements" element={<ResponsiveLayout><AchievementsPage /></ResponsiveLayout>} />
-            <Route path="/create-playlist" element={<ResponsiveLayout><CreatePlaylist /></ResponsiveLayout>} />
-            <Route path="/lists/:listId" element={<ResponsiveLayout><ViewPlaylist /></ResponsiveLayout>} />
-            <Route path="/discover" element={<ResponsiveLayout><RestaurantTinder /></ResponsiveLayout>} />
-            <Route path="/help" element={<ResponsiveLayout><HelpPage /></ResponsiveLayout>} />
+            {/* Protected routes */}
+            <Route path="/map" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <MapComponent />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/profile" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <ProfilePage />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/settings" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <SettingsPage />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/DisplayUser" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <DisplayUser />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/lists/:listId/edit" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <EditPlaylist />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/lists" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <ListsPage />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/restaurants" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <RestaurantCollectionWithNav data={sampleRestaurantData} />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/restaurant/:restaurantId" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <IndivRestaurantCard />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/achievements" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <AchievementsPage />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/create-playlist" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <CreatePlaylist />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/lists/:listId" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <ViewPlaylist />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/discover" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <RestaurantTinder />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/help" element={
+              <PrivateRoute>
+                <ResponsiveLayout>
+                  <HelpPage />
+                </ResponsiveLayout>
+              </PrivateRoute>
+            } />
+
+            {/* Catch-all route for 404s */}
+            <Route path="*" element={
+              <Navigate to="/login" replace />
+            } />
           </Routes>
         </Router>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthUser } from '../hooks/useAuthUser';
 import { X, Heart, UtensilsCrossed, Star, MapPin, DollarSign, Loader2 ,Globe, Navigation} from 'lucide-react';
@@ -22,6 +22,8 @@ const RestaurantTinder = () => {
         message: "",
     });
     const [userLocation, setUserLocation] = useState(null);
+    const [dragStart, setDragStart] = useState(null);
+    const cardRef = useRef(null);
 
     // Get user location when component mounts
     useEffect(() => {
@@ -193,21 +195,36 @@ const RestaurantTinder = () => {
 
     const handleDragStart = (e) => {
         setDragging(true);
-        const touch = e.touches ? e.touches[0] : e;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        setDragStart(clientX);
         setDragOffset(0);
+
+        // Prevent default behavior only for mouse events to avoid text selection
+        if (!e.touches) {
+            e.preventDefault();
+        }
     };
 
     const handleDragMove = (e) => {
-        if (!dragging) return;
-        const touch = e.touches ? e.touches[0] : e;
-        const newOffset = e.touches ? touch.clientX - window.innerWidth / 2 : e.clientX - window.innerWidth / 2;
-        setDragOffset(newOffset);
+        if (!dragging || dragStart === null) return;
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const newOffset = clientX - dragStart;
+
+        // Limit the drag offset to a reasonable range
+        const limitedOffset = Math.max(Math.min(newOffset, 250), -250);
+        setDragOffset(limitedOffset);
+
+        // Prevent default behavior only for mouse events
+        if (!e.touches) {
+            e.preventDefault();
+        }
     };
 
-    const handleDragEnd = () => {
+    const handleDragEnd = (e) => {
         if (!dragging) return;
-        setDragging(false);
 
+        // Trigger actions based on drag distance
         if (dragOffset > 100) {
             // Swiped right - like
             fetchPlaylists();
@@ -217,8 +234,31 @@ const RestaurantTinder = () => {
             setCurrentIndex(prev => prev + 1);
         }
 
+        // Reset drag state
+        setDragging(false);
+        setDragStart(null);
         setDragOffset(0);
     };
+
+    useEffect(() => {
+        const card = cardRef.current;
+        if (!card) return;
+
+        const handleTouchMove = (e) => {
+            if (dragging) {
+                // Prevent screen scrolling while dragging
+                e.preventDefault();
+            }
+        };
+
+        card.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+        return () => {
+            card.removeEventListener('touchmove', handleTouchMove);
+        };
+    }, [dragging]);
+
+
     const renderDistance = () => {
         if (!userLocation || !currentRestaurant?.location?.gmaps) return null;
 
@@ -269,9 +309,11 @@ const RestaurantTinder = () => {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
             <div className="max-w-md mx-auto mt-8">
                 <div
-                    className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden transform transition-transform"
+                    ref={cardRef}
+                    className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden touch-none select-none"
                     style={{
-                        transform: `translateX(${dragOffset}px) rotate(${dragOffset * 0.02}deg)`,
+                        transform: `translateX(${dragOffset}px) rotate(${dragOffset * 0.03}deg)`,
+                        transition: dragging ? 'none' : 'transform 0.3s ease-out'
                     }}
                     onMouseDown={handleDragStart}
                     onMouseMove={handleDragMove}

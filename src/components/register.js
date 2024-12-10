@@ -10,14 +10,7 @@ import {
 } from "lucide-react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
-
-// For formatting achievement id
-const formatString = (str) => {
-  return str
-    .split("_") // Split the string by underscores
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
-    .join(" "); // Join the words with spaces
-};
+import { formatString } from "../utils/stringUtils";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -35,7 +28,11 @@ const Register = () => {
   const [usernameAvailable, setUsernameAvailable] = useState(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalData, setModalData] = useState({ title: "", message: "" });
+  const [modalData, setModalData] = useState({
+    title: "",
+    message: "",
+    subtitle: "",
+  });
 
   const navigate = useNavigate();
 
@@ -92,7 +89,8 @@ const Register = () => {
     const points = achievementData["points"]; // Extract id and points from the response
     const id = formatString(achievementData["id"]);
     setModalData({
-      title: `New Achievement: ${id}`, // Include the achievement ID in the title
+      title: `New Achievement`, // Include the achievement ID in the title
+      subtitle: `${id}`,
       message: `Congrats! You earned ${points} points!`, // Include points in the message
     });
     setModalVisible(true); // Show the modal
@@ -425,11 +423,11 @@ const Register = () => {
           </form>
         </div>
       </div>
-      {/* MessageModal */}
       <MessageModal
         show={modalVisible}
-        title={modalData.title}
-        message={modalData.message}
+        title={modalData.title} // Main title
+        subtitle={modalData.subtitle} // Subtitle
+        message={modalData.message} // Main message body
         onClose={() => {
           setModalVisible(false); // Close the modal
           navigate("/login", {

@@ -247,6 +247,8 @@ const CreatePlaylist = () => {
       // Check for new achievements
       if (data.newAchievements.length > 0) {
         handleAchievement(data.newAchievements[0]);
+      } else {
+        navigate("/lists");
       }
     } catch (err) {
       setError(err.message);

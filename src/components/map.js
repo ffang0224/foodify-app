@@ -435,7 +435,6 @@ const MapComponent = () => {
         </div>
       </div>
 
-       
       {showFilters && (
   <div className="fixed inset-0 bg-black bg-opacity-50 z-40 sm:bg-transparent sm:relative">
     <div className="absolute right-0 top-0 h-full w-[85vw] sm:w-auto sm:max-w-xs sm:h-auto sm:top-20 sm:left-4 bg-white dark:bg-gray-800 p-4 rounded-l-lg sm:rounded-lg shadow-lg z-50 overflow-y-auto">
